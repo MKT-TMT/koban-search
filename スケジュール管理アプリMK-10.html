@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スケジュール管理アプリ MK-3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg:       #e8f7f9;
+    --surface:  #ffffff;
+    --surface2: #f0fafb;
+    --border:   #b8e4ec;
+    --border2:  #7ecfe0;
+    --accent:   #0ea8d8;
+    --accent2:  #3dbf7a;
+    --green:    #2ecf7a;
+    --amber:    #e08a10;
+    --red:      #e03535;
+    --sky:      #0ea8d8;
+    --text:     #0d2a30;
+    --muted:    #5a8a96;
+    --card-shadow: 0 2px 10px rgba(14,168,216,.10);
+    --mono: 'DM Mono', monospace;
+    --sans: 'Noto Sans JP', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ══════════════ HEADER ══════════════ */
+  .header {
+    position: sticky; top:0; z-index:200;
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 54px; gap: 10px;
+    box-shadow: 0 2px 12px rgba(60,80,160,.07);
+  }
+  .logo {
+    font-family: var(--mono); font-size: 15px; letter-spacing: 1.5px;
+    color: var(--accent); font-weight: 500;
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+
+  /* ══════════════ TAB BAR ══════════════ */
+  .tab-bar {
+    display: flex; gap: 2px;
+    background: var(--surface2);
+    border-radius: 10px; padding: 3px;
+    border: 1px solid var(--border);
+  }
+  .tab {
+    font-family: var(--sans); font-size: 12px; font-weight: 600;
+    padding: 5px 14px; border-radius: 7px; cursor: pointer;
+    border: none; background: transparent; color: var(--muted);
+    transition: all .16s ease; letter-spacing: 0.3px;
+  }
+  .tab.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(14,168,216,.35); }
+  .tab:hover:not(.active) { color: var(--text); background: var(--border); }
+
+  /* ══════════════ NAV ROW ══════════════ */
+  .nav-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px 10px;
+  }
+  .nav-title { font-size: 19px; font-weight: 700; color: var(--text); }
+  .nav-btns { display: flex; gap: 6px; }
+  .nav-btn {
+    height: 34px; border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--surface); color: var(--text); cursor: pointer; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .14s; user-select: none; padding: 0 10px;
+    box-shadow: var(--card-shadow);
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: #e0f7fd; }
+  .today-btn { font-size: 11px; font-family: var(--sans); font-weight: 600; letter-spacing: 0.4px; }
+
+  /* ══════════════ MONTH VIEW ══════════════ */
+  .month-grid { padding: 0 14px 20px; }
+  .dow-row { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 6px; }
+  .dow-cell {
+    text-align: center; font-size: 11px; font-weight: 700;
+    padding: 6px 0; color: var(--muted); letter-spacing: 0.8px;
+  }
+  .dow-cell.sat { color: var(--sky); }
+  .dow-cell.sun { color: var(--red); }
+
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+  .cal-cell {
+    background: var(--surface); border-radius: 9px; padding: 6px 5px 7px;
+    min-height: 74px; cursor: pointer;
+    border: 1.5px solid var(--border);
+    transition: border-color .13s, box-shadow .13s;
+    box-shadow: var(--card-shadow);
+  }
+  .cal-cell:hover { border-color: var(--accent); box-shadow: 0 3px 14px rgba(14,168,216,.18); }
+  .cal-cell.other-month { opacity: .38; box-shadow: none; }
+  .cal-cell.today { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(14,168,216,.22); }
+  .cal-cell.selected { border-color: var(--accent2); background: #e6faef; }
+
+  .cal-date {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    margin-bottom: 4px; color: var(--text);
+  }
+  .cal-cell.today .cal-date {
+    background: var(--accent); color: #fff;
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 4px;
+    font-size: 11px;
+  }
+  .cal-cell.sat .cal-date { color: var(--sky); }
+  .cal-cell.sun .cal-date { color: var(--red); }
+  .cal-cell.today.sat .cal-date,
+  .cal-cell.today.sun .cal-date { color: #fff; }
+
+  .cal-shift {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.3px;
+    padding: 2px 4px; border-radius: 4px; display: inline-block;
+    margin-bottom: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .cal-shift.work    { background: #c8eef8; color: #0878a0; }
+  .cal-shift.holiday { background: #c8f5e2; color: #0f7a48; }
+  .cal-shift.off     { background: #ffefd4; color: #b86800; }
+  .cal-shift.paid    { background: #ffd9d9; color: #c01010; }
+  .cal-time { font-family: var(--mono); font-size: 8px; color: var(--muted); }
+
+  /* ══════════════ WEEK VIEW ══════════════ */
+  .week-view { padding: 0 0 24px; overflow-x: auto; }
+  .week-table { min-width: 620px; width: 100%; border-collapse: collapse; }
+
+  .wt-label {
+    padding: 8px 12px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+    color: var(--muted);
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    white-space: nowrap; vertical-align: middle;
+  }
+  .wt-section-row td {
+    background: #d4f2fa;
+    padding: 5px 12px;
+    font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+    color: var(--accent); text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+  }
+
+  .wt-day-header {
+    text-align: center; padding: 10px 4px 8px;
+    background: var(--surface2);
+    border-bottom: 2px solid var(--border2);
+    border-right: 1px solid var(--border);
+    cursor: pointer; transition: background .13s; min-width: 86px;
+  }
+  .wt-day-header:hover { background: #d4f2fa; }
+  .wt-day-header.today { background: #d4f2fa; border-bottom-color: var(--accent); }
+  .wt-day-header.selected-col { background: #e6faef; border-bottom-color: var(--accent2); }
+  .wt-dow { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--muted); }
+  .wt-day-header.today .wt-dow   { color: var(--accent); }
+  .wt-day-header.sat .wt-dow     { color: var(--sky); }
+  .wt-day-header.sun .wt-dow     { color: var(--red); }
+  .wt-date-num {
+    font-family: var(--mono); font-size: 20px; font-weight: 600;
+    margin-top: 1px; line-height: 1;
+  }
+  .wt-day-header.today .wt-date-num   { color: var(--accent); }
+  .wt-day-header.sat .wt-date-num     { color: var(--sky); }
+  .wt-day-header.sun .wt-date-num     { color: var(--red); }
+  .wt-month-label { font-size: 9px; color: var(--muted); margin-top: 3px; }
+
+  .wt-cell {
+    text-align: center; padding: 7px 5px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    font-family: var(--mono); font-size: 12px;
+    vertical-align: middle; transition: background .1s; background: var(--surface);
+  }
+  .wt-cell:hover { background: #e0f7fd; }
+  .wt-cell.today-col    { background: #e8f9fc; }
+  .wt-cell.selected-col { background: #e6faef; }
+  .wt-cell.empty        { color: var(--muted); font-size: 11px; }
+
+  .wt-shift-badge {
+    display: inline-block; padding: 3px 7px; border-radius: 5px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2px;
+  }
+  .wt-shift-badge.work    { background: #c8eef8; color: #0878a0; }
+  .wt-shift-badge.holiday { background: #c8f5e2; color: #0f7a48; }
+  .wt-shift-badge.off     { background: #ffefd4; color: #b86800; }
+  .wt-shift-badge.paid    { background: #ffd9d9; color: #c01010; }
+
+  .wt-summary-badge {
+    display: inline-block; padding: 3px 7px; border-radius: 5px;
+    font-size: 11px; font-weight: 700; font-family: var(--mono); letter-spacing: 0.2px;
+  }
+  .wt-summary-badge.ok   { background: #c8f5e2; color: #0a6e3e; }
+  .wt-summary-badge.warn { background: #fff3cc; color: #8a5c00; }
+  .wt-summary-badge.bad  { background: #ffd9d9; color: #b00000; }
+
+  /* ══════════════ DAY VIEW ══════════════ */
+  .day-view { padding: 0 16px 40px; max-width: 620px; margin: 0 auto; }
+
+  .day-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; margin-bottom: 12px; overflow: hidden;
+    box-shadow: var(--card-shadow);
+  }
+  .day-card-header {
+    padding: 12px 16px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .day-card-icon { font-size: 17px; }
+  .day-card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .day-card-sub { font-size: 12px; color: var(--muted); margin-left: auto; font-family: var(--mono); }
+  .day-card-body { padding: 14px 16px; }
+
+  .life-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 0; border-bottom: 1px solid var(--border);
+  }
+  .life-row:last-child { border-bottom: none; }
+  .life-label { font-size: 13px; color: var(--muted); }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .stat-box {
+    background: var(--surface2); border-radius: 10px; padding: 10px 12px;
+    border: 1px solid var(--border); text-align: center;
+  }
+  .stat-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+  .stat-val { font-family: var(--mono); font-size: 17px; font-weight: 600; color: var(--text); }
+  .stat-val.good { color: var(--green); }
+  .stat-val.warn { color: var(--amber); }
+  .stat-val.bad  { color: var(--red); }
+
+  /* ══════════════ INPUT VIEW ══════════════ */
+  .input-view { padding: 0 16px 40px; max-width: 620px; margin: 0 auto; }
+
+  /* date selector strip */
+  .date-selector {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0 4px;
+  }
+  .date-selector-label { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .date-input-native {
+    flex: 1; background: var(--surface); border: 1.5px solid var(--border2);
+    border-radius: 9px; padding: 8px 12px; color: var(--text);
+    font-family: var(--mono); font-size: 14px; font-weight: 500; outline: none;
+    box-shadow: var(--card-shadow); transition: border-color .14s;
+  }
+  .date-input-native:focus { border-color: var(--accent); }
+
+  /* shift section in input */
+  .inp-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; margin-bottom: 12px; overflow: hidden;
+    box-shadow: var(--card-shadow);
+  }
+  .inp-card-header {
+    padding: 11px 16px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .inp-card-body { padding: 14px 16px; }
+
+  /* special shift buttons */
+  .special-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .special-btn {
+    padding: 7px 14px; border-radius: 8px; cursor: pointer;
+    font-size: 12px; font-weight: 700; border: 1.5px solid var(--border2);
+    background: var(--surface2); color: var(--muted);
+    transition: all .14s;
+  }
+  .special-btn:hover { border-color: var(--accent); color: var(--accent); background: #d4f2fa; }
+  .special-btn.sel-holiday { background: #d4f5e5; color: #0a7a3e; border-color: #18b86a; }
+  .special-btn.sel-sub     { background: #ffefd4; color: #965800; border-color: #e08a10; }
+  .special-btn.sel-paid    { background: #ffd9d9; color: #a01010; border-color: #e03535; }
+  .special-btn.sel-off     { background: #ebebeb; color: #555; border-color: #aaa; }
+
+  /* shift search + grid */
+  .shift-search {
+    width: 100%; background: var(--surface2); border: 1.5px solid var(--border2);
+    border-radius: 9px; padding: 9px 12px; color: var(--text);
+    font-family: var(--mono); font-size: 13px; outline: none; margin-bottom: 10px;
+    transition: border-color .14s; box-shadow: var(--card-shadow);
+  }
+  .shift-search:focus { border-color: var(--accent); }
+  .shift-search::placeholder { color: var(--muted); }
+  .shift-list {
+    max-height: 200px; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 5px;
+  }
+  .shift-list::-webkit-scrollbar { width: 4px; }
+  .shift-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .shift-badge {
+    font-family: var(--mono); font-size: 11px; padding: 6px 8px; border-radius: 7px;
+    cursor: pointer; border: 1.5px solid var(--border); background: var(--surface2);
+    color: var(--muted); transition: all .12s; text-align: center; font-weight: 500;
+  }
+  .shift-badge:hover { border-color: var(--accent); color: var(--accent); background: #d4f2fa; }
+  .shift-badge.selected { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(14,168,216,.3); }
+
+  /* custom shift */
+  .custom-row {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding-top: 10px; border-top: 1px solid var(--border); margin-top: 10px;
+  }
+  .custom-row input {
+    background: var(--surface2); border: 1.5px solid var(--border2);
+    border-radius: 8px; padding: 7px 10px; color: var(--text);
+    font-family: var(--mono); font-size: 12px; outline: none;
+    transition: border-color .14s;
+  }
+  .custom-row input:focus { border-color: var(--accent); }
+  .custom-name-inp { flex: 1; min-width: 80px; }
+  .custom-time-inp { width: 100px; }
+  .btn-register {
+    padding: 8px 16px; background: var(--accent); border: none;
+    border-radius: 8px; color: #fff; font-size: 12px; cursor: pointer;
+    font-family: var(--sans); font-weight: 700; transition: opacity .14s;
+    box-shadow: 0 2px 8px rgba(14,168,216,.3);
+  }
+  .btn-register:hover { opacity: .88; }
+
+  /* life input rows */
+  .inp-life-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .inp-life-row:last-child { border-bottom: none; }
+  .inp-life-label { font-size: 13px; color: var(--muted); }
+  .inp-life-time {
+    background: var(--surface2); border: 1.5px solid var(--border2);
+    border-radius: 8px; padding: 6px 12px;
+    color: var(--text); font-family: var(--mono); font-size: 14px; font-weight: 500;
+    outline: none; width: 120px; transition: border-color .14s;
+    box-shadow: var(--card-shadow);
+  }
+  .inp-life-time:focus { border-color: var(--accent); }
+
+  /* sleep day toggle */
+  .sleep-day-toggle {
+    display: flex; border-radius: 7px; overflow: hidden;
+    border: 1.5px solid var(--border2); background: var(--surface2);
+    font-size: 11px; font-weight: 700; font-family: var(--sans);
+    flex-shrink: 0;
+  }
+  .sleep-day-toggle button {
+    padding: 5px 10px; border: none; background: transparent;
+    color: var(--muted); cursor: pointer; transition: all .14s;
+    white-space: nowrap; line-height: 1;
+  }
+  .sleep-day-toggle button.active {
+    background: var(--accent); color: #fff;
+  }
+  .inp-life-row-sleep {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    gap: 8px; flex-wrap: wrap;
+  }
+  .inp-life-row-sleep .inp-life-label { font-size: 13px; color: var(--muted); flex-shrink: 0; }
+
+  /* interval input section */
+  .inp-interval-section {
+    background: #e8faf2; border: 1.5px solid #8ee0b8;
+    border-radius: 14px; margin-bottom: 12px; overflow: hidden;
+    box-shadow: var(--card-shadow);
+  }
+  .inp-interval-header {
+    padding: 11px 16px; background: #c6f2de;
+    border-bottom: 1px solid #8ee0b8;
+    font-size: 13px; font-weight: 700; color: #0a6e3e;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .inp-interval-body { padding: 14px 16px; }
+  .inp-interval-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 0; border-bottom: 1px solid #b8e8d2;
+  }
+  .inp-interval-row:last-child { border-bottom: none; }
+  .inp-interval-label { font-size: 12px; color: #1a7a50; font-weight: 600; flex: 1; }
+  .inp-interval-right { display: flex; align-items: center; gap: 8px; }
+  .inp-interval-minutes {
+    background: var(--surface); border: 1.5px solid #8ee0b8;
+    border-radius: 8px; padding: 6px 10px;
+    color: var(--text); font-family: var(--mono); font-size: 13px; font-weight: 500;
+    outline: none; width: 80px; text-align: center; transition: border-color .14s;
+    box-shadow: var(--card-shadow);
+  }
+  .inp-interval-minutes:focus { border-color: var(--accent2); }
+  .inp-interval-display {
+    font-family: var(--mono); font-size: 14px; font-weight: 700;
+    color: #0a6e3e; min-width: 52px; text-align: right;
+  }
+
+  /* ══════════════ EXPORT / IMPORT ══════════════ */
+  .data-btns {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .data-btn {
+    height: 30px; padding: 0 11px; border-radius: 7px; border: 1.5px solid var(--border2);
+    font-size: 11px; font-weight: 700; font-family: var(--sans);
+    cursor: pointer; display: flex; align-items: center; gap: 4px;
+    transition: all .14s; white-space: nowrap;
+  }
+  .data-btn-export { background: #e0f7fd; color: var(--accent); border-color: var(--accent); }
+  .data-btn-export:hover { background: var(--accent); color: #fff; }
+  .data-btn-import { background: #e6faef; color: #0a6e3e; border-color: #2ecf7a; }
+  .data-btn-import:hover { background: #2ecf7a; color: #fff; }
+
+  /* モーダル */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 900;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(3px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--surface); border-radius: 18px; padding: 24px;
+    width: min(92vw, 520px); box-shadow: 0 8px 40px rgba(0,0,0,.22);
+    border: 1.5px solid var(--border2);
+  }
+  .modal-title {
+    font-size: 15px; font-weight: 800; color: var(--text);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+  }
+  .modal-desc {
+    font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.7;
+  }
+  .modal-textarea {
+    width: 100%; height: 160px; border: 1.5px solid var(--border2);
+    border-radius: 10px; padding: 10px 12px; font-family: var(--mono);
+    font-size: 11px; color: var(--text); background: var(--surface2);
+    resize: vertical; outline: none; box-sizing: border-box;
+  }
+  .modal-textarea:focus { border-color: var(--accent); }
+  .modal-btns {
+    display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap;
+  }
+  .modal-btn {
+    padding: 9px 20px; border-radius: 9px; border: none; font-size: 13px;
+    font-weight: 700; font-family: var(--sans); cursor: pointer; transition: all .14s;
+  }
+  .modal-btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(14,168,216,.3); }
+  .modal-btn-primary:hover { opacity: .88; }
+  .modal-btn-green { background: #2ecf7a; color: #fff; box-shadow: 0 2px 8px rgba(46,207,122,.3); }
+  .modal-btn-green:hover { opacity: .88; }
+  .modal-btn-cancel { background: var(--surface2); color: var(--muted); border: 1.5px solid var(--border2); }
+  .modal-btn-cancel:hover { color: var(--text); }
+
+  /* ══════════════ SECTION LABEL ══════════════ */
+  .section-label {
+    font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+    color: var(--muted); text-transform: uppercase;
+    padding: 0 2px; margin-bottom: 8px; margin-top: 18px;
+  }
+
+  /* ══════════════ TOAST ══════════════ */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--green); color: #fff; padding: 10px 22px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none;
+    transition: all .25s; z-index: 999; white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(24,184,106,.35);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ══════════════ WARN ALERTS ══════════════ */
+  .alert-warn {
+    margin-top: 8px; padding: 9px 13px; border-radius: 9px;
+    font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+  }
+  .alert-warn.bad  { background: #ffeaea; color: var(--red);  border-left: 3px solid var(--red); }
+  .alert-warn.warn { background: #fff4df; color: var(--amber); border-left: 3px solid var(--amber); }
+
+  /* ══════════════ RESPONSIVE ══════════════ */
+  @media (max-width: 600px) {
+    .cal-cell { min-height: 58px; padding: 4px; }
+    .cal-shift { font-size: 8px; }
+    .cal-time { display: none; }
+    .nav-title { font-size: 17px; }
+    .tab { padding: 5px 10px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">MK-3 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="data-btns">
+    <button class="data-btn data-btn-export" onclick="openExportModal()">⬇️ 書き出し</button>
+    <button class="data-btn data-btn-import" onclick="openImportModal()">⬆️ 読み込み</button>
+  </div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchView('month')">月</button>
+    <button class="tab" onclick="switchView('week')">週</button>
+    <button class="tab" onclick="switchView('day')">日</button>
+    <button class="tab" onclick="switchView('input')">入力</button>
+  </div>
+</div>
+
+<!-- エクスポートモーダル -->
+<div class="modal-overlay" id="exportModal" onclick="if(event.target===this)closeModal('exportModal')">
+  <div class="modal-box">
+    <div class="modal-title">⬇️ データ書き出し</div>
+    <div class="modal-desc">
+      下のテキストを<strong>全選択してコピー</strong>し、メモ帳・メモアプリ等に貼り付けて<strong>.json</strong>という名前で保存してください。<br>
+      iPhoneやiPadへはそのファイルをAirDrop・iCloudで共有してください。
+    </div>
+    <textarea class="modal-textarea" id="exportText" readonly onclick="this.select()"></textarea>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-primary" onclick="selectExportText()">📋 全選択</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('exportModal')">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- インポートモーダル -->
+<div class="modal-overlay" id="importModal" onclick="if(event.target===this)closeModal('importModal')">
+  <div class="modal-box">
+    <div class="modal-title">⬆️ データ読み込み</div>
+    <div class="modal-desc">
+      書き出したJSONテキストを下に<strong>貼り付け</strong>て「読み込む」を押してください。<br>
+      既存データと統合されます（同じ日付はインポート側が優先されます）。
+    </div>
+    <textarea class="modal-textarea" id="importText" placeholder="JSONデータをここに貼り付け…"></textarea>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-green" onclick="doImport()">✅ 読み込む</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('importModal')">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<div class="nav-row">
+  <div class="nav-title" id="navTitle"></div>
+  <div class="nav-btns">
+    <button class="nav-btn today-btn" onclick="goToday()">今日</button>
+    <button class="nav-btn" onclick="navPrev()">‹</button>
+    <button class="nav-btn" onclick="navNext()">›</button>
+  </div>
+</div>
+
+<div id="viewContainer"></div>
+<div class="toast" id="toast">保存しました</div>
+
+<script>
+// ══════════════════════════════════════════
+// SHIFT DATA
+// ══════════════════════════════════════════
+const SHIFT_TABLE = {
+"001交番":{"start":"06:36","end":"20:57"},"002交番":{"start":"06:23","end":"20:52"},"003交番":{"start":"06:03","end":"18:37"},"004交番":{"start":"05:46","end":"15:08"},"005交番":{"start":"05:38","end":"12:32"},"006交番":{"start":"14:57","end":"23:56"},"007交番":{"start":"12:52","end":"22:42"},"008交番":{"start":"11:47","end":"21:14"},"009交番":{"start":"06:19","end":"20:21"},"010交番":{"start":"05:59","end":"14:27"},"011交番":{"start":"14:51","end":"23:47"},"012交番":{"start":"14:03","end":"23:29"},"013交番":{"start":"13:39","end":"23:20"},"014交番":{"start":"13:55","end":"22:54"},"016交番":{"start":"14:19","end":"23:46"},"017交番":{"start":"13:58","end":"22:57"},"018交番":{"start":"13:37","end":"22:29"},"019交番":{"start":"07:53","end":"21:46"},"020交番":{"start":"06:58","end":"21:02"},"021交番":{"start":"06:30","end":"20:55"},"022交番":{"start":"06:17","end":"19:28"},"023交番":{"start":"06:05","end":"19:18"},"024交番":{"start":"05:44","end":"14:02"},"025交番":{"start":"05:40","end":"14:01"},"026交番":{"start":"11:19","end":"21:26"},"027交番":{"start":"06:40","end":"20:42"},"028交番":{"start":"06:15","end":"20:12"},"029交番":{"start":"05:46","end":"19:58"},"030交番":{"start":"05:37","end":"13:52"},"031交番":{"start":"06:22","end":"20:48"},"032交番":{"start":"05:51","end":"15:21"},"033交番":{"start":"05:50","end":"14:24"},"034交番":{"start":"05:43","end":"14:10"},"035交番":{"start":"05:40","end":"13:33"},"036交番":{"start":"12:58","end":"21:38"},"037交番":{"start":"06:38","end":"20:56"},"038交番":{"start":"06:16","end":"20:15"},"039交番":{"start":"06:07","end":"14:22"},"040交番":{"start":"05:43","end":"13:39"},"042交番":{"start":"14:37","end":"23:50"},"043交番":{"start":"14:39","end":"22:23"},"044交番":{"start":"11:39","end":"21:44"},"046交番":{"start":"06:34","end":"20:23"},"047交番":{"start":"06:26","end":"19:42"},"048交番":{"start":"05:50","end":"19:24"},"049交番":{"start":"05:37","end":"19:24"},"050交番":{"start":"05:31","end":"19:02"},"201交番":{"start":"08:43","end":"20:58"},"202交番":{"start":"08:17","end":"20:30"},"203交番":{"start":"06:19","end":"19:58"},"204交番":{"start":"05:44","end":"16:33"},"205交番":{"start":"05:41","end":"13:08"},"206交番":{"start":"14:52","end":"23:57"},"207交番":{"start":"11:56","end":"22:22"},"211交番":{"start":"14:03","end":"23:49"},"212交番":{"start":"13:40","end":"23:18"},"213交番":{"start":"12:33","end":"22:55"},"214交番":{"start":"12:19","end":"22:54"},"215交番":{"start":"08:56","end":"21:56"},"216交番":{"start":"10:33","end":"23:47"},"217交番":{"start":"09:40","end":"22:08"},"218交番":{"start":"09:10","end":"21:45"},"219交番":{"start":"08:00","end":"21:28"},"222交番":{"start":"06:19","end":"20:03"},"223交番":{"start":"05:53","end":"19:02"},"224交番":{"start":"05:51","end":"18:29"},"227交番":{"start":"07:30","end":"20:19"},"228交番":{"start":"06:45","end":"19:50"},"229交番":{"start":"06:23","end":"17:21"},"233交番":{"start":"05:52","end":"18:30"},"235交番":{"start":"05:43","end":"15:28"},"239交番":{"start":"07:07","end":"19:26"},"240交番":{"start":"05:43","end":"15:08"},"241交番":{"start":"12:05","end":"23:43"},"242交番":{"start":"10:44","end":"23:29"},"243交番":{"start":"09:01","end":"22:44"},"244交番":{"start":"08:40","end":"21:55"},"245交番":{"start":"08:38","end":"21:33"},"246交番":{"start":"07:16","end":"20:07"},"247交番":{"start":"05:50","end":"19:19"},"248交番":{"start":"05:35","end":"19:16"},"249交番":{"start":"05:37","end":"18:24"},"250交番":{"start":"05:31","end":"17:58"},"402交番":{"start":"06:38","end":"20:30"},"403交番":{"start":"06:19","end":"19:50"},"404交番":{"start":"05:44","end":"17:21"},"405交番":{"start":"05:41","end":"13:08"},"406交番":{"start":"13:54","end":"23:57"},"407交番":{"start":"11:56","end":"22:22"},"408交番":{"start":"08:00","end":"20:58"},"409交番":{"start":"06:23","end":"19:55"},"412交番":{"start":"13:40","end":"23:18"},"413交番":{"start":"12:19","end":"22:54"},"414交番":{"start":"08:43","end":"22:44"},"415交番":{"start":"08:17","end":"19:02"},"416交番":{"start":"11:05","end":"23:47"},"417交番":{"start":"10:03","end":"22:08"},"418交番":{"start":"09:10","end":"21:45"},"419交番":{"start":"08:50","end":"21:55"},"420交番":{"start":"08:38","end":"21:28"},"423交番":{"start":"06:19","end":"20:03"},"425交番":{"start":"05:53","end":"14:04"},"426交番":{"start":"09:40","end":"21:56"},"427交番":{"start":"07:30","end":"20:19"},"428交番":{"start":"06:45","end":"19:58"},"429交番":{"start":"05:51","end":"19:17"},"433交番":{"start":"05:52","end":"18:30"},"435交番":{"start":"05:43","end":"15:08"},"436交番":{"start":"11:33","end":"23:49"},"437交番":{"start":"10:33","end":"22:55"},"438交番":{"start":"08:56","end":"21:33"},"439交番":{"start":"07:07","end":"19:26"},"440交番":{"start":"05:43","end":"14:58"},"442交番":{"start":"12:03","end":"23:43"},"443交番":{"start":"10:56","end":"23:29"},"446交番":{"start":"07:16","end":"20:07"},"447交番":{"start":"05:50","end":"19:19"},"448交番":{"start":"05:35","end":"19:16"},"449交番":{"start":"05:37","end":"18:24"},"450交番":{"start":"05:31","end":"17:58"}
+};
+const HOLIDAY_SHIFTS = { "501交番":"公休日", "502交番":"振替休日", "503交番":"有給休暇" };
+const DOW = ["日","月","火","水","木","金","土"];
+
+// ══════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════
+const STORAGE_KEY = 'mkx_data_v2'; // バージョンを上げると古いキャッシュを無視
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+}
+function saveData(d) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+  showToast('保存しました ✓');
+}
+
+const INITIAL_DATA = {
+  "2026-02-26":{"shift":"028交番","life":{}},
+  "2026-02-28":{"shift":"442交番","life":{}},
+  "2026-03-01":{"shift":"242交番","life":{"sleep":"02:00","wake":"09:00","ready":"09:05","commute":"09:50"}},
+  "2026-03-02":{"shift":"502交番","life":{"sleep":"01:30","wake":"08:30","ready":"09:25","commute":"10:25"}},
+  "2026-03-03":{"shift":"044交番","life":{"sleep":"00:00","wake":"08:00","ready":"09:55","commute":"10:45"}},
+  "2026-03-04":{"shift":"custom","customLabel":"分割勤務","customStart":"06:58","customEnd":"21:38","life":{"sleep":"23:00","wake":"05:35","ready":"05:40","commute":"06:15"}},
+  "2026-03-05":{"shift":"007交番","life":{"sleep":"00:00","wake":"08:00","ready":"10:55","commute":"11:55"}},
+  "2026-03-06":{"shift":"501交番","life":{"sleep":"23:20"}},
+  "2026-03-07":{"shift":"446交番","life":{"sleep":"21:50","wake":"05:50","ready":"05:55","commute":"06:30"}},
+  "2026-03-08":{"shift":"247交番","life":{"sleep":"21:50","wake":"04:20","ready":"04:30","commute":"05:05"}},
+  "2026-03-09":{"shift":"048交番","life":{}},
+  "2026-03-10":{"shift":null,"life":{"sleep":"21:55"}},
+  "2026-03-11":{"shift":"502交番","life":{}},
+  "2026-03-12":{"shift":"501交番","life":{"sleep":"23:30"}},
+  "2026-03-13":{"shift":null,"life":{}},
+  "2026-03-19":{"shift":"501交番","life":{}},
+  "2026-03-20":{"shift":"501交番","life":{}},
+  "2026-03-26":{"shift":"501交番","life":{}}
+};
+
+let appData = loadData();
+// INITIAL_DATAをdeep mergeで反映
+// エントリがない→丸ごと追加、ある→ユーザー未入力フィールドのみ補完
+Object.keys(INITIAL_DATA).forEach(k => {
+  if (!appData[k]) {
+    appData[k] = JSON.parse(JSON.stringify(INITIAL_DATA[k]));
+  } else {
+    const init = INITIAL_DATA[k];
+    if (!appData[k].life) appData[k].life = {};
+    Object.keys(init.life || {}).forEach(lk => {
+      if (appData[k].life[lk] === undefined || appData[k].life[lk] === null || appData[k].life[lk] === '') {
+        appData[k].life[lk] = init.life[lk];
+      }
+    });
+    if (init.shift && !appData[k].shift) appData[k].shift = init.shift;
+  }
+});
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let view = 'month';
+const today = new Date();
+let cursor = new Date(today.getFullYear(), today.getMonth(), 1);
+let selectedDate = fmtDate(today);
+let weekStart = getWeekStart(today);
+
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getWeekStart(d) {
+  const day = d.getDay();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() - day);
+}
+function parseTime(s) {
+  if (!s) return null;
+  const parts = s.split(':').map(Number);
+  return parts[0] * 60 + (parts[1] || 0);
+}
+function diffMin(a, b) {
+  let d = b - a;
+  if (d < 0) d += 1440;
+  return d;
+}
+function fmtMin(m) {
+  if (m === null || m === undefined || isNaN(m)) return '--:--';
+  return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+}
+
+function getShiftInfo(dateKey) {
+  const rec = appData[dateKey];
+  if (!rec || !rec.shift) return null;
+  if (rec.shift === 'custom') return { label: rec.customLabel || 'カスタム', start: rec.customStart, end: rec.customEnd, type: 'work' };
+  if (HOLIDAY_SHIFTS[rec.shift]) return { label: HOLIDAY_SHIFTS[rec.shift], start: null, end: null, type: rec.shift === '503交番' ? 'paid' : rec.shift === '501交番' ? 'holiday' : 'off' };
+  const s = SHIFT_TABLE[rec.shift];
+  if (s) return { label: rec.shift, start: s.start, end: s.end, type: 'work' };
+  return null;
+}
+function getIntervalHours(dateKey) {
+  const info = getShiftInfo(dateKey);
+  if (!info || !info.start) return null;
+  const prev = new Date(dateKey); prev.setDate(prev.getDate()-1);
+  const prevInfo = getShiftInfo(fmtDate(prev));
+  if (!prevInfo || !prevInfo.end) return null;
+  return diffMin(parseTime(prevInfo.end), parseTime(info.start));
+}
+function getSleepHours(dateKey) {
+  const rec = appData[dateKey];
+  if (!rec || !rec.life) return null;
+  const wake = parseTime(rec.life.wake);
+  if (wake === null) return null;
+
+  // sleepDay: 'prev'(デフォルト) = 前日データのsleep, 'today' = 当日データのsleep
+  const sleepDay = rec.life.sleepDay || 'prev';
+  let sleep = null;
+  if (sleepDay === 'today') {
+    sleep = parseTime(rec.life.sleep);
+  } else {
+    const prev = new Date(dateKey); prev.setDate(prev.getDate()-1);
+    const prevRec = appData[fmtDate(prev)];
+    sleep = prevRec && prevRec.life ? parseTime(prevRec.life.sleep) : null;
+  }
+  if (sleep === null) return null;
+  return diffMin(sleep, wake);
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function switchView(v) {
+  view = v;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['month','week','day','input'][i] === v);
+  });
+  if (v === 'week') weekStart = getWeekStart(new Date(selectedDate));
+  render();
+}
+function navPrev() {
+  if (view === 'month') cursor.setMonth(cursor.getMonth()-1);
+  else if (view === 'week') weekStart.setDate(weekStart.getDate()-1);
+  else { const d = new Date(selectedDate); d.setDate(d.getDate()-1); selectedDate = fmtDate(d); }
+  render();
+}
+function navNext() {
+  if (view === 'month') cursor.setMonth(cursor.getMonth()+1);
+  else if (view === 'week') weekStart.setDate(weekStart.getDate()+1);
+  else { const d = new Date(selectedDate); d.setDate(d.getDate()+1); selectedDate = fmtDate(d); }
+  render();
+}
+function goToday() {
+  cursor = new Date(today.getFullYear(), today.getMonth(), 1);
+  selectedDate = fmtDate(today);
+  weekStart = getWeekStart(today);
+  render();
+}
+
+function updateNavTitle() {
+  const el = document.getElementById('navTitle');
+  if (view === 'month') {
+    el.textContent = `${cursor.getFullYear()}年${cursor.getMonth()+1}月`;
+  } else if (view === 'week') {
+    const end = new Date(weekStart); end.setDate(end.getDate()+6);
+    el.textContent = `${weekStart.getMonth()+1}/${weekStart.getDate()} — ${end.getMonth()+1}/${end.getDate()}`;
+  } else if (view === 'day') {
+    const d = new Date(selectedDate);
+    el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
+  } else {
+    const d = new Date(selectedDate);
+    el.textContent = `入力 — ${d.getMonth()+1}月${d.getDate()}日`;
+  }
+}
+
+function render() {
+  updateNavTitle();
+  if (view === 'month')      renderMonth();
+  else if (view === 'week')  renderWeek();
+  else if (view === 'day')   renderDay();
+  else                       renderInput();
+}
+
+// ══════════════════════════════════════════
+// MONTH VIEW
+// ══════════════════════════════════════════
+function renderMonth() {
+  const c = document.getElementById('viewContainer');
+  const year = cursor.getFullYear(), month = cursor.getMonth();
+  const startDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayKey = fmtDate(today);
+
+  let html = '<div class="month-grid"><div class="dow-row">';
+  ['日','月','火','水','木','金','土'].forEach((d,i) => {
+    html += `<div class="dow-cell ${i===0?'sun':i===6?'sat':''}">${d}</div>`;
+  });
+  html += '</div><div class="cal-grid">';
+
+  const prevDays = new Date(year, month, 0).getDate();
+  for (let i = startDow-1; i >= 0; i--) {
+    html += renderCalCell(year, month-1, prevDays-i, fmtDate(new Date(year, month-1, prevDays-i)), true, todayKey);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    html += renderCalCell(year, month, d, fmtDate(new Date(year, month, d)), false, todayKey);
+  }
+  const total = startDow + daysInMonth;
+  const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let d = 1; d <= rem; d++) {
+    html += renderCalCell(year, month+1, d, fmtDate(new Date(year, month+1, d)), true, todayKey);
+  }
+  html += '</div></div>';
+  c.innerHTML = html;
+}
+
+function renderCalCell(year, month, day, dateKey, other, todayKey) {
+  const dow = new Date(year, month, day).getDay();
+  const isToday = dateKey === todayKey;
+  const isSel = dateKey === selectedDate;
+  const info = getShiftInfo(dateKey);
+  let cls = 'cal-cell';
+  if (other) cls += ' other-month';
+  if (isToday) cls += ' today';
+  if (isSel) cls += ' selected';
+  if (dow === 0) cls += ' sun';
+  if (dow === 6) cls += ' sat';
+
+  let inner = `<div class="cal-date">${day}</div>`;
+  if (info) {
+    let sc = info.type === 'work' ? 'work' : info.type === 'holiday' ? 'holiday' : info.type === 'paid' ? 'paid' : 'off';
+    inner += `<div class="cal-shift ${sc}">${info.label}</div>`;
+    if (info.start && !other) inner += `<div class="cal-time">${info.start}–${info.end}</div>`;
+  }
+  return `<div class="${cls}" onclick="selectDate('${dateKey}')">${inner}</div>`;
+}
+
+function selectDate(key) {
+  selectedDate = key;
+  switchView('day');
+}
+
+// ══════════════════════════════════════════
+// WEEK VIEW
+// ══════════════════════════════════════════
+function renderWeek() {
+  const c = document.getElementById('viewContainer');
+  const todayKey = fmtDate(today);
+  const days = Array.from({length:7}, (_,i) => {
+    const d = new Date(weekStart); d.setDate(d.getDate()+i); return d;
+  });
+
+  function cell(key, value, extraCls='') {
+    const isTod = key === todayKey, isSel = key === selectedDate;
+    let cls = 'wt-cell';
+    if (isTod) cls += ' today-col';
+    if (isSel) cls += ' selected-col';
+    if (extraCls) cls += ' ' + extraCls;
+    return `<td class="${cls}">${value}</td>`;
+  }
+  function emptyCell(key) { return cell(key, '—', 'empty'); }
+
+  function headerCell(d) {
+    const key = fmtDate(d), dow = d.getDay();
+    const isToday = key === todayKey, isSel = key === selectedDate;
+    let cls = 'wt-day-header';
+    if (isToday) cls += ' today';
+    if (isSel) cls += ' selected-col';
+    if (dow === 6) cls += ' sat';
+    if (dow === 0) cls += ' sun';
+    return `<th class="${cls}" onclick="selectDate('${key}')">
+      <div class="wt-dow">${DOW[dow]}</div>
+      <div class="wt-date-num">${d.getDate()}</div>
+      <div class="wt-month-label">${d.getMonth()+1}月</div>
+    </th>`;
+  }
+
+  function row(label, fn) {
+    return `<tr><td class="wt-label">${label}</td>${days.map(d => fn(d, fmtDate(d))).join('')}</tr>`;
+  }
+  function sectionRow(title) {
+    return `<tr class="wt-section-row"><td colspan="8">${title}</td></tr>`;
+  }
+
+  const headerRow = `<tr><th class="wt-label" style="background:var(--surface2);border-bottom:2px solid var(--border2);border-right:1px solid var(--border)"></th>${days.map(headerCell).join('')}</tr>`;
+
+  const html = `<div class="week-view"><table class="week-table">
+    <thead>${headerRow}</thead>
+    <tbody>
+      ${sectionRow('シフト情報')}
+      ${row('交番', (d,key) => {
+        const info = getShiftInfo(key);
+        if (!info) return emptyCell(key);
+        const bc = info.type === 'work' ? 'work' : info.type === 'holiday' ? 'holiday' : info.type === 'paid' ? 'paid' : 'off';
+        return cell(key, `<span class="wt-shift-badge ${bc}">${info.label}</span>`);
+      })}
+      ${row('開始', (d,key) => {
+        const info = getShiftInfo(key);
+        return info && info.start ? cell(key, info.start) : emptyCell(key);
+      })}
+      ${row('終了', (d,key) => {
+        const info = getShiftInfo(key);
+        return info && info.end ? cell(key, info.end) : emptyCell(key);
+      })}
+      ${sectionRow('📊 サマリー')}
+      ${row('⏳ 勤務時間', (d,key) => {
+        const info = getShiftInfo(key);
+        if (!info || !info.start || !info.end) return emptyCell(key);
+        const m = diffMin(parseTime(info.start), parseTime(info.end));
+        const cls = m > 780 ? 'wt-summary-badge warn' : 'wt-summary-badge ok';
+        return cell(key, `<span class="${cls}">${fmtMin(m)}</span>`);
+      })}
+      ${row('🔄 勤務間時間', (d,key) => {
+        const m = getIntervalHours(key);
+        if (m === null) return emptyCell(key);
+        const cls = m < 480 ? 'wt-summary-badge bad' : m < 600 ? 'wt-summary-badge warn' : 'wt-summary-badge ok';
+        return cell(key, `<span class="${cls}">${fmtMin(m)}</span>`);
+      })}
+      ${row('😴 睡眠時間', (d,key) => {
+        const m = getSleepHours(key);
+        if (m === null) return emptyCell(key);
+        const cls = m < 360 ? 'wt-summary-badge bad' : m < 420 ? 'wt-summary-badge warn' : 'wt-summary-badge ok';
+        return cell(key, `<span class="${cls}">${fmtMin(m)}</span>`);
+      })}
+      ${sectionRow('🗒️ 生活記録')}
+      ${row('💤 就寝', (d,key) => {
+        const rec = appData[key];
+        const sleepDay = rec && rec.life && rec.life.sleepDay === 'today' ? 'today' : 'prev';
+        let val = null;
+        if (sleepDay === 'today') {
+          // 当日モード：当日データのsleep
+          val = rec && rec.life && rec.life.sleep ? rec.life.sleep : null;
+        } else {
+          // 前日モード：前日データのsleepを参照
+          // ただし前日が「当日モード」で保存していた場合もそちらを参照
+          const prev = new Date(d); prev.setDate(prev.getDate()-1);
+          const prevKey = fmtDate(prev);
+          const prevRec = appData[prevKey];
+          if (prevRec && prevRec.life) {
+            if (prevRec.life.sleepDay === 'today') {
+              // 前日が当日モード → 前日データのsleep
+              val = prevRec.life.sleep || null;
+            } else {
+              // 前日が前日モード → 前日データのsleep（翌日=当日の就寝として記録）
+              val = prevRec.life.sleep || null;
+            }
+          }
+        }
+        const badge = sleepDay === 'today'
+          ? `<span style="font-size:9px;background:#c8eef8;color:#0878a0;border-radius:4px;padding:1px 5px;margin-right:3px;font-weight:700;">当日</span>`
+          : `<span style="font-size:9px;background:#f0fafb;color:#5a8a96;border-radius:4px;padding:1px 5px;margin-right:3px;font-weight:700;">前日</span>`;
+        return val ? cell(key, badge + val) : emptyCell(key);
+      })}
+      ${row('☀️ 起床', (d,key) => {
+        const rec = appData[key];
+        return rec && rec.life && rec.life.wake ? cell(key, rec.life.wake) : emptyCell(key);
+      })}
+      ${row('🚿 準備', (d,key) => {
+        const rec = appData[key];
+        return rec && rec.life && rec.life.ready ? cell(key, rec.life.ready) : emptyCell(key);
+      })}
+      ${row('🚃 出社', (d,key) => {
+        const rec = appData[key];
+        return rec && rec.life && rec.life.commute ? cell(key, rec.life.commute) : emptyCell(key);
+      })}
+    </tbody>
+  </table></div>`;
+  c.innerHTML = html;
+}
+
+// ══════════════════════════════════════════
+// DAY VIEW (読み取り専用)
+// ══════════════════════════════════════════
+function renderDay() {
+  const c = document.getElementById('viewContainer');
+  const key = selectedDate;
+  const rec = appData[key] || {};
+  const life = rec.life || {};
+  const info = getShiftInfo(key);
+  const intervalMin = getIntervalHours(key);
+  const sleepMin = getSleepHours(key);
+  const workMin = info && info.start && info.end ? diffMin(parseTime(info.start), parseTime(info.end)) : null;
+
+  const prev = new Date(key); prev.setDate(prev.getDate()-1);
+  const prevRec = appData[fmtDate(prev)] || {};
+  const prevLife = prevRec.life || {};
+
+  const intervalColor = intervalMin === null ? '' : intervalMin < 480 ? 'bad' : intervalMin < 600 ? 'warn' : 'good';
+  const sleepColor = sleepMin === null ? '' : sleepMin < 360 ? 'bad' : sleepMin < 420 ? 'warn' : 'good';
+
+  function infoRow(label, val) {
+    return `<div class="life-row">
+      <span class="life-label">${label}</span>
+      <span style="font-family:var(--mono);font-size:15px;font-weight:600;color:${val ? 'var(--text)' : 'var(--muted)'}">${val || '—'}</span>
+    </div>`;
+  }
+
+  c.innerHTML = `
+  <div class="day-view">
+    <div class="section-label">シフト情報</div>
+    <div class="day-card">
+      <div class="day-card-header">
+        <span class="day-card-icon">📋</span>
+        <span class="day-card-title">${info ? info.label : '未設定'}</span>
+        ${info && info.start ? `<span class="day-card-sub">${info.start} – ${info.end}</span>` : ''}
+      </div>
+      <div class="day-card-body">
+        ${infoRow('勤務開始', info && info.start ? info.start : '')}
+        ${infoRow('勤務終了', info && info.end ? info.end : '')}
+      </div>
+    </div>
+
+    <div class="section-label">生活記録</div>
+    <div class="day-card">
+      <div class="day-card-body">
+        ${infoRow('💤 就寝（' + (life.sleepDay === 'today' ? '当日）' : '前日）'), life.sleepDay === 'today' ? (life.sleep || '') : (prevLife.sleep || ''))}
+        ${infoRow('☀️ 起床', life.wake || '')}
+        ${infoRow('🚿 準備完了', life.ready || '')}
+        ${infoRow('🚃 出社', life.commute || '')}
+      </div>
+    </div>
+
+    <div class="section-label">サマリー</div>
+    <div class="day-card">
+      <div class="day-card-body">
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="stat-label">勤務時間</div>
+            <div class="stat-val">${fmtMin(workMin)}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">勤務間時間</div>
+            <div class="stat-val ${intervalColor}">${fmtMin(intervalMin)}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">睡眠時間</div>
+            <div class="stat-val ${sleepColor}">${fmtMin(sleepMin)}</div>
+          </div>
+        </div>
+        ${intervalMin !== null && intervalMin < 480 ? `<div class="alert-warn bad">⚠️ 勤務間隔が8時間未満です（${fmtMin(intervalMin)}）</div>` : ''}
+        ${sleepMin !== null && sleepMin < 360 ? `<div class="alert-warn warn">😴 睡眠が6時間未満です（${fmtMin(sleepMin)}）</div>` : ''}
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:16px">
+      <button onclick="selectedDate='${key}';switchView('input')"
+        style="padding:10px 28px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(58,123,255,.3);font-family:var(--sans)">
+        ✏️ この日を入力・編集する
+      </button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// INPUT VIEW
+// ══════════════════════════════════════════
+function renderInput() {
+  const c = document.getElementById('viewContainer');
+  const key = selectedDate;
+  const rec = appData[key] || { shift: null, life: {} };
+  const life = rec.life || {};
+
+  const allShiftIds = Object.keys(SHIFT_TABLE).sort((a,b) => parseInt(a)-parseInt(b));
+
+  const specials = [
+    { id:'501交番', label:'公休日',  selCls:'sel-holiday' },
+    { id:'502交番', label:'振替休日', selCls:'sel-sub' },
+    { id:'503交番', label:'有給休暇', selCls:'sel-paid' },
+    { id:null,     label:'休み（未設定）', selCls:'sel-off' },
+  ];
+
+  let specialHtml = '<div class="special-btns">';
+  specials.forEach(s => {
+    const active = rec.shift === s.id;
+    specialHtml += `<button class="special-btn${active?' '+s.selCls:''}" onclick="setShift('${key}','${s.id}')">${s.label}</button>`;
+  });
+  specialHtml += '</div>';
+
+  let shiftListHtml = `<input class="shift-search" type="text" placeholder="交番番号を検索… (例: 028)" id="shiftSearch" oninput="filterShifts(this.value)">
+  <div class="shift-list" id="shiftList">`;
+  allShiftIds.forEach(id => {
+    const s = SHIFT_TABLE[id];
+    const sel = rec.shift === id;
+    shiftListHtml += `<span class="shift-badge${sel?' selected':''}" onclick="setShift('${key}','${id}')" title="${s.start}–${s.end}">${id.replace('交番','')}</span>`;
+  });
+  shiftListHtml += '</div>';
+
+  const isCustom = rec.shift === 'custom';
+  const customHtml = `
+  <div class="custom-row">
+    <div style="width:100%;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px">カスタム（分割勤務など）</div>
+    <input type="text" placeholder="名称" value="${isCustom?rec.customLabel||'':''}" id="custLabel" class="custom-name-inp">
+    <input type="time" value="${isCustom?rec.customStart||'':''}" id="custStart" class="custom-time-inp">
+    <input type="time" value="${isCustom?rec.customEnd||'':''}" id="custEnd" class="custom-time-inp">
+    <button class="btn-register" onclick="setCustomShift('${key}')">登録</button>
+  </div>`;
+
+  const lifeFields = [
+    { field:'wake',    label:'☀️ 起床' },
+    { field:'ready',   label:'🚿 準備完了' },
+    { field:'commute', label:'🚃 出社' },
+  ];
+  let lifeHtml = '';
+
+  // 就寝行：前日／当日トグル付き
+  const sleepVal = life.sleep || '';
+  const sleepDay = life.sleepDay || 'prev';
+  const sleepLabel = sleepDay === 'today' ? '💤 就寝（当日）' : '💤 就寝（前日）';
+  lifeHtml += `<div class="inp-life-row-sleep">
+    <span class="inp-life-label">${sleepLabel}</span>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+      <div class="sleep-day-toggle">
+        <button class="${sleepDay==='prev'?'active':''}" onclick="setSleepDay('${key}','prev')">前日</button>
+        <button class="${sleepDay==='today'?'active':''}" onclick="setSleepDay('${key}','today')">当日</button>
+      </div>
+      <input type="time" value="${sleepVal}" class="inp-life-time"
+        onchange="setLife('${key}','sleep',this.value)"
+        onfocus="this.style.borderColor='var(--accent)'"
+        onblur="this.style.borderColor='var(--border2)'">
+    </div>
+  </div>`;
+
+  lifeFields.forEach(f => {
+    const val = life[f.field] || '';
+    lifeHtml += `<div class="inp-life-row">
+      <span class="inp-life-label">${f.label}</span>
+      <input type="time" value="${val}" class="inp-life-time"
+        onchange="setLife('${key}','${f.field}',this.value)"
+        onfocus="this.style.borderColor='var(--accent)'"
+        onblur="this.style.borderColor='var(--border2)'">
+    </div>`;
+  });
+
+  // 間時間の表示用データ
+  const intervals = rec.intervals || {};
+  const intervalDefs = [
+    { field: 'commuteToReady', label: '🚃 出社　⇔　🚿 準備完了', fromField: 'ready',  toField: 'commute' },
+    { field: 'readyToWake',   label: '🚿 準備完了　⇔　☀️ 起床',  fromField: 'wake',   toField: 'ready' },
+    { field: 'wakeToSleep',   label: '☀️ 起床　⇔　💤 就寝（前日）', fromField: null, toField: null, isSleep: true },
+  ];
+
+  function calcIntervalDisplay(def) {
+    if (def.isSleep) {
+      const wake = parseTime(life.wake);
+      let sleep = null;
+      const sleepDay = life.sleepDay || 'prev';
+      if (sleepDay === 'today') {
+        sleep = parseTime(life.sleep);
+      } else {
+        const prev2 = new Date(key); prev2.setDate(prev2.getDate()-1);
+        const prevRec2 = appData[fmtDate(prev2)];
+        sleep = prevRec2 && prevRec2.life ? parseTime(prevRec2.life.sleep) : null;
+      }
+      if (wake !== null && sleep !== null) return diffMin(sleep, wake);
+    } else {
+      const from = parseTime(life[def.fromField]);
+      const to   = parseTime(life[def.toField]);
+      if (from !== null && to !== null) return diffMin(from, to);
+    }
+    return null;
+  }
+
+  let intervalRowHtml = '';
+  intervalDefs.forEach(def => {
+    const savedMin = intervals[def.field] !== undefined ? intervals[def.field] : '';
+    const calcMin  = calcIntervalDisplay(def);
+    const dispVal  = calcMin !== null ? fmtMin(calcMin) : '--:--';
+    const dispStyle = calcMin !== null && calcMin < 360 ? 'color:#e03535;font-weight:700' :
+                      calcMin !== null && calcMin < 420 ? 'color:#e08a10;font-weight:700' :
+                      'color:#0a6e3e;font-weight:700';
+    intervalRowHtml += `<div class="inp-interval-row">
+      <span class="inp-interval-label">${def.label}</span>
+      <div class="inp-interval-right">
+        <input type="number" min="0" max="999" placeholder="分"
+          value="${savedMin}"
+          class="inp-interval-minutes"
+          onchange="setIntervalData('${key}','${def.field}',this.value)"
+          onfocus="this.style.borderColor='var(--accent2)'"
+          onblur="this.style.borderColor='#8ee0b8'">
+        <span style="font-size:11px;color:#5a8a96;min-width:14px;">分</span>
+        <span class="inp-interval-display" style="${dispStyle}">${dispVal}</span>
+      </div>
+    </div>`;
+  });
+
+  c.innerHTML = `
+  <div class="input-view">
+    <div class="date-selector">
+      <span class="date-selector-label">対象日</span>
+      <input type="date" value="${key}" class="date-input-native" onchange="changeInputDate(this.value)">
+    </div>
+
+    <div class="section-label">シフト設定</div>
+    <div class="inp-card">
+      <div class="inp-card-header">📋 交番・勤務区分</div>
+      <div class="inp-card-body">
+        ${specialHtml}
+        ${shiftListHtml}
+        ${customHtml}
+      </div>
+    </div>
+
+    <div class="section-label">生活時刻の記録</div>
+    <div class="inp-card">
+      <div class="inp-card-header">🕐 時刻入力</div>
+      <div class="inp-card-body">${lifeHtml}</div>
+    </div>
+
+    <div class="section-label">逆算用・間時間の設定</div>
+    <div class="inp-interval-section">
+      <div class="inp-interval-header">⏱️ 各区間の所要時間（分）</div>
+      <div class="inp-interval-body">
+        ${intervalRowHtml}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════
+function changeInputDate(val) {
+  selectedDate = val;
+  updateNavTitle();
+  renderInput();
+}
+
+function setShift(dateKey, shiftId) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  appData[dateKey].shift = shiftId;
+  delete appData[dateKey].customLabel;
+  delete appData[dateKey].customStart;
+  delete appData[dateKey].customEnd;
+  saveData(appData);
+  renderInput();
+}
+
+function setCustomShift(dateKey) {
+  const label = document.getElementById('custLabel').value.trim() || 'カスタム';
+  const start = document.getElementById('custStart').value;
+  const end   = document.getElementById('custEnd').value;
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  appData[dateKey].shift = 'custom';
+  appData[dateKey].customLabel = label;
+  appData[dateKey].customStart = start;
+  appData[dateKey].customEnd   = end;
+  saveData(appData);
+  renderInput();
+}
+
+function setLife(dateKey, field, val) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].life) appData[dateKey].life = {};
+  appData[dateKey].life[field] = val;
+  saveData(appData);
+}
+
+function setSleepDay(dateKey, dayVal) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].life) appData[dateKey].life = {};
+  appData[dateKey].life.sleepDay = dayVal;
+  saveData(appData);
+  renderInput();
+}
+
+function setIntervalData(dateKey, field, val) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].intervals) appData[dateKey].intervals = {};
+  appData[dateKey].intervals[field] = val === '' ? undefined : parseInt(val);
+  saveData(appData);
+  renderInput();
+}
+
+function filterShifts(q) {
+  const list = document.getElementById('shiftList');
+  if (!list) return;
+  const lq = q.toLowerCase().replace('交番','');
+  list.querySelectorAll('.shift-badge').forEach(b => {
+    const txt = b.textContent.toLowerCase().replace('交番','');
+    b.style.display = (!q || txt.includes(lq)) ? '' : 'none';
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ══════════════════════════════════════════
+// EXPORT / IMPORT（Safari対応コピペ方式）
+// ══════════════════════════════════════════
+function openExportModal() {
+  document.getElementById('exportText').value = JSON.stringify(appData, null, 2);
+  document.getElementById('exportModal').classList.add('show');
+}
+function selectExportText() {
+  const ta = document.getElementById('exportText');
+  ta.select();
+  ta.setSelectionRange(0, 99999); // モバイル対応
+  try {
+    document.execCommand('copy');
+    showToast('クリップボードにコピーしました ✓');
+  } catch {
+    showToast('手動でコピーしてください');
+  }
+}
+function openImportModal() {
+  document.getElementById('importText').value = '';
+  document.getElementById('importModal').classList.add('show');
+}
+function doImport() {
+  const txt = document.getElementById('importText').value.trim();
+  if (!txt) { showToast('⚠️ テキストを貼り付けてください'); return; }
+  try {
+    const imported = JSON.parse(txt);
+    const count = Object.keys(imported).length;
+    Object.keys(imported).forEach(k => { appData[k] = imported[k]; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    closeModal('importModal');
+    render();
+    showToast(`読み込み完了 ✓ （${count}件）`);
+  } catch {
+    showToast('⚠️ データの形式が正しくありません');
+  }
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// ── Init ──
+render();
+</script>
+</body>
+</html>
