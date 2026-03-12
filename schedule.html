@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-13</title>
+<title>スケジュール管理アプリ MK-14</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -502,7 +502,7 @@
 <body>
 
 <div class="header">
-  <div class="logo">MK-13 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-14 <span class="logo-sub">スケジュール管理</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1379,7 +1379,7 @@ render();
     firestoreSave = function(d) {
       setSyncStatus('syncing');
       isSavingLocally = true;
-      setDoc(docRef, { appData: d }, { merge: true })
+      setDoc(docRef, { appData: d })
         .then(() => {
           setSyncStatus('ok');
           // 短い待機後にフラグ解除（自snapshotが届く猶予）
