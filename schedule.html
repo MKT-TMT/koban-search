@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-11</title>
+<title>スケジュール管理アプリ MK-13</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -503,7 +502,7 @@
 <body>
 
 <div class="header">
-  <div class="logo">MK-11 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-13 <span class="logo-sub">スケジュール管理</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -577,14 +576,21 @@ const DOW = ["日","月","火","水","木","金","土"];
 // ══════════════════════════════════════════
 // STORAGE
 // ══════════════════════════════════════════
-const STORAGE_KEY = 'mkx_data_v2'; // バージョンを上げると古いキャッシュを無視
+const STORAGE_KEY = 'mkx_data_v2';
 
 function loadData() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
 }
+
+// Firestore保存関数（Firebase初期化後に上書きされる）
+let firestoreSave = null;
+
 function saveData(d) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
   showToast('保存しました ✓');
+  if (firestoreSave) {
+    firestoreSave(d);
+  }
 }
 
 const INITIAL_DATA = {
@@ -1303,8 +1309,8 @@ render();
 // ══════════════════════════════════════════
 (async function initFirebase() {
   try {
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js");
-    const { getFirestore, doc, setDoc, onSnapshot, getDoc } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, doc, setDoc, onSnapshot, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIqSyfHwHg5ygdyB5XA6KBsIDqiyLQLgU",
@@ -1318,6 +1324,9 @@ render();
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const docRef = doc(db, "schedules", "mkdata");
+
+    // ローカル保存中フラグ（自分の書き込みによるonSnapshotを無視）
+    let isSavingLocally = false;
 
     function setSyncStatus(status) {
       const dot = document.getElementById('syncDot');
@@ -1335,23 +1344,25 @@ render();
       }
     }
 
-    // Firestoreからデータを取得してマージ
+    // Firestoreからデータを初回取得してマージ（クラウド優先）
     try {
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         const cloudData = snap.data().appData || {};
-        // クラウドデータをローカルにマージ（クラウド優先）
         Object.keys(cloudData).forEach(k => { appData[k] = cloudData[k]; });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
         render();
       }
       setSyncStatus('ok');
     } catch(e) {
+      console.warn('初回取得エラー:', e);
       setSyncStatus('offline');
     }
 
     // リアルタイム監視（他デバイスの変更を自動反映）
+    // 自分の書き込み起因のsnapshotは無視してUI上書きを防ぐ
     onSnapshot(docRef, (snap) => {
+      if (isSavingLocally) return; // 自分の保存中は無視
       if (snap.exists()) {
         const cloudData = snap.data().appData || {};
         Object.keys(cloudData).forEach(k => { appData[k] = cloudData[k]; });
@@ -1359,22 +1370,32 @@ render();
         render();
         setSyncStatus('ok');
       }
-    }, () => setSyncStatus('offline'));
+    }, (err) => {
+      console.warn('onSnapshotエラー:', err);
+      setSyncStatus('offline');
+    });
 
-    // saveDataをオーバーライドしてFirestoreにも保存
-    const _origSave = saveData;
-    window.saveData = function(d) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
-      showToast('保存しました ✓');
+    // firestoreSaveをセット（saveData内から呼ばれる）
+    firestoreSave = function(d) {
       setSyncStatus('syncing');
+      isSavingLocally = true;
       setDoc(docRef, { appData: d }, { merge: true })
-        .then(() => setSyncStatus('ok'))
-        .catch(() => setSyncStatus('offline'));
+        .then(() => {
+          setSyncStatus('ok');
+          // 短い待機後にフラグ解除（自snapshotが届く猶予）
+          setTimeout(() => { isSavingLocally = false; }, 2000);
+        })
+        .catch((e) => {
+          console.warn('Firestore保存エラー:', e);
+          setSyncStatus('offline');
+          isSavingLocally = false;
+        });
     };
 
   } catch(e) {
     console.error('Firebase初期化エラー:', e);
-    document.getElementById('syncText').textContent = 'ローカルのみ';
+    const txt = document.getElementById('syncText');
+    if (txt) txt.textContent = 'ローカルのみ';
   }
 })();
 </script>
