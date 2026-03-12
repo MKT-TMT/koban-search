@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-16</title>
+<title>スケジュール管理アプリ MK-17</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -502,7 +502,7 @@
 <body>
 
 <div class="header">
-  <div class="logo">MK-16 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-17 <span class="logo-sub">スケジュール管理</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -681,42 +681,16 @@ function getIntervalHours(dateKey) {
   return diffMin(parseTime(prevInfo.end), parseTime(info.start));
 }
 function getSleepHours(dateKey) {
+  // 設計：sleepには「この日の起床に対応する就寝時刻」を入力する
+  // （前夜23時台でも深夜0〜4時台でも、起床と対になる日付に入力）
+  // よって sleep と wake は常に当日データ同士で計算する
   const rec = appData[dateKey];
   if (!rec || !rec.life) return null;
-
-  const wake = parseTime(rec.life.wake);
-  if (wake === null) return null;
-
-  // sleepDayが明示的に設定されている場合はそれに従う
-  // 未設定の場合：sleepが5:00未満（深夜〜早朝）なら深夜モード、それ以外は通常モード
-  let sleepDay = rec.life.sleepDay;
-  if (!sleepDay) {
-    const sleepMin = parseTime(rec.life.sleep);
-    sleepDay = (sleepMin !== null && sleepMin < 300) ? 'today' : 'prev';
-  }
-
-  if (sleepDay === 'today') {
-    // 深夜モード：当日のsleepと当日のwakeで計算
-    const sleep = parseTime(rec.life.sleep);
-    if (sleep === null) return null;
-    return diffMin(sleep, wake);
-  } else {
-    // 通常モード：前日のsleepと当日のwakeで計算
-    const prev = new Date(dateKey); prev.setDate(prev.getDate()-1);
-    const prevRec = appData[fmtDate(prev)];
-    if (!prevRec || !prevRec.life) return null;
-    // 前日が深夜モードの場合は前日の就寝は当日計算用なので参照しない
-    const prevSleepDay = prevRec.life.sleepDay || (parseTime(prevRec.life.sleep) !== null && parseTime(prevRec.life.sleep) < 300 ? 'today' : 'prev');
-    if (prevSleepDay === 'today') return null;
-    const sleep = parseTime(prevRec.life.sleep);
-    if (sleep === null) return null;
-    return diffMin(sleep, wake);
-  }
+  const sleep = parseTime(rec.life.sleep);
+  const wake  = parseTime(rec.life.wake);
+  if (sleep === null || wake === null) return null;
+  return diffMin(sleep, wake);
 }
-
-// ══════════════════════════════════════════
-// NAVIGATION
-// ══════════════════════════════════════════
 function switchView(v) {
   view = v;
   document.querySelectorAll('.tab').forEach((t, i) => {
@@ -912,14 +886,7 @@ function renderWeek() {
       ${row('💤 就寝', (d,key) => {
         const rec = appData[key];
         const val = rec && rec.life && rec.life.sleep ? rec.life.sleep : null;
-        if (!val) return emptyCell(key);
-        // sleepDayが明示設定されていない場合は時刻で自動判定（5:00未満=深夜モード）
-        let sd = rec.life.sleepDay;
-        if (!sd) { const sm = parseTime(val); sd = (sm !== null && sm < 300) ? 'today' : 'prev'; }
-        const badge = sd === 'today'
-          ? `<span style="font-size:9px;background:#c8eef8;color:#0878a0;border-radius:4px;padding:1px 5px;margin-right:3px;font-weight:700;">深夜</span>`
-          : ``;
-        return cell(key, badge + val);
+        return val ? cell(key, val) : emptyCell(key);
       })}
       ${row('☀️ 起床', (d,key) => {
         const rec = appData[key];
@@ -983,7 +950,7 @@ function renderDay() {
     <div class="section-label">生活記録</div>
     <div class="day-card">
       <div class="day-card-body">
-        ${infoRow('💤 就寝' + (life.sleepDay === 'today' ? '（深夜）' : ''), life.sleep || '')}
+        ${infoRow('💤 就寝', life.sleep || '')}
         ${infoRow('☀️ 起床', life.wake || '')}
         ${infoRow('🚿 準備完了', life.ready || '')}
         ${infoRow('🚃 出社', life.commute || '')}
@@ -1072,22 +1039,14 @@ function renderInput() {
   ];
   let lifeHtml = '';
 
-  // 就寝行：前日／当日トグル付き
+    // 就寝行：シンプルな時刻入力（sleepには「この日の起床に対応する就寝時刻」を入力）
   const sleepVal = life.sleep || '';
-  const sleepDay = life.sleepDay || 'prev';
-  const sleepLabel = sleepDay === 'today' ? '💤 就寝（深夜帰宅・当日中）' : '💤 就寝（当日夜→翌日起床用）';
-  lifeHtml += `<div class="inp-life-row-sleep">
-    <span class="inp-life-label">${sleepLabel}</span>
-    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
-      <div class="sleep-day-toggle">
-        <button class="${sleepDay==='prev'?'active':''}" onclick="setSleepDay('${key}','prev')">通常</button>
-        <button class="${sleepDay==='today'?'active':''}" onclick="setSleepDay('${key}','today')">深夜</button>
-      </div>
-      <input type="time" value="${sleepVal}" class="inp-life-time"
-        onchange="setLife('${key}','sleep',this.value)"
-        onfocus="this.style.borderColor='var(--accent)'"
-        onblur="this.style.borderColor='var(--border2)'">
-    </div>
+  lifeHtml += `<div class="inp-life-row">
+    <span class="inp-life-label">💤 就寝</span>
+    <input type="time" value="${sleepVal}" class="inp-life-time"
+      onchange="setLife('${key}','sleep',this.value)"
+      onfocus="this.style.borderColor='var(--accent)'"
+      onblur="this.style.borderColor='var(--border2)'">
   </div>`;
 
   lifeFields.forEach(f => {
@@ -1106,22 +1065,14 @@ function renderInput() {
   const intervalDefs = [
     { field: 'commuteToReady', label: '🚃 出社　⇔　🚿 準備完了', fromField: 'ready',  toField: 'commute' },
     { field: 'readyToWake',   label: '🚿 準備完了　⇔　☀️ 起床',  fromField: 'wake',   toField: 'ready' },
-    { field: 'wakeToSleep',   label: '💤 就寝　⇔　☀️ 起床（翌日）', fromField: null, toField: null, isSleep: true },
+    { field: 'wakeToSleep',   label: '💤 就寝　⇔　☀️ 起床', fromField: null, toField: null, isSleep: true },
   ];
 
   function calcIntervalDisplay(def) {
     if (def.isSleep) {
-      const wake = parseTime(life.wake);
-      let sleep = null;
-      const sleepDay = life.sleepDay || 'prev';
-      if (sleepDay === 'today') {
-        sleep = parseTime(life.sleep);
-      } else {
-        const prev2 = new Date(key); prev2.setDate(prev2.getDate()-1);
-        const prevRec2 = appData[fmtDate(prev2)];
-        sleep = prevRec2 && prevRec2.life ? parseTime(prevRec2.life.sleep) : null;
-      }
-      if (wake !== null && sleep !== null) return diffMin(sleep, wake);
+      const sleep = parseTime(life.sleep);
+      const wake  = parseTime(life.wake);
+      if (sleep !== null && wake !== null) return diffMin(sleep, wake);
     } else {
       const from = parseTime(life[def.fromField]);
       const to   = parseTime(life[def.toField]);
