@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-3</title>
+<title>スケジュール管理アプリ MK-11</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -502,7 +503,11 @@
 <body>
 
 <div class="header">
-  <div class="logo">MK-3 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-11 <span class="logo-sub">スケジュール管理</span></div>
+  <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
+    <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
+    <span id="syncText">接続中…</span>
+  </div>
   <div class="data-btns">
     <button class="data-btn data-btn-export" onclick="openExportModal()">⬇️ 書き出し</button>
     <button class="data-btn data-btn-import" onclick="openImportModal()">⬆️ 読み込み</button>
@@ -1292,6 +1297,86 @@ function closeModal(id) {
 
 // ── Init ──
 render();
+
+// ══════════════════════════════════════════
+// FIREBASE FIRESTORE 同期
+// ══════════════════════════════════════════
+(async function initFirebase() {
+  try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js");
+    const { getFirestore, doc, setDoc, onSnapshot, getDoc } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCIqSyfHwHg5ygdyB5XA6KBsIDqiyLQLgU",
+      authDomain: "schedule-app-d1ba4.firebaseapp.com",
+      projectId: "schedule-app-d1ba4",
+      storageBucket: "schedule-app-d1ba4.firebasestorage.app",
+      messagingSenderId: "350863090121",
+      appId: "1:350863090121:web:b3283d3895cdb0670c4818"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const docRef = doc(db, "schedules", "mkdata");
+
+    function setSyncStatus(status) {
+      const dot = document.getElementById('syncDot');
+      const txt = document.getElementById('syncText');
+      if (!dot || !txt) return;
+      if (status === 'ok') {
+        dot.style.background = '#2ecf7a';
+        txt.textContent = '同期済み';
+      } else if (status === 'syncing') {
+        dot.style.background = '#e08a10';
+        txt.textContent = '同期中…';
+      } else {
+        dot.style.background = '#e03535';
+        txt.textContent = 'オフライン';
+      }
+    }
+
+    // Firestoreからデータを取得してマージ
+    try {
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const cloudData = snap.data().appData || {};
+        // クラウドデータをローカルにマージ（クラウド優先）
+        Object.keys(cloudData).forEach(k => { appData[k] = cloudData[k]; });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        render();
+      }
+      setSyncStatus('ok');
+    } catch(e) {
+      setSyncStatus('offline');
+    }
+
+    // リアルタイム監視（他デバイスの変更を自動反映）
+    onSnapshot(docRef, (snap) => {
+      if (snap.exists()) {
+        const cloudData = snap.data().appData || {};
+        Object.keys(cloudData).forEach(k => { appData[k] = cloudData[k]; });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        render();
+        setSyncStatus('ok');
+      }
+    }, () => setSyncStatus('offline'));
+
+    // saveDataをオーバーライドしてFirestoreにも保存
+    const _origSave = saveData;
+    window.saveData = function(d) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+      showToast('保存しました ✓');
+      setSyncStatus('syncing');
+      setDoc(docRef, { appData: d }, { merge: true })
+        .then(() => setSyncStatus('ok'))
+        .catch(() => setSyncStatus('offline'));
+    };
+
+  } catch(e) {
+    console.error('Firebase初期化エラー:', e);
+    document.getElementById('syncText').textContent = 'ローカルのみ';
+  }
+})();
 </script>
 </body>
 </html>
