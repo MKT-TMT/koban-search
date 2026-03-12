@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-14</title>
+<title>スケジュール管理アプリ MK-15</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -502,7 +502,7 @@
 <body>
 
 <div class="header">
-  <div class="logo">MK-14 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-15 <span class="logo-sub">スケジュール管理</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -683,21 +683,27 @@ function getIntervalHours(dateKey) {
 function getSleepHours(dateKey) {
   const rec = appData[dateKey];
   if (!rec || !rec.life) return null;
-  const wake = parseTime(rec.life.wake);
-  if (wake === null) return null;
 
-  // sleepDay: 'prev'(デフォルト) = 前日データのsleep, 'today' = 当日データのsleep
+  // sleepDay='today'（深夜帰宅モード）: 当日のsleepと当日のwakeで計算
+  // sleepDay='prev'（通常モード）: 前日のsleepフィールド（前日夜就寝）と当日のwakeで計算
   const sleepDay = rec.life.sleepDay || 'prev';
-  let sleep = null;
+
   if (sleepDay === 'today') {
-    sleep = parseTime(rec.life.sleep);
+    const sleep = parseTime(rec.life.sleep);
+    const wake  = parseTime(rec.life.wake);
+    if (sleep === null || wake === null) return null;
+    return diffMin(sleep, wake);
   } else {
+    const wake = parseTime(rec.life.wake);
+    if (wake === null) return null;
     const prev = new Date(dateKey); prev.setDate(prev.getDate()-1);
     const prevRec = appData[fmtDate(prev)];
-    sleep = prevRec && prevRec.life ? parseTime(prevRec.life.sleep) : null;
+    if (!prevRec || !prevRec.life) return null;
+    if (prevRec.life.sleepDay === 'today') return null;
+    const sleep = parseTime(prevRec.life.sleep);
+    if (sleep === null) return null;
+    return diffMin(sleep, wake);
   }
-  if (sleep === null) return null;
-  return diffMin(sleep, wake);
 }
 
 // ══════════════════════════════════════════
@@ -896,31 +902,15 @@ function renderWeek() {
       })}
       ${sectionRow('🗒️ 生活記録')}
       ${row('💤 就寝', (d,key) => {
+        // 就寝時刻は常に「その日のsleepフィールド」を表示する
+        // sleepDay='prev'(デフォルト)：その日に入力したsleepは「当日夜の就寝時刻」を意味し、翌日の睡眠計算に使われる
+        // sleepDay='today'：早朝帰宅など当日深夜の就寝（起床と同じ日付側に就寝）
         const rec = appData[key];
         const sleepDay = rec && rec.life && rec.life.sleepDay === 'today' ? 'today' : 'prev';
-        let val = null;
-        if (sleepDay === 'today') {
-          // 当日モード：当日データのsleep
-          val = rec && rec.life && rec.life.sleep ? rec.life.sleep : null;
-        } else {
-          // 前日モード：前日データのsleepを参照
-          // ただし前日が「当日モード」で保存していた場合もそちらを参照
-          const prev = new Date(d); prev.setDate(prev.getDate()-1);
-          const prevKey = fmtDate(prev);
-          const prevRec = appData[prevKey];
-          if (prevRec && prevRec.life) {
-            if (prevRec.life.sleepDay === 'today') {
-              // 前日が当日モード → 前日データのsleep
-              val = prevRec.life.sleep || null;
-            } else {
-              // 前日が前日モード → 前日データのsleep（翌日=当日の就寝として記録）
-              val = prevRec.life.sleep || null;
-            }
-          }
-        }
+        const val = rec && rec.life && rec.life.sleep ? rec.life.sleep : null;
         const badge = sleepDay === 'today'
-          ? `<span style="font-size:9px;background:#c8eef8;color:#0878a0;border-radius:4px;padding:1px 5px;margin-right:3px;font-weight:700;">当日</span>`
-          : `<span style="font-size:9px;background:#f0fafb;color:#5a8a96;border-radius:4px;padding:1px 5px;margin-right:3px;font-weight:700;">前日</span>`;
+          ? `<span style="font-size:9px;background:#c8eef8;color:#0878a0;border-radius:4px;padding:1px 5px;margin-right:3px;font-weight:700;">深夜</span>`
+          : ``;
         return val ? cell(key, badge + val) : emptyCell(key);
       })}
       ${row('☀️ 起床', (d,key) => {
@@ -985,7 +975,7 @@ function renderDay() {
     <div class="section-label">生活記録</div>
     <div class="day-card">
       <div class="day-card-body">
-        ${infoRow('💤 就寝（' + (life.sleepDay === 'today' ? '当日）' : '前日）'), life.sleepDay === 'today' ? (life.sleep || '') : (prevLife.sleep || ''))}
+        ${infoRow('💤 就寝' + (life.sleepDay === 'today' ? '（深夜）' : ''), life.sleep || '')}
         ${infoRow('☀️ 起床', life.wake || '')}
         ${infoRow('🚿 準備完了', life.ready || '')}
         ${infoRow('🚃 出社', life.commute || '')}
@@ -1077,13 +1067,13 @@ function renderInput() {
   // 就寝行：前日／当日トグル付き
   const sleepVal = life.sleep || '';
   const sleepDay = life.sleepDay || 'prev';
-  const sleepLabel = sleepDay === 'today' ? '💤 就寝（当日）' : '💤 就寝（前日）';
+  const sleepLabel = sleepDay === 'today' ? '💤 就寝（深夜帰宅・当日中）' : '💤 就寝（当日夜→翌日起床用）';
   lifeHtml += `<div class="inp-life-row-sleep">
     <span class="inp-life-label">${sleepLabel}</span>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
       <div class="sleep-day-toggle">
-        <button class="${sleepDay==='prev'?'active':''}" onclick="setSleepDay('${key}','prev')">前日</button>
-        <button class="${sleepDay==='today'?'active':''}" onclick="setSleepDay('${key}','today')">当日</button>
+        <button class="${sleepDay==='prev'?'active':''}" onclick="setSleepDay('${key}','prev')">通常</button>
+        <button class="${sleepDay==='today'?'active':''}" onclick="setSleepDay('${key}','today')">深夜</button>
       </div>
       <input type="time" value="${sleepVal}" class="inp-life-time"
         onchange="setLife('${key}','sleep',this.value)"
@@ -1108,7 +1098,7 @@ function renderInput() {
   const intervalDefs = [
     { field: 'commuteToReady', label: '🚃 出社　⇔　🚿 準備完了', fromField: 'ready',  toField: 'commute' },
     { field: 'readyToWake',   label: '🚿 準備完了　⇔　☀️ 起床',  fromField: 'wake',   toField: 'ready' },
-    { field: 'wakeToSleep',   label: '☀️ 起床　⇔　💤 就寝（前日）', fromField: null, toField: null, isSleep: true },
+    { field: 'wakeToSleep',   label: '💤 就寝　⇔　☀️ 起床（翌日）', fromField: null, toField: null, isSleep: true },
   ];
 
   function calcIntervalDisplay(def) {
