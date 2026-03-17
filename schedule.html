@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-19</title>
+<title>スケジュール管理アプリ MK-20</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -470,6 +470,53 @@
     padding: 0 2px; margin-bottom: 8px; margin-top: 18px;
   }
 
+  /* ══════════════ NEW KOBAN BUTTON ══════════════ */
+  .data-btn-new-koban {
+    background: linear-gradient(135deg, #ff8c00, #e05a00);
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(224,90,0,.35);
+  }
+  .data-btn-new-koban:hover { opacity: .88; }
+
+  /* ══════════════ REVERSE CALC SECTION ══════════════ */
+  .calc-section {
+    background: var(--surface); border-radius: 14px;
+    border: 1.5px solid #ffd080;
+    box-shadow: 0 2px 10px rgba(224,138,16,.12);
+    overflow: hidden; margin-bottom: 20px;
+  }
+  .calc-header {
+    background: linear-gradient(135deg, #fff4df, #ffecc8);
+    font-size: 12px; font-weight: 800; color: #8a5c00;
+    padding: 10px 16px; letter-spacing: 0.5px;
+    border-bottom: 1px solid #ffd080;
+  }
+  .calc-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .calc-row {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .calc-label {
+    font-size: 12px; font-weight: 700; color: var(--text);
+    min-width: 110px; flex-shrink: 0;
+  }
+  .calc-sel {
+    flex: 1; padding: 7px 8px;
+    border: 1.5px solid #ffd080; border-radius: 8px;
+    background: var(--surface2); color: var(--text);
+    font-size: 13px; font-family: var(--mono); font-weight: 700;
+    outline: none; cursor: pointer;
+    transition: border-color .14s;
+  }
+  .calc-sel:focus { border-color: var(--amber); }
+  .calc-sel-wide { max-width: 120px; }
+  .calc-sel-s    { max-width: 70px; }
+  .calc-unit { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+  .calc-divider {
+    font-size: 10px; font-weight: 800; color: var(--muted);
+    letter-spacing: 1px; padding: 4px 0 2px; margin-top: 4px;
+  }
+
   /* ══════════════ TOAST ══════════════ */
   .toast {
     position: fixed; bottom: 28px; left: 50%;
@@ -549,7 +596,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-19</div>
+    <div class="auth-logo">MK-20</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -564,12 +611,13 @@
 
 
 <div class="header">
-  <div class="logo">MK-19 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-20 <span class="logo-sub">スケジュール管理</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
   </div>
   <div class="data-btns">
+    <button class="data-btn data-btn-new-koban" onclick="openNewKobanModal()">🔄 新交番</button>
     <button class="data-btn data-btn-export" onclick="openExportModal()">⬇️ 書き出し</button>
     <button class="data-btn data-btn-import" onclick="openImportModal()">⬆️ 読み込み</button>
   </div>
@@ -613,6 +661,34 @@
   </div>
 </div>
 
+<!-- 新交番管理モーダル -->
+<div class="modal-overlay" id="newKobanModal" onclick="if(event.target===this)closeModal('newKobanModal')">
+  <div class="modal-box" style="width:min(96vw,560px)">
+    <div class="modal-title">🔄 新交番管理</div>
+    <div id="nkStatus" style="margin-bottom:10px;font-size:12px;"></div>
+
+    <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">施行日（この日以降に新交番を使用）</div>
+    <input type="date" id="nkEffectiveDate" style="width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:9px;font-size:14px;font-family:var(--sans);background:var(--surface2);color:var(--text);outline:none;box-sizing:border-box;margin-bottom:14px;">
+
+    <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">使用中の新交番テーブル</div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
+      新交番テーブルはアプリに組み込み済みです（平日51件・土曜42件・日祝41件）。<br>
+      施行日を設定するだけで自動的に切り替わります。
+    </div>
+    <div id="nkTablePreview" style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:11px;font-family:var(--mono);max-height:120px;overflow-y:auto;margin-bottom:14px;color:var(--muted);">
+      平日: 001〜055番台 （51件）<br>
+      土曜: 401〜455番台 （42件）<br>
+      日祝: 201〜255番台 （41件）
+    </div>
+
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-green" onclick="saveNewKoban()">✅ 施行日を保存</button>
+      <button class="modal-btn" style="background:#ffeaea;color:#c01010;border:none;font-weight:700;" onclick="clearNewKoban()">🗑️ 設定を削除</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('newKobanModal')">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <div class="nav-row">
   <div class="nav-title" id="navTitle"></div>
   <div class="nav-btns">
@@ -629,9 +705,43 @@
 // ══════════════════════════════════════════
 // SHIFT DATA
 // ══════════════════════════════════════════
+// ── 現行交番テーブル（001-055=平日, 401-455=土曜, 201-255=日祝）──
 const SHIFT_TABLE = {
-"001交番":{"start":"06:36","end":"20:57"},"002交番":{"start":"06:23","end":"20:52"},"003交番":{"start":"06:03","end":"18:37"},"004交番":{"start":"05:46","end":"15:08"},"005交番":{"start":"05:38","end":"12:32"},"006交番":{"start":"14:57","end":"23:56"},"007交番":{"start":"12:52","end":"22:42"},"008交番":{"start":"11:47","end":"21:14"},"009交番":{"start":"06:19","end":"20:21"},"010交番":{"start":"05:59","end":"14:27"},"011交番":{"start":"14:51","end":"23:47"},"012交番":{"start":"14:03","end":"23:29"},"013交番":{"start":"13:39","end":"23:20"},"014交番":{"start":"13:55","end":"22:54"},"016交番":{"start":"14:19","end":"23:46"},"017交番":{"start":"13:58","end":"22:57"},"018交番":{"start":"13:37","end":"22:29"},"019交番":{"start":"07:53","end":"21:46"},"020交番":{"start":"06:58","end":"21:02"},"021交番":{"start":"06:30","end":"20:55"},"022交番":{"start":"06:17","end":"19:28"},"023交番":{"start":"06:05","end":"19:18"},"024交番":{"start":"05:44","end":"14:02"},"025交番":{"start":"05:40","end":"14:01"},"026交番":{"start":"11:19","end":"21:26"},"027交番":{"start":"06:40","end":"20:42"},"028交番":{"start":"06:15","end":"20:12"},"029交番":{"start":"05:46","end":"19:58"},"030交番":{"start":"05:37","end":"13:52"},"031交番":{"start":"06:22","end":"20:48"},"032交番":{"start":"05:51","end":"15:21"},"033交番":{"start":"05:50","end":"14:24"},"034交番":{"start":"05:43","end":"14:10"},"035交番":{"start":"05:40","end":"13:33"},"036交番":{"start":"12:58","end":"21:38"},"037交番":{"start":"06:38","end":"20:56"},"038交番":{"start":"06:16","end":"20:15"},"039交番":{"start":"06:07","end":"14:22"},"040交番":{"start":"05:43","end":"13:39"},"042交番":{"start":"14:37","end":"23:50"},"043交番":{"start":"14:39","end":"22:23"},"044交番":{"start":"11:39","end":"21:44"},"046交番":{"start":"06:34","end":"20:23"},"047交番":{"start":"06:26","end":"19:42"},"048交番":{"start":"05:50","end":"19:24"},"049交番":{"start":"05:37","end":"19:24"},"050交番":{"start":"05:31","end":"19:02"},"201交番":{"start":"08:43","end":"20:58"},"202交番":{"start":"08:17","end":"20:30"},"203交番":{"start":"06:19","end":"19:58"},"204交番":{"start":"05:44","end":"16:33"},"205交番":{"start":"05:41","end":"13:08"},"206交番":{"start":"14:52","end":"23:57"},"207交番":{"start":"11:56","end":"22:22"},"211交番":{"start":"14:03","end":"23:49"},"212交番":{"start":"13:40","end":"23:18"},"213交番":{"start":"12:33","end":"22:55"},"214交番":{"start":"12:19","end":"22:54"},"215交番":{"start":"08:56","end":"21:56"},"216交番":{"start":"10:33","end":"23:47"},"217交番":{"start":"09:40","end":"22:08"},"218交番":{"start":"09:10","end":"21:45"},"219交番":{"start":"08:00","end":"21:28"},"222交番":{"start":"06:19","end":"20:03"},"223交番":{"start":"05:53","end":"19:02"},"224交番":{"start":"05:51","end":"18:29"},"227交番":{"start":"07:30","end":"20:19"},"228交番":{"start":"06:45","end":"19:50"},"229交番":{"start":"06:23","end":"17:21"},"233交番":{"start":"05:52","end":"18:30"},"235交番":{"start":"05:43","end":"15:28"},"239交番":{"start":"07:07","end":"19:26"},"240交番":{"start":"05:43","end":"15:08"},"241交番":{"start":"12:05","end":"23:43"},"242交番":{"start":"10:44","end":"23:29"},"243交番":{"start":"09:01","end":"22:44"},"244交番":{"start":"08:40","end":"21:55"},"245交番":{"start":"08:38","end":"21:33"},"246交番":{"start":"07:16","end":"20:07"},"247交番":{"start":"05:50","end":"19:19"},"248交番":{"start":"05:35","end":"19:16"},"249交番":{"start":"05:37","end":"18:24"},"250交番":{"start":"05:31","end":"17:58"},"402交番":{"start":"06:38","end":"20:30"},"403交番":{"start":"06:19","end":"19:50"},"404交番":{"start":"05:44","end":"17:21"},"405交番":{"start":"05:41","end":"13:08"},"406交番":{"start":"13:54","end":"23:57"},"407交番":{"start":"11:56","end":"22:22"},"408交番":{"start":"08:00","end":"20:58"},"409交番":{"start":"06:23","end":"19:55"},"412交番":{"start":"13:40","end":"23:18"},"413交番":{"start":"12:19","end":"22:54"},"414交番":{"start":"08:43","end":"22:44"},"415交番":{"start":"08:17","end":"19:02"},"416交番":{"start":"11:05","end":"23:47"},"417交番":{"start":"10:03","end":"22:08"},"418交番":{"start":"09:10","end":"21:45"},"419交番":{"start":"08:50","end":"21:55"},"420交番":{"start":"08:38","end":"21:28"},"423交番":{"start":"06:19","end":"20:03"},"425交番":{"start":"05:53","end":"14:04"},"426交番":{"start":"09:40","end":"21:56"},"427交番":{"start":"07:30","end":"20:19"},"428交番":{"start":"06:45","end":"19:58"},"429交番":{"start":"05:51","end":"19:17"},"433交番":{"start":"05:52","end":"18:30"},"435交番":{"start":"05:43","end":"15:08"},"436交番":{"start":"11:33","end":"23:49"},"437交番":{"start":"10:33","end":"22:55"},"438交番":{"start":"08:56","end":"21:33"},"439交番":{"start":"07:07","end":"19:26"},"440交番":{"start":"05:43","end":"14:58"},"442交番":{"start":"12:03","end":"23:43"},"443交番":{"start":"10:56","end":"23:29"},"446交番":{"start":"07:16","end":"20:07"},"447交番":{"start":"05:50","end":"19:19"},"448交番":{"start":"05:35","end":"19:16"},"449交番":{"start":"05:37","end":"18:24"},"450交番":{"start":"05:31","end":"17:58"}
+"001交番":{"start":"06:36","end":"20:57"},"002交番":{"start":"06:23","end":"20:52"},"003交番":{"start":"06:03","end":"18:37"},"004交番":{"start":"05:46","end":"15:08"},"005交番":{"start":"05:38","end":"12:32"},"006交番":{"start":"14:57","end":"23:56"},"007交番":{"start":"12:52","end":"22:42"},"008交番":{"start":"11:47","end":"21:14"},"009交番":{"start":"06:19","end":"20:21"},"010交番":{"start":"05:59","end":"14:27"},"011交番":{"start":"14:51","end":"23:47"},"012交番":{"start":"14:03","end":"23:29"},"013交番":{"start":"13:39","end":"23:20"},"014交番":{"start":"13:55","end":"22:54"},"016交番":{"start":"14:19","end":"23:46"},"017交番":{"start":"13:58","end":"22:57"},"018交番":{"start":"13:37","end":"22:29"},"019交番":{"start":"07:53","end":"21:46"},"020交番":{"start":"06:58","end":"21:02"},"021交番":{"start":"06:30","end":"20:55"},"022交番":{"start":"06:17","end":"19:28"},"023交番":{"start":"06:05","end":"19:18"},"024交番":{"start":"05:44","end":"14:02"},"025交番":{"start":"05:40","end":"14:01"},"026交番":{"start":"11:19","end":"21:26"},"027交番":{"start":"06:40","end":"20:42"},"028交番":{"start":"06:15","end":"20:12"},"029交番":{"start":"05:46","end":"19:58"},"030交番":{"start":"05:37","end":"13:52"},"031交番":{"start":"06:22","end":"20:48"},"032交番":{"start":"05:51","end":"15:21"},"033交番":{"start":"05:50","end":"14:24"},"034交番":{"start":"05:43","end":"14:10"},"035交番":{"start":"05:40","end":"13:33"},"036交番":{"start":"12:58","end":"21:38"},"037交番":{"start":"06:38","end":"20:56"},"038交番":{"start":"06:16","end":"20:15"},"039交番":{"start":"06:07","end":"14:22"},"040交番":{"start":"05:43","end":"13:39"},"042交番":{"start":"14:37","end":"23:50"},"043交番":{"start":"14:39","end":"22:23"},"044交番":{"start":"11:39","end":"21:44"},"046交番":{"start":"06:34","end":"20:23"},"047交番":{"start":"06:26","end":"19:42"},"048交番":{"start":"05:50","end":"19:24"},"049交番":{"start":"05:37","end":"19:24"},"050交番":{"start":"05:31","end":"19:02"},
+"201交番":{"start":"08:43","end":"20:58"},"202交番":{"start":"08:17","end":"20:30"},"203交番":{"start":"06:19","end":"19:58"},"204交番":{"start":"05:44","end":"16:33"},"205交番":{"start":"05:41","end":"13:08"},"206交番":{"start":"14:52","end":"23:57"},"207交番":{"start":"11:56","end":"22:22"},"211交番":{"start":"14:03","end":"23:49"},"212交番":{"start":"13:40","end":"23:18"},"213交番":{"start":"12:33","end":"22:55"},"214交番":{"start":"12:19","end":"22:54"},"215交番":{"start":"08:56","end":"21:56"},"216交番":{"start":"10:33","end":"23:47"},"217交番":{"start":"09:40","end":"22:08"},"218交番":{"start":"09:10","end":"21:45"},"219交番":{"start":"08:00","end":"21:28"},"222交番":{"start":"06:19","end":"20:03"},"223交番":{"start":"05:53","end":"19:02"},"224交番":{"start":"05:51","end":"18:29"},"227交番":{"start":"07:30","end":"20:19"},"228交番":{"start":"06:45","end":"19:50"},"229交番":{"start":"06:23","end":"17:21"},"233交番":{"start":"05:52","end":"18:30"},"235交番":{"start":"05:43","end":"15:28"},"239交番":{"start":"07:07","end":"19:26"},"240交番":{"start":"05:43","end":"15:08"},"241交番":{"start":"12:05","end":"23:43"},"242交番":{"start":"10:44","end":"23:29"},"243交番":{"start":"09:01","end":"22:44"},"244交番":{"start":"08:40","end":"21:55"},"245交番":{"start":"08:38","end":"21:33"},"246交番":{"start":"07:16","end":"20:07"},"247交番":{"start":"05:50","end":"19:19"},"248交番":{"start":"05:35","end":"19:16"},"249交番":{"start":"05:37","end":"18:24"},"250交番":{"start":"05:31","end":"17:58"},
+"402交番":{"start":"06:38","end":"20:30"},"403交番":{"start":"06:19","end":"19:50"},"404交番":{"start":"05:44","end":"17:21"},"405交番":{"start":"05:41","end":"13:08"},"406交番":{"start":"13:54","end":"23:57"},"407交番":{"start":"11:56","end":"22:22"},"408交番":{"start":"08:00","end":"20:58"},"409交番":{"start":"06:23","end":"19:55"},"412交番":{"start":"13:40","end":"23:18"},"413交番":{"start":"12:19","end":"22:54"},"414交番":{"start":"08:43","end":"22:44"},"415交番":{"start":"08:17","end":"19:02"},"416交番":{"start":"11:05","end":"23:47"},"417交番":{"start":"10:03","end":"22:08"},"418交番":{"start":"09:10","end":"21:45"},"419交番":{"start":"08:50","end":"21:55"},"420交番":{"start":"08:38","end":"21:28"},"423交番":{"start":"06:19","end":"20:03"},"425交番":{"start":"05:53","end":"14:04"},"426交番":{"start":"09:40","end":"21:56"},"427交番":{"start":"07:30","end":"20:19"},"428交番":{"start":"06:45","end":"19:58"},"429交番":{"start":"05:51","end":"19:17"},"433交番":{"start":"05:52","end":"18:30"},"435交番":{"start":"05:43","end":"15:08"},"436交番":{"start":"11:33","end":"23:49"},"437交番":{"start":"10:33","end":"22:55"},"438交番":{"start":"08:56","end":"21:33"},"439交番":{"start":"07:07","end":"19:26"},"440交番":{"start":"05:43","end":"14:58"},"442交番":{"start":"12:03","end":"23:43"},"443交番":{"start":"10:56","end":"23:29"},"446交番":{"start":"07:16","end":"20:07"},"447交番":{"start":"05:50","end":"19:19"},"448交番":{"start":"05:35","end":"19:16"},"449交番":{"start":"05:37","end":"18:24"},"450交番":{"start":"05:31","end":"17:58"}
 };
+
+// ── 新交番テーブル（施行日以降に自動切替）──
+// 001-055=平日, 401-455=土曜, 201-255=日祝（MK-19の誤分類を修正済み）
+const NEW_SHIFT_TABLE = {
+"001交番":{"start":"14:56","end":"23:58","type":"weekday"},"002交番":{"start":"14:18","end":"23:47","type":"weekday"},"003交番":{"start":"13:39","end":"23:20","type":"weekday"},"004交番":{"start":"12:56","end":"22:45","type":"weekday"},"005交番":{"start":"10:39","end":"21:46","type":"weekday"},"006交番":{"start":"07:01","end":"20:43","type":"weekday"},"007交番":{"start":"06:26","end":"19:43","type":"weekday"},"008交番":{"start":"06:04","end":"19:24","type":"weekday"},"009交番":{"start":"05:55","end":"19:04","type":"weekday"},"010交番":{"start":"05:37","end":"17:06","type":"weekday"},"011交番":{"start":"13:03","end":"22:45","type":"weekday"},"012交番":{"start":"12:56","end":"22:06","type":"weekday"},"013交番":{"start":"12:23","end":"21:48","type":"weekday"},"014交番":{"start":"06:58","end":"21:26","type":"weekday"},"015交番":{"start":"06:39","end":"21:18","type":"weekday"},"016交番":{"start":"06:22","end":"20:43","type":"weekday"},"017交番":{"start":"06:07","end":"20:21","type":"weekday"},"018交番":{"start":"05:51","end":"17:30","type":"weekday"},"019交番":{"start":"05:40","end":"12:53","type":"weekday"},"020交番":{"start":"05:38","end":"12:39","type":"weekday"},"021交番":{"start":"06:38","end":"20:56","type":"weekday"},"022交番":{"start":"06:36","end":"20:55","type":"weekday"},"023交番":{"start":"06:05","end":"19:06","type":"weekday"},"024交番":{"start":"05:46","end":"17:55","type":"weekday"},"025交番":{"start":"05:31","end":"11:38","type":"weekday"},"026交番":{"start":"06:23","end":"20:48","type":"weekday"},"027交番":{"start":"06:19","end":"20:25","type":"weekday"},"028交番":{"start":"05:58","end":"18:41","type":"weekday"},"029交番":{"start":"05:50","end":"13:53","type":"weekday"},"030交番":{"start":"05:46","end":"13:08","type":"weekday"},"031交番":{"start":"15:24","end":"22:29","type":"weekday"},"032交番":{"start":"14:51","end":"23:47","type":"weekday"},"033交番":{"start":"13:56","end":"23:31","type":"weekday"},"034交番":{"start":"13:18","end":"22:56","type":"weekday"},"035交番":{"start":"11:56","end":"22:23","type":"weekday"},"036交番":{"start":"07:33","end":"21:27","type":"weekday"},"037交番":{"start":"06:43","end":"20:28","type":"weekday"},"038交番":{"start":"06:34","end":"20:23","type":"weekday"},"039交番":{"start":"06:06","end":"19:25","type":"weekday"},"040交番":{"start":"05:50","end":"17:55","type":"weekday"},"041交番":{"start":"14:45","end":"22:59","type":"weekday"},"042交番":{"start":"12:18","end":"21:38","type":"weekday"},"043交番":{"start":"06:40","end":"20:59","type":"weekday"},"046交番":{"start":"06:15","end":"20:21","type":"weekday"},"047交番":{"start":"06:03","end":"20:00","type":"weekday"},"048交番":{"start":"05:59","end":"19:15","type":"weekday"},"049交番":{"start":"05:43","end":"14:04","type":"weekday"},"050交番":{"start":"05:37","end":"13:15","type":"weekday"},"051交番":{"start":"06:30","end":"20:52","type":"weekday"},"054交番":{"start":"05:43","end":"13:53","type":"weekday"},"055交番":{"start":"05:40","end":"12:41","type":"weekday"},
+"201交番":{"start":"12:43","end":"23:57","type":"sunday"},"202交番":{"start":"11:43","end":"23:47","type":"sunday"},"203交番":{"start":"13:40","end":"23:18","type":"sunday"},"204交番":{"start":"12:50","end":"22:43","type":"sunday"},"205交番":{"start":"10:40","end":"21:43","type":"sunday"},"206交番":{"start":"07:04","end":"20:11","type":"sunday"},"207交番":{"start":"07:16","end":"19:51","type":"sunday"},"208交番":{"start":"06:11","end":"19:09","type":"sunday"},"209交番":{"start":"05:44","end":"19:00","type":"sunday"},"210交番":{"start":"05:37","end":"17:07","type":"sunday"},"211交番":{"start":"11:33","end":"22:48","type":"sunday"},"212交番":{"start":"09:44","end":"22:05","type":"sunday"},"213交番":{"start":"09:50","end":"21:55","type":"sunday"},"214交番":{"start":"08:36","end":"21:28","type":"sunday"},"215交番":{"start":"06:39","end":"17:15","type":"sunday"},"216交番":{"start":"07:33","end":"20:58","type":"sunday"},"218交番":{"start":"05:51","end":"17:25","type":"sunday"},"219交番":{"start":"05:44","end":"14:28","type":"sunday"},"220交番":{"start":"05:41","end":"13:09","type":"sunday"},"221交番":{"start":"08:00","end":"20:30","type":"sunday"},"222交番":{"start":"06:43","end":"20:57","type":"sunday"},"223交番":{"start":"08:40","end":"19:02","type":"sunday"},"224交番":{"start":"05:46","end":"19:07","type":"sunday"},"225交番":{"start":"05:31","end":"14:40","type":"sunday"},"226交番":{"start":"06:23","end":"19:26","type":"sunday"},"227交番":{"start":"06:19","end":"20:19","type":"sunday"},"228交番":{"start":"05:58","end":"18:31","type":"sunday"},"229交番":{"start":"05:50","end":"14:02","type":"sunday"},"231交番":{"start":"11:51","end":"22:08","type":"sunday"},"232交番":{"start":"11:56","end":"23:45","type":"sunday"},"233交番":{"start":"13:50","end":"23:32","type":"sunday"},"234交番":{"start":"13:01","end":"22:54","type":"sunday"},"235交番":{"start":"10:03","end":"22:24","type":"sunday"},"236交番":{"start":"08:09","end":"21:28","type":"sunday"},"237交番":{"start":"06:37","end":"20:16","type":"sunday"},"238交番":{"start":"06:54","end":"20:23","type":"sunday"},"239交番":{"start":"06:50","end":"19:19","type":"sunday"},"240交番":{"start":"05:50","end":"17:55","type":"sunday"},"241交番":{"start":"11:01","end":"22:56","type":"sunday"},"242交番":{"start":"09:43","end":"21:33","type":"sunday"},"249交番":{"start":"05:43","end":"14:18","type":"sunday"},
+"401交番":{"start":"12:43","end":"23:57","type":"saturday"},"402交番":{"start":"11:43","end":"23:47","type":"saturday"},"403交番":{"start":"13:40","end":"23:18","type":"saturday"},"404交番":{"start":"12:50","end":"22:43","type":"saturday"},"405交番":{"start":"10:40","end":"21:43","type":"saturday"},"406交番":{"start":"07:04","end":"20:11","type":"saturday"},"407交番":{"start":"07:16","end":"19:51","type":"saturday"},"408交番":{"start":"06:11","end":"19:09","type":"saturday"},"409交番":{"start":"05:44","end":"19:00","type":"saturday"},"410交番":{"start":"05:37","end":"17:07","type":"saturday"},"411交番":{"start":"11:33","end":"22:48","type":"saturday"},"412交番":{"start":"09:44","end":"22:05","type":"saturday"},"413交番":{"start":"09:50","end":"21:55","type":"saturday"},"414交番":{"start":"08:36","end":"21:28","type":"saturday"},"415交番":{"start":"06:39","end":"17:15","type":"saturday"},"416交番":{"start":"07:33","end":"20:58","type":"saturday"},"418交番":{"start":"05:51","end":"17:31","type":"saturday"},"419交番":{"start":"05:44","end":"14:28","type":"saturday"},"420交番":{"start":"05:41","end":"13:09","type":"saturday"},"421交番":{"start":"06:38","end":"20:30","type":"saturday"},"422交番":{"start":"06:43","end":"20:57","type":"saturday"},"423交番":{"start":"08:46","end":"19:02","type":"saturday"},"424交番":{"start":"05:46","end":"19:07","type":"saturday"},"425交番":{"start":"05:31","end":"14:40","type":"saturday"},"426交番":{"start":"06:23","end":"19:26","type":"saturday"},"427交番":{"start":"06:19","end":"20:19","type":"saturday"},"428交番":{"start":"05:58","end":"18:31","type":"saturday"},"429交番":{"start":"05:50","end":"14:02","type":"saturday"},"431交番":{"start":"11:51","end":"22:08","type":"saturday"},"432交番":{"start":"11:56","end":"23:45","type":"saturday"},"433交番":{"start":"13:50","end":"23:32","type":"saturday"},"434交番":{"start":"13:01","end":"22:54","type":"saturday"},"435交番":{"start":"10:03","end":"22:24","type":"saturday"},"436交番":{"start":"08:09","end":"21:28","type":"saturday"},"437交番":{"start":"06:37","end":"20:16","type":"saturday"},"438交番":{"start":"06:54","end":"20:23","type":"saturday"},"439交番":{"start":"06:50","end":"19:19","type":"saturday"},"440交番":{"start":"05:50","end":"17:55","type":"saturday"},"441交番":{"start":"11:01","end":"22:56","type":"saturday"},"442交番":{"start":"09:43","end":"21:33","type":"saturday"},"443交番":{"start":"08:09","end":"20:59","type":"saturday"},"449交番":{"start":"05:43","end":"14:18","type":"saturday"}
+};
+
+// 新交番設定をlocalStorageから読み込み（施行日のみ。テーブルは上記定数を使用）
+const NEW_KOBAN_KEY = 'mkx_new_koban_v1';
+function loadNewKobanConfig() {
+  try { return JSON.parse(localStorage.getItem(NEW_KOBAN_KEY) || 'null'); } catch { return null; }
+}
+function saveNewKobanConfig(cfg) {
+  localStorage.setItem(NEW_KOBAN_KEY, JSON.stringify(cfg));
+}
+
+// 実効テーブル取得：日付が施行日以降なら新交番、それ以前は現行
+function getEffectiveShiftTable(dateKey) {
+  const cfg = loadNewKobanConfig();
+  if (cfg && cfg.effectiveDate && dateKey >= cfg.effectiveDate) {
+    return NEW_SHIFT_TABLE;
+  }
+  return SHIFT_TABLE;
+}
+// 施行日を返す（未設定ならnull）
+function getEffectiveDate() {
+  const cfg = loadNewKobanConfig();
+  return cfg ? cfg.effectiveDate : null;
+}
 const HOLIDAY_SHIFTS = { "501交番":"公休日", "502交番":"振替休日", "503交番":"有給休暇" };
 const DOW = ["日","月","火","水","木","金","土"];
 
@@ -730,7 +840,8 @@ function getShiftInfo(dateKey) {
   if (!rec || !rec.shift) return null;
   if (rec.shift === 'custom') return { label: rec.customLabel || 'カスタム', start: rec.customStart, end: rec.customEnd, type: 'work' };
   if (HOLIDAY_SHIFTS[rec.shift]) return { label: HOLIDAY_SHIFTS[rec.shift], start: null, end: null, type: rec.shift === '503交番' ? 'paid' : rec.shift === '501交番' ? 'holiday' : 'off' };
-  const s = SHIFT_TABLE[rec.shift];
+  const tbl = getEffectiveShiftTable(dateKey);
+  const s = tbl[rec.shift];
   if (s) return { label: rec.shift, start: s.start, end: s.end, type: 'work' };
   return null;
 }
@@ -1067,7 +1178,7 @@ function renderInput() {
   const rec = appData[key] || { shift: null, life: {} };
   const life = rec.life || {};
 
-  const allShiftIds = Object.keys(SHIFT_TABLE).sort((a,b) => parseInt(a)-parseInt(b));
+  const allShiftIds = Object.keys(getEffectiveShiftTable(key)).sort((a,b) => parseInt(a)-parseInt(b));
 
   const specials = [
     { id:'501交番', label:'公休日',  selCls:'sel-holiday' },
@@ -1123,12 +1234,12 @@ function renderInput() {
   ];
   let lifeHtml = '';
 
-    // 就寝行：シンプルな時刻入力（sleepには「この日の起床に対応する就寝時刻」を入力）
+  // 就寝行
   const sleepVal = life.sleep || '';
   lifeHtml += `<div class="inp-life-row">
     <span class="inp-life-label">💤 就寝</span>
-    <input type="time" value="${sleepVal}" class="inp-life-time"
-      onchange="setLife('${key}','sleep',this.value)"
+    <input type="time" value="${sleepVal}" class="inp-life-time" id="life_sleep"
+      onchange="onLifeChange('${key}','sleep',this.value)"
       onfocus="this.style.borderColor='var(--accent)'"
       onblur="this.style.borderColor='var(--border2)'">
   </div>`;
@@ -1137,56 +1248,89 @@ function renderInput() {
     const val = life[f.field] || '';
     lifeHtml += `<div class="inp-life-row">
       <span class="inp-life-label">${f.label}</span>
-      <input type="time" value="${val}" class="inp-life-time"
-        onchange="setLife('${key}','${f.field}',this.value)"
+      <input type="time" value="${val}" class="inp-life-time" id="life_${f.field}"
+        onchange="onLifeChange('${key}','${f.field}',this.value)"
         onfocus="this.style.borderColor='var(--accent)'"
         onblur="this.style.borderColor='var(--border2)'">
     </div>`;
   });
 
-  // 間時間の表示用データ
-  const intervals = rec.intervals || {};
-  const intervalDefs = [
-    { field: 'commuteToReady', label: '🚃 出社　⇔　🚿 準備完了', fromField: 'ready',  toField: 'commute' },
-    { field: 'readyToWake',   label: '🚿 準備完了　⇔　☀️ 起床',  fromField: 'wake',   toField: 'ready' },
-    { field: 'wakeToSleep',   label: '💤 就寝　⇔　☀️ 起床', fromField: null, toField: null, isSleep: true },
-  ];
+  // ── 逆算セクション ──
+  const calc = rec.calc || {};
+  // デフォルト値
+  const DEF_ARRIVE_TO_COMMUTE = calc.arriveToCommute !== undefined ? calc.arriveToCommute : 90;
+  const DEF_COMMUTE_TO_READY  = calc.commuteToReady  !== undefined ? calc.commuteToReady  : 90;
+  const DEF_READY_TO_WAKE     = calc.readyToWake     !== undefined ? calc.readyToWake     : 240;
+  const DEF_SLEEP_H           = calc.sleepH          !== undefined ? calc.sleepH          : 6;
+  const DEF_SLEEP_M           = calc.sleepM          !== undefined ? calc.sleepM          : 30;
+  const DEF_ARRIVE            = calc.arriveTime      !== undefined ? calc.arriveTime      : '';
 
-  function calcIntervalDisplay(def) {
-    if (def.isSleep) {
-      const sleep = parseTime(life.sleep);
-      const wake  = parseTime(life.wake);
-      if (sleep !== null && wake !== null) return diffMin(sleep, wake);
-    } else {
-      const from = parseTime(life[def.fromField]);
-      const to   = parseTime(life[def.toField]);
-      if (from !== null && to !== null) return diffMin(from, to);
+  // 到着時刻プルダウン（0:00〜23:55 5分刻み）
+  let arriveOpts = '<option value="">--</option>';
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 5) {
+      const v = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      arriveOpts += `<option value="${v}"${DEF_ARRIVE===v?' selected':''}>${v}</option>`;
     }
-    return null;
   }
 
-  let intervalRowHtml = '';
-  intervalDefs.forEach(def => {
-    const savedMin = intervals[def.field] !== undefined ? intervals[def.field] : '';
-    const calcMin  = calcIntervalDisplay(def);
-    const dispVal  = calcMin !== null ? fmtMin(calcMin) : '--:--';
-    const dispStyle = calcMin !== null && calcMin < 360 ? 'color:#e03535;font-weight:700' :
-                      calcMin !== null && calcMin < 420 ? 'color:#e08a10;font-weight:700' :
-                      'color:#0a6e3e;font-weight:700';
-    intervalRowHtml += `<div class="inp-interval-row">
-      <span class="inp-interval-label">${def.label}</span>
-      <div class="inp-interval-right">
-        <input type="number" min="0" max="999" placeholder="分"
-          value="${savedMin}"
-          class="inp-interval-minutes"
-          onchange="setIntervalData('${key}','${def.field}',this.value)"
-          onfocus="this.style.borderColor='var(--accent2)'"
-          onblur="this.style.borderColor='#8ee0b8'">
-        <span style="font-size:11px;color:#5a8a96;min-width:14px;">分</span>
-        <span class="inp-interval-display" style="${dispStyle}">${dispVal}</span>
+  // 分プルダウン（0〜300、5分刻み）
+  function minOpts(cur) {
+    let o = '';
+    for (let i = 0; i <= 300; i += 5) o += `<option value="${i}"${cur===i?' selected':''}>${i}</option>`;
+    return o;
+  }
+  // 睡眠時間：時間（1〜12）＋分（0〜55、5分刻み）
+  let sleepHOpts = '';
+  for (let i = 1; i <= 12; i++) sleepHOpts += `<option value="${i}"${DEF_SLEEP_H===i?' selected':''}>${i}</option>`;
+  let sleepMOpts = '';
+  for (let i = 0; i < 60; i += 5) sleepMOpts += `<option value="${i}"${DEF_SLEEP_M===i?' selected':''}>${i}</option>`;
+
+  const calcSectionHtml = `
+  <div class="calc-section">
+    <div class="calc-header">🏢 逆算設定（会社到着時刻から逆算）</div>
+    <div class="calc-body">
+      <div class="calc-row">
+        <span class="calc-label">🏢 会社到着</span>
+        <select class="calc-sel calc-sel-wide" id="calc_arrive" onchange="onCalcChange('${key}')">
+          ${arriveOpts}
+        </select>
       </div>
-    </div>`;
-  });
+      <div class="calc-divider">▼ 各区間の所要時間</div>
+      <div class="calc-row">
+        <span class="calc-label">到着 → 出社</span>
+        <select class="calc-sel" id="calc_a2c" onchange="onCalcChange('${key}')">
+          ${minOpts(DEF_ARRIVE_TO_COMMUTE)}
+        </select>
+        <span class="calc-unit">分</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">出社 → 準備完了</span>
+        <select class="calc-sel" id="calc_c2r" onchange="onCalcChange('${key}')">
+          ${minOpts(DEF_COMMUTE_TO_READY)}
+        </select>
+        <span class="calc-unit">分</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">準備完了 → 起床</span>
+        <select class="calc-sel" id="calc_r2w" onchange="onCalcChange('${key}')">
+          ${minOpts(DEF_READY_TO_WAKE)}
+        </select>
+        <span class="calc-unit">分</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">睡眠時間</span>
+        <select class="calc-sel calc-sel-s" id="calc_sh" onchange="onCalcChange('${key}')">
+          ${sleepHOpts}
+        </select>
+        <span class="calc-unit">時間</span>
+        <select class="calc-sel calc-sel-s" id="calc_sm" onchange="onCalcChange('${key}')">
+          ${sleepMOpts}
+        </select>
+        <span class="calc-unit">分</span>
+      </div>
+    </div>
+  </div>`;
 
   c.innerHTML = `
   <div class="input-view">
@@ -1212,13 +1356,8 @@ function renderInput() {
       <div class="inp-card-body">${lifeHtml}</div>
     </div>
 
-    <div class="section-label">逆算用・間時間の設定</div>
-    <div class="inp-interval-section">
-      <div class="inp-interval-header">⏱️ 各区間の所要時間（分）</div>
-      <div class="inp-interval-body">
-        ${intervalRowHtml}
-      </div>
-    </div>
+    <div class="section-label">逆算</div>
+    ${calcSectionHtml}
   </div>`;
 }
 
@@ -1241,6 +1380,82 @@ function setShift(dateKey, shiftId) {
   renderInput();
 }
 
+// ── 生活時刻の手動変更 → 逆算欄にも反映 ──
+function onLifeChange(dateKey, field, val) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].life) appData[dateKey].life = {};
+  appData[dateKey].life[field] = val;
+  // 逆算欄を上書きなしで更新（到着時刻→各区間は変えない）
+  _syncCalcFromLife(dateKey);
+  saveData(appData);
+}
+
+// 生活時刻から逆算欄の到着時刻を逆算して更新
+function _syncCalcFromLife(dateKey) {
+  const rec = appData[dateKey];
+  if (!rec || !rec.life) return;
+  const life = rec.life;
+  const calc = rec.calc || {};
+  // commuteがあれば到着時刻を逆算
+  const commuteMin = parseTime(life.commute);
+  if (commuteMin !== null) {
+    const a2c = calc.arriveToCommute !== undefined ? calc.arriveToCommute : 90;
+    // arrive = commute - a2c
+    let arriveMin = commuteMin - a2c;
+    if (arriveMin < 0) arriveMin += 1440;
+    if (!appData[dateKey].calc) appData[dateKey].calc = {};
+    appData[dateKey].calc.arriveTime = fmtMin(arriveMin);
+  }
+}
+
+// ── 逆算プルダウン変更 → 生活時刻に反映 ──
+function onCalcChange(dateKey) {
+  const arriveEl = document.getElementById('calc_arrive');
+  const a2cEl    = document.getElementById('calc_a2c');
+  const c2rEl    = document.getElementById('calc_c2r');
+  const r2wEl    = document.getElementById('calc_r2w');
+  const shEl     = document.getElementById('calc_sh');
+  const smEl     = document.getElementById('calc_sm');
+  if (!arriveEl) return;
+
+  const arriveTime   = arriveEl.value;
+  const arriveToCommute = parseInt(a2cEl.value);
+  const commuteToReady  = parseInt(c2rEl.value);
+  const readyToWake     = parseInt(r2wEl.value);
+  const sleepH          = parseInt(shEl.value);
+  const sleepM          = parseInt(smEl.value);
+  const sleepTotal      = sleepH * 60 + sleepM;
+
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].life) appData[dateKey].life = {};
+  if (!appData[dateKey].calc) appData[dateKey].calc = {};
+
+  // 設定値を保存
+  appData[dateKey].calc = { arriveTime, arriveToCommute, commuteToReady, readyToWake, sleepH, sleepM };
+
+  if (arriveTime) {
+    const arriveMin  = parseTime(arriveTime);
+    const commuteMin = (arriveMin - arriveToCommute + 1440) % 1440;
+    const readyMin   = (commuteMin - commuteToReady + 1440) % 1440;
+    const wakeMin    = (readyMin - readyToWake + 1440) % 1440;
+    const sleepMin   = (wakeMin - sleepTotal + 1440) % 1440;
+
+    appData[dateKey].life.commute = fmtMin(commuteMin);
+    appData[dateKey].life.ready   = fmtMin(readyMin);
+    appData[dateKey].life.wake    = fmtMin(wakeMin);
+    appData[dateKey].life.sleep   = fmtMin(sleepMin);
+
+    // DOM即時反映
+    const fields = ['commute','ready','wake','sleep'];
+    const vals   = [commuteMin, readyMin, wakeMin, sleepMin];
+    fields.forEach((f, i) => {
+      const el = document.getElementById('life_' + f);
+      if (el) el.value = fmtMin(vals[i]);
+    });
+  }
+  saveData(appData);
+}
+
 function setCustomShift(dateKey) {
   const label = document.getElementById('custLabel').value.trim() || 'カスタム';
   const start = document.getElementById('custStart').value;
@@ -1254,27 +1469,17 @@ function setCustomShift(dateKey) {
   renderInput();
 }
 
+// 互換ラッパー（日ビュー等から参照される場合を考慮）
 function setLife(dateKey, field, val) {
-  if (!appData[dateKey]) appData[dateKey] = { life: {} };
-  if (!appData[dateKey].life) appData[dateKey].life = {};
-  appData[dateKey].life[field] = val;
-  saveData(appData);
+  onLifeChange(dateKey, field, val);
 }
 
 function setSleepDay(dateKey, dayVal) {
-  if (!appData[dateKey]) appData[dateKey] = { life: {} };
-  if (!appData[dateKey].life) appData[dateKey].life = {};
-  appData[dateKey].life.sleepDay = dayVal;
-  saveData(appData);
-  renderInput();
+  // MK-20ではsleepDayフラグ廃止済み。互換のため空実装
 }
 
 function setIntervalData(dateKey, field, val) {
-  if (!appData[dateKey]) appData[dateKey] = { life: {} };
-  if (!appData[dateKey].intervals) appData[dateKey].intervals = {};
-  appData[dateKey].intervals[field] = val === '' ? undefined : parseInt(val);
-  saveData(appData);
-  renderInput();
+  // MK-20では逆算セクションに統合。互換のため空実装
 }
 
 function filterShifts(q) {
@@ -1373,6 +1578,41 @@ function doImport() {
 }
 function closeModal(id) {
   document.getElementById(id).classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// 新交番管理
+// ══════════════════════════════════════════
+function openNewKobanModal() {
+  const cfg = loadNewKobanConfig();
+  const statusEl = document.getElementById('nkStatus');
+  const dateEl   = document.getElementById('nkEffectiveDate');
+  if (cfg && cfg.effectiveDate) {
+    dateEl.value = cfg.effectiveDate;
+    statusEl.innerHTML = `<span style="background:#d4f9e8;color:#0a7a40;padding:4px 10px;border-radius:7px;font-weight:700;">✅ 施行日設定済：${cfg.effectiveDate} 以降に新交番を使用中</span>`;
+  } else {
+    dateEl.value = '';
+    statusEl.innerHTML = `<span style="background:#fff4df;color:#8a5c00;padding:4px 10px;border-radius:7px;font-weight:700;">⚠️ 未設定 — 現在は現行交番を使用中</span>`;
+  }
+  document.getElementById('newKobanModal').classList.add('show');
+}
+
+function saveNewKoban() {
+  const dateEl = document.getElementById('nkEffectiveDate');
+  const d = dateEl.value;
+  if (!d) { showToast('⚠️ 施行日を入力してください'); return; }
+  saveNewKobanConfig({ effectiveDate: d });
+  closeModal('newKobanModal');
+  render();
+  showToast(`✅ 施行日を ${d} に設定しました`);
+}
+
+function clearNewKoban() {
+  if (!confirm('新交番の設定を削除し、現行交番に戻しますか？')) return;
+  localStorage.removeItem(NEW_KOBAN_KEY);
+  closeModal('newKobanModal');
+  render();
+  showToast('🗑️ 新交番設定を削除しました');
 }
 
 // ── Init ──
