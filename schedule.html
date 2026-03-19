@@ -590,6 +590,90 @@
     min-height: 16px;
   }
 
+  /* ══════════════ STATS VIEW ══════════════ */
+  .stats-view { padding: 0 16px 40px; max-width: 680px; margin: 0 auto; }
+
+  .stats-period-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0 14px;
+  }
+  .stats-period-label { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .stats-period-toggle {
+    display: flex; background: var(--surface2); border-radius: 9px;
+    border: 1.5px solid var(--border2); overflow: hidden;
+  }
+  .stats-period-toggle button {
+    font-family: var(--sans); font-size: 12px; font-weight: 700;
+    padding: 6px 18px; border: none; background: transparent;
+    color: var(--muted); cursor: pointer; transition: all .14s;
+  }
+  .stats-period-toggle button.active { background: var(--accent); color: #fff; }
+
+  .stats-avg-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+  .stats-avg-box {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 13px; padding: 14px 10px; text-align: center;
+    box-shadow: var(--card-shadow);
+  }
+  .stats-avg-icon { font-size: 18px; margin-bottom: 4px; }
+  .stats-avg-label { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .stats-avg-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text); }
+  .stats-avg-val.ok   { color: var(--green); }
+  .stats-avg-val.warn { color: var(--amber); }
+  .stats-avg-val.bad  { color: var(--red); }
+  .stats-avg-sub { font-size: 9px; color: var(--muted); margin-top: 3px; }
+  .stats-avg-count { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  .stats-alert {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; border-radius: 11px; margin-bottom: 12px;
+    font-size: 13px; font-weight: 700;
+  }
+  .stats-alert.bad  { background: #ffeaea; color: var(--red);  border: 1.5px solid var(--red); }
+  .stats-alert.warn { background: #fff4df; color: var(--amber); border: 1.5px solid var(--amber); }
+  .stats-alert-icon { font-size: 18px; flex-shrink: 0; }
+
+  .stats-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; margin-bottom: 12px; overflow: hidden;
+    box-shadow: var(--card-shadow);
+  }
+  .stats-card-header {
+    padding: 11px 16px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    color: var(--accent); text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .stats-card-body { padding: 14px 16px; }
+
+  /* バーチャート */
+  .stats-bar-wrap { display: flex; align-items: flex-end; gap: 4px; height: 80px; padding: 0 0 4px; }
+  .stats-bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 3px; height: 100%; justify-content: flex-end; }
+  .stats-bar { border-radius: 4px 4px 0 0; width: 100%; transition: opacity .2s; }
+  .stats-bar-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); white-space: nowrap; }
+
+  /* ラインチャート */
+  .stats-line-wrap { width: 100%; height: 90px; position: relative; }
+  .stats-line-wrap svg { width: 100%; height: 100%; overflow: visible; }
+
+  /* 凡例 */
+  .stats-legend { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+  .stats-legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); }
+  .stats-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  /* 集計テーブル */
+  .stats-summary-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+  }
+  .stats-summary-row:last-child { border-bottom: none; }
+  .stats-summary-label { color: var(--muted); font-weight: 600; }
+  .stats-summary-val { font-family: var(--mono); font-weight: 700; color: var(--text); }
+  .stats-summary-val.accent { color: var(--accent); }
+
+  .stats-empty { text-align: center; padding: 32px 0; color: var(--muted); font-size: 14px; }
+
 </style>
 </head>
 <body>
@@ -626,6 +710,7 @@
     <button class="tab" onclick="switchView('week')">週</button>
     <button class="tab" onclick="switchView('day')">日</button>
     <button class="tab" onclick="switchView('input')">入力</button>
+    <button class="tab" onclick="switchView('stats')">📊</button>
   </div>
 </div>
 
@@ -812,6 +897,8 @@ const today = new Date();
 let cursor = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = fmtDate(today);
 let weekStart = getWeekStart(today);
+let statsCursor = new Date(today.getFullYear(), today.getMonth(), 1);
+let statsPeriod = 'month'; // 'month' | 'year'
 
 function fmtDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -867,7 +954,7 @@ function getSleepHours(dateKey) {
 function switchView(v) {
   view = v;
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['month','week','day','input'][i] === v);
+    t.classList.toggle('active', ['month','week','day','input','stats'][i] === v);
   });
   if (v === 'week') weekStart = getWeekStart(new Date(selectedDate));
   render();
@@ -875,12 +962,20 @@ function switchView(v) {
 function navPrev() {
   if (view === 'month') cursor.setMonth(cursor.getMonth()-1);
   else if (view === 'week') weekStart.setDate(weekStart.getDate()-1);
+  else if (view === 'stats') {
+    if (statsPeriod === 'month') statsCursor.setMonth(statsCursor.getMonth()-1);
+    else statsCursor.setFullYear(statsCursor.getFullYear()-1);
+  }
   else { const d = new Date(selectedDate); d.setDate(d.getDate()-1); selectedDate = fmtDate(d); }
   render();
 }
 function navNext() {
   if (view === 'month') cursor.setMonth(cursor.getMonth()+1);
   else if (view === 'week') weekStart.setDate(weekStart.getDate()+1);
+  else if (view === 'stats') {
+    if (statsPeriod === 'month') statsCursor.setMonth(statsCursor.getMonth()+1);
+    else statsCursor.setFullYear(statsCursor.getFullYear()+1);
+  }
   else { const d = new Date(selectedDate); d.setDate(d.getDate()+1); selectedDate = fmtDate(d); }
   render();
 }
@@ -888,6 +983,7 @@ function goToday() {
   cursor = new Date(today.getFullYear(), today.getMonth(), 1);
   selectedDate = fmtDate(today);
   weekStart = getWeekStart(today);
+  statsCursor = new Date(today.getFullYear(), today.getMonth(), 1);
   render();
 }
 
@@ -901,6 +997,12 @@ function updateNavTitle() {
   } else if (view === 'day') {
     const d = new Date(selectedDate);
     el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
+  } else if (view === 'stats') {
+    if (statsPeriod === 'month') {
+      el.textContent = `${statsCursor.getFullYear()}年${statsCursor.getMonth()+1}月 — 統計`;
+    } else {
+      el.textContent = `${statsCursor.getFullYear()}年 — 統計`;
+    }
   } else {
     const d = new Date(selectedDate);
     el.textContent = `入力 — ${d.getMonth()+1}月${d.getDate()}日`;
@@ -912,6 +1014,7 @@ function render() {
   if (view === 'month')      renderMonth();
   else if (view === 'week')  renderWeek();
   else if (view === 'day')   renderDay();
+  else if (view === 'stats') renderStats();
   else                       renderInput();
 }
 
@@ -1165,6 +1268,240 @@ function renderDay() {
         style="padding:10px 28px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(58,123,255,.3);font-family:var(--sans)">
         ✏️ この日を入力・編集する
       </button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// STATS VIEW
+// ══════════════════════════════════════════
+function renderStats() {
+  const c = document.getElementById('viewContainer');
+  const year = statsCursor.getFullYear();
+  const month = statsCursor.getMonth();
+
+  // 集計対象の日付キー一覧を生成
+  let keys = [];
+  if (statsPeriod === 'month') {
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      keys.push(fmtDate(new Date(year, month, d)));
+    }
+  } else {
+    for (let m = 0; m < 12; m++) {
+      const dim = new Date(year, m+1, 0).getDate();
+      for (let d = 1; d <= dim; d++) {
+        keys.push(fmtDate(new Date(year, m, d)));
+      }
+    }
+  }
+
+  // データ収集
+  let workArr = [], ivArr = [], sleepArr = [];
+  let workDays = 0, holidayDays = 0, paidDays = 0, offDays = 0;
+  let totalWorkMin = 0;
+  let ivViolations = 0; // 勤務間10時間未満
+
+  keys.forEach(key => {
+    const info = getShiftInfo(key);
+    if (info) {
+      if (info.type === 'work') {
+        workDays++;
+        const wm = diffMin(parseTime(info.start), parseTime(info.end));
+        workArr.push({ key, val: wm });
+        totalWorkMin += wm;
+      } else if (info.type === 'holiday') holidayDays++;
+      else if (info.type === 'paid') paidDays++;
+      else offDays++;
+    }
+    const iv = getIntervalHours(key);
+    if (iv !== null) {
+      ivArr.push({ key, val: iv });
+      if (iv < 600) ivViolations++; // 10時間 = 600分
+    }
+    const sl = getSleepHours(key);
+    if (sl !== null) sleepArr.push({ key, val: sl });
+  });
+
+  const avg = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b.val,0)/arr.length) : null;
+  const avgWork  = avg(workArr);
+  const avgIv    = avg(ivArr);
+  const avgSleep = avg(sleepArr);
+
+  function avgBox(icon, label, minutes, goodThresh, warnThresh, sub) {
+    let cls = 'stats-avg-val';
+    if (minutes !== null) {
+      cls += minutes >= goodThresh ? ' ok' : minutes >= warnThresh ? ' warn' : ' bad';
+    }
+    return `<div class="stats-avg-box">
+      <div class="stats-avg-icon">${icon}</div>
+      <div class="stats-avg-label">${label}</div>
+      <div class="${cls}">${minutes !== null ? fmtMin(minutes) : '--:--'}</div>
+      <div class="stats-avg-sub">${sub}</div>
+      <div class="stats-avg-count">${minutes !== null ? (label==='勤務間' ? ivArr.length : label==='睡眠' ? sleepArr.length : workArr.length)+'件' : 'データなし'}</div>
+    </div>`;
+  }
+
+  // バーチャート（月ビュー：日別勤務時間 / 年ビュー：月別平均勤務時間）
+  let barHtml = '';
+  if (statsPeriod === 'month') {
+    const maxW = workArr.length ? Math.max(...workArr.map(x=>x.val)) : 600;
+    barHtml = workArr.slice(-20).map(x => {
+      const d = new Date(x.key).getDate();
+      const pct = Math.round(x.val / maxW * 100);
+      const color = x.val > 780 ? 'var(--amber)' : 'var(--accent)';
+      return `<div class="stats-bar-col">
+        <div class="stats-bar" style="height:${pct}%;background:${color};"></div>
+        <div class="stats-bar-lbl">${d}</div>
+      </div>`;
+    }).join('');
+    if (!barHtml) barHtml = '<div style="color:var(--muted);font-size:12px;text-align:center;width:100%;padding:20px 0;">勤務データなし</div>';
+  } else {
+    // 年ビュー：月別平均勤務時間
+    const monthLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    const monthAvgs = Array.from({length:12}, (_,m) => {
+      const mkeys = Array.from({length: new Date(year,m+1,0).getDate()}, (_,d) => fmtDate(new Date(year,m,d+1)));
+      const mwork = mkeys.flatMap(k => {
+        const info = getShiftInfo(k);
+        if (!info || !info.start || !info.end) return [];
+        return [{ key:k, val: diffMin(parseTime(info.start), parseTime(info.end)) }];
+      });
+      return mwork.length ? Math.round(mwork.reduce((a,b)=>a+b.val,0)/mwork.length) : null;
+    });
+    const maxM = Math.max(...monthAvgs.filter(x=>x!==null), 600);
+    barHtml = monthLabels.map((lbl, m) => {
+      const val = monthAvgs[m];
+      if (val === null) return `<div class="stats-bar-col"><div class="stats-bar" style="height:4%;background:var(--border);"></div><div class="stats-bar-lbl">${m+1}</div></div>`;
+      const pct = Math.round(val / maxM * 100);
+      const color = val > 780 ? 'var(--amber)' : 'var(--accent)';
+      return `<div class="stats-bar-col">
+        <div class="stats-bar" style="height:${pct}%;background:${color};"></div>
+        <div class="stats-bar-lbl">${m+1}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 折れ線チャート（睡眠・勤務間）
+  function buildLineChart(arr1, arr2, color1, color2, maxPts) {
+    const pts1 = arr1.slice(-maxPts);
+    const pts2 = arr2.slice(-maxPts);
+    const allVals = [...pts1.map(x=>x.val), ...pts2.map(x=>x.val)];
+    if (!allVals.length) return '<div class="stats-empty">データが足りません</div>';
+    const minV = Math.min(...allVals) - 30;
+    const maxV = Math.max(...allVals) + 30;
+    const W = 280, H = 80;
+    const count = Math.max(pts1.length, pts2.length, 1);
+    const xStep = count > 1 ? W / (count - 1) : W / 2;
+
+    function toXY(arr) {
+      return arr.map((x, i) => {
+        const px = Math.round(i * xStep);
+        const py = Math.round(H - ((x.val - minV) / (maxV - minV)) * H);
+        return `${px},${py}`;
+      });
+    }
+
+    const poly1 = toXY(pts1);
+    const poly2 = toXY(pts2);
+
+    const dots1 = pts1.map((x,i) => {
+      const px = Math.round(i * xStep);
+      const py = Math.round(H - ((x.val - minV) / (maxV - minV)) * H);
+      return `<circle cx="${px}" cy="${py}" r="3" fill="${color1}"/>`;
+    }).join('');
+    const dots2 = pts2.map((x,i) => {
+      const px = Math.round(i * xStep);
+      const py = Math.round(H - ((x.val - minV) / (maxV - minV)) * H);
+      const bad = arr2 === ivArr && x.val < 600;
+      return `<circle cx="${px}" cy="${py}" r="3" fill="${bad ? 'var(--red)' : color2}"/>`;
+    }).join('');
+
+    const line1 = poly1.length > 1 ? `<polyline points="${poly1.join(' ')}" fill="none" stroke="${color1}" stroke-width="2" stroke-linejoin="round"/>` : '';
+    const line2 = poly2.length > 1 ? `<polyline points="${poly2.join(' ')}" fill="none" stroke="${color2}" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 3"/>` : '';
+
+    return `<div class="stats-line-wrap">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <line x1="0" y1="${Math.round(H/3)}" x2="${W}" y2="${Math.round(H/3)}" stroke="var(--border)" stroke-width="0.5"/>
+        <line x1="0" y1="${Math.round(H*2/3)}" x2="${W}" y2="${Math.round(H*2/3)}" stroke="var(--border)" stroke-width="0.5"/>
+        ${line1}${line2}${dots1}${dots2}
+      </svg>
+    </div>`;
+  }
+
+  const lineChart = buildLineChart(sleepArr, ivArr, 'var(--accent)', 'var(--green)', statsPeriod === 'month' ? 20 : 50);
+
+  // 違反アラート（勤務間10時間未満）
+  const alertHtml = ivViolations > 0
+    ? `<div class="stats-alert bad"><div class="stats-alert-icon">⚠️</div>勤務間10時間未満が ${ivViolations}日 あります</div>`
+    : ivArr.length > 0
+    ? `<div class="stats-alert" style="background:#e6faef;border-color:var(--green);color:#0a6e3e;"><div class="stats-alert-icon">✅</div>勤務間違反なし</div>`
+    : '';
+
+  // 期間切替ボタン
+  const toggleHtml = `<div class="stats-period-bar">
+    <span class="stats-period-label">表示期間</span>
+    <div class="stats-period-toggle">
+      <button class="${statsPeriod==='month'?'active':''}" onclick="statsPeriod='month';render()">月</button>
+      <button class="${statsPeriod==='year'?'active':''}" onclick="statsPeriod='year';render()">年</button>
+    </div>
+  </div>`;
+
+  // 集計テーブル
+  const summaryHtml = `
+    <div class="stats-summary-row">
+      <span class="stats-summary-label">勤務日数</span>
+      <span class="stats-summary-val">${workDays}日</span>
+    </div>
+    <div class="stats-summary-row">
+      <span class="stats-summary-label">公休 / 振替 / 有給</span>
+      <span class="stats-summary-val">${holidayDays}日 / ${offDays}日 / ${paidDays}日</span>
+    </div>
+    <div class="stats-summary-row">
+      <span class="stats-summary-label">合計勤務時間</span>
+      <span class="stats-summary-val accent">${fmtMin(totalWorkMin)}</span>
+    </div>
+    <div class="stats-summary-row">
+      <span class="stats-summary-label">勤務間データ件数</span>
+      <span class="stats-summary-val">${ivArr.length}件</span>
+    </div>
+    <div class="stats-summary-row">
+      <span class="stats-summary-label">睡眠データ件数</span>
+      <span class="stats-summary-val">${sleepArr.length}件</span>
+    </div>
+  `;
+
+  c.innerHTML = `<div class="stats-view">
+    ${toggleHtml}
+    <div class="stats-avg-grid">
+      ${avgBox('⏳','勤務時間', avgWork, 1, 1, '平均/勤務日')}
+      ${avgBox('🔄','勤務間', avgIv, 660, 600, '平均')}
+      ${avgBox('😴','睡眠', avgSleep, 420, 360, '平均/日')}
+    </div>
+    ${alertHtml}
+    <div class="stats-card">
+      <div class="stats-card-header">⏳ 勤務時間${statsPeriod==='month'?'（日別）':'（月別平均）'}</div>
+      <div class="stats-card-body">
+        <div class="stats-bar-wrap">${barHtml}</div>
+        <div class="stats-legend">
+          <div class="stats-legend-item"><div class="stats-legend-dot" style="background:var(--accent);"></div>通常</div>
+          <div class="stats-legend-item"><div class="stats-legend-dot" style="background:var(--amber);"></div>長時間（13時間超）</div>
+        </div>
+      </div>
+    </div>
+    <div class="stats-card">
+      <div class="stats-card-header">📈 睡眠 / 勤務間の推移</div>
+      <div class="stats-card-body">
+        ${lineChart}
+        <div class="stats-legend">
+          <div class="stats-legend-item"><div class="stats-legend-dot" style="background:var(--accent);"></div>睡眠時間</div>
+          <div class="stats-legend-item"><div class="stats-legend-dot" style="background:var(--green);border:1px dashed var(--green);"></div>勤務間時間</div>
+          <div class="stats-legend-item"><div class="stats-legend-dot" style="background:var(--red);"></div>10時間未満違反</div>
+        </div>
+      </div>
+    </div>
+    <div class="stats-card">
+      <div class="stats-card-header">🗒️ 集計</div>
+      <div class="stats-card-body">${summaryHtml}</div>
     </div>
   </div>`;
 }
