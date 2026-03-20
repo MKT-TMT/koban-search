@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-25</title>
+<title>スケジュール管理アプリ MK-28</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -689,7 +689,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-25</div>
+    <div class="auth-logo">MK-28</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -1601,9 +1601,9 @@ function renderKoban() {
             </div>`
           ).join('')}
           <div style="display:flex;gap:6px;margin-top:6px">
-            <button onclick="saveRouteEdit('${editDataKey}','${r.no}')"
+            <button onclick="saveRouteEdit(${JSON.stringify(editDataKey)},${JSON.stringify(r.no)})"
               style="flex:1;padding:7px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)">保存</button>
-            <button onclick="deleteRouteEdit('${editDataKey}','${r.no}','${isNew}')"
+            <button onclick="deleteRouteEdit(${JSON.stringify(editDataKey)},${JSON.stringify(r.no)},${isNew})"
               style="padding:7px 12px;background:#FCEBEB;border:none;border-radius:8px;color:#A32D2D;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)">${isNew?'削除':'修正取消'}</button>
           </div>
         </div>` : '';
@@ -1612,7 +1612,7 @@ function renderKoban() {
           <span style="font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0">${r.no}${tagHtml}</span>
           <span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.dep_place} → ${r.arr_place}</span>
           <span style="font-family:var(--mono);font-size:11px;color:var(--accent);flex-shrink:0">${r.dep_time}</span>
-          <button onclick="window._kobanState.editOpenNo='${isOpen?'null':r.no}';if('${isOpen}')window._kobanState.editOpenNo=null;renderKoban()"
+          <button onclick="toggleRouteEdit(${JSON.stringify(r.no)})"
             style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:var(--sans);color:var(--muted)">${isOpen?'閉じる':'編集'}</button>
         </div>
         ${formHtml}
@@ -2352,7 +2352,7 @@ function deleteRouteEdit(dataKey, no, isNew) {
   const edits = loadKobanEdits();
   if (!edits[dataKey]) edits[dataKey] = {};
   if (!edits[dataKey].routes) edits[dataKey].routes = {};
-  if (isNew === 'true') {
+  if (isNew === true || isNew === 'true') {
     delete edits[dataKey].routes[no];
   } else {
     edits[dataKey].routes[no] = null; // 削除マーク
@@ -2417,6 +2417,14 @@ function clearNewKoban() {
   showToast('🗑️ 新交番設定を削除しました');
 }
 
+// ── 路線編集フォーム開閉トグル ──
+function toggleRouteEdit(no) {
+  const st = window._kobanState || {};
+  st.editOpenNo = (st.editOpenNo === no) ? null : no;
+  window._kobanState = st;
+  renderKoban();
+}
+
 // ── Init ──
 render();
 
@@ -2424,7 +2432,7 @@ render();
 // AUTH
 // ══════════════════════════════════════════
 (function() {
-  const PASS = 'MKT-SKJ2026';
+  const PASS = 'mk2026';
   const LOCAL_KEY  = 'mkx_auth_remember';
   const SESSION_KEY = 'mkx_auth_session';
   // localStorageに記憶済み、またはセッション中なら認証スキップ
@@ -2436,7 +2444,7 @@ render();
 })();
 
 function checkAuth() {
-  const PASS = 'MKT-SKJ2026';
+  const PASS = 'mk2026';
   const LOCAL_KEY   = 'mkx_auth_remember';
   const SESSION_KEY = 'mkx_auth_session';
   const val = document.getElementById('authInput').value;
