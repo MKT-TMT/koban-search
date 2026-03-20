@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-28</title>
+<title>スケジュール管理アプリ MK-31</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -689,7 +689,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-28</div>
+    <div class="auth-logo">MK-31</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -704,7 +704,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-25 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-31 <span class="logo-sub">スケジュール管理</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1387,6 +1387,13 @@ function renderDay() {
       </div>
     </div>
 
+    <div style="text-align:center;margin-top:16px">
+      <button onclick="selectedDate='${key}';switchView('input')"
+        style="padding:10px 28px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(58,123,255,.3);font-family:var(--sans)">
+        ✏️ この日を入力・編集する
+      </button>
+    </div>
+
     ${(()=>{
       if (!info || info.type !== 'work') return '';
       const kd = getKobanDetail(info.label, key);
@@ -1421,13 +1428,6 @@ function renderDay() {
       </div>
     </div>`;
     })()}
-
-    <div style="text-align:center;margin-top:16px">
-      <button onclick="selectedDate='${key}';switchView('input')"
-        style="padding:10px 28px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(58,123,255,.3);font-family:var(--sans)">
-        ✏️ この日を入力・編集する
-      </button>
-    </div>
   </div>`;
 }
 
@@ -1951,7 +1951,7 @@ function renderInput() {
   let shiftListHtml = `<input class="shift-search" type="text" placeholder="交番番号を検索… (例: 028)" id="shiftSearch" oninput="filterShifts(this.value)">
   <div class="shift-list" id="shiftList">`;
   allShiftIds.forEach(id => {
-    const s = SHIFT_TABLE[id];
+    const s = getEffectiveShiftTable(key)[id];
     const sel = rec.shift === id;
     shiftListHtml += `<span class="shift-badge${sel?' selected':''}" onclick="setShift('${key}','${id}')" title="${s.start}–${s.end}">${id.replace('交番','')}</span>`;
   });
@@ -2309,6 +2309,7 @@ function doImport() {
     const count = Object.keys(imported).length;
     Object.keys(imported).forEach(k => { appData[k] = imported[k]; });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    if (firestoreSave) firestoreSave(appData);
     closeModal('importModal');
     render();
     showToast(`読み込み完了 ✓ （${count}件）`);
