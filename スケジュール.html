@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-38</title>
+<title>スケジュール管理アプリ MK-40</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -756,7 +756,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-38</div>
+    <div class="auth-logo">MK-40</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -771,7 +771,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-38 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-40 <span class="logo-sub">スケジュール管理</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -928,6 +928,16 @@ function getEffectiveRoutes(dbType, shu, koban) {
   return { routes: result, isModified: true };
 }
 
+// ── ラッシュ時間帯判定（朝7:00-9:00 / 夕17:00-19:00）──
+function isRushTime(timeStr) {
+  if (!timeStr) return { rush: false, label: '' };
+  const parts = timeStr.split(':').map(Number);
+  const min = parts[0] * 60 + parts[1];
+  if (min >= 7*60 && min < 9*60)  return { rush: true, label: '朝R' };
+  if (min >= 17*60 && min < 19*60) return { rush: true, label: '夕R' };
+  return { rush: false, label: '' };
+}
+
 // ── 路線テーブル描画（折返しバッジ・ハイライト共通） ──
 function buildRouteTable(routes) {
   const SPECIAL = /栄|名古屋駅|金山/;
@@ -945,6 +955,21 @@ function buildRouteTable(routes) {
 
   const rows = routes.map((r, i) => {
     const barW = Math.min(100, Math.round(Math.min(r.ride_min, 80) / 80 * 100));
+    const depRush = isRushTime(r.dep_time);
+    const arrRush = isRushTime(r.arr_time);
+    const isRush  = depRush.rush || arrRush.rush;
+
+    // 発時・着時カラー＆ラッシュバッジ
+    const depColor  = depRush.rush ? '#A32D2D' : 'var(--accent)';
+    const arrColor  = arrRush.rush ? '#A32D2D' : 'var(--accent)';
+    const depBadge  = depRush.rush ? `<span style="background:#FCEBEB;color:#A32D2D;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:500;margin-left:3px;vertical-align:middle">${depRush.label}</span>` : '';
+    const arrBadge  = arrRush.rush ? `<span style="background:#FCEBEB;color:#A32D2D;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:500;margin-left:3px;vertical-align:middle">${arrRush.label}</span>` : '';
+
+    // 乗務バー・乗務時間カラー
+    const barColor  = isRush ? '#A32D2D' : 'var(--accent)';
+    const rideColor = isRush ? '#A32D2D' : 'var(--muted)';
+    const rideFW    = isRush ? 'font-weight:500;' : '';
+
     let intHtml = '';
     if (r.interval !== null && i > 0) {
       if (r.interval < 10) {
@@ -959,14 +984,14 @@ function buildRouteTable(routes) {
     return `<tr style="${hlStyle}border-bottom:1px solid var(--border)">
       <td style="font-family:var(--mono);font-size:11px;color:var(--muted);padding:6px 6px 6px 0;white-space:nowrap">${r.no}</td>
       <td style="font-size:12px;padding:6px 4px;white-space:nowrap">${r.dep_place}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--accent);padding:6px 4px;white-space:nowrap">${r.dep_time}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:${depColor};padding:6px 4px;white-space:nowrap">${r.dep_time}${depBadge}</td>
       <td style="font-size:12px;padding:6px 4px;white-space:nowrap">${r.arr_place}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--accent);padding:6px 4px;white-space:nowrap">${r.arr_time}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:${arrColor};padding:6px 4px;white-space:nowrap">${r.arr_time}${arrBadge}</td>
       <td style="padding:6px 0 6px 4px;min-width:80px">
         <div style="background:#e8f7f9;border-radius:4px;height:7px">
-          <div style="background:var(--accent);height:7px;border-radius:4px;width:${barW}%;min-width:3px"></div>
+          <div style="background:${barColor};height:7px;border-radius:4px;width:${barW}%;min-width:3px"></div>
         </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">${r.ride_min}分${intHtml}</div>
+        <div style="font-size:10px;color:${rideColor};${rideFW}margin-top:2px">${r.ride_min}分${intHtml}</div>
       </td>
     </tr>`;
   }).join('');
