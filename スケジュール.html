@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-41</title>
+<title>スケジュール管理アプリ MK-44</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -331,39 +331,155 @@
     color: #6200cc; transition: all .12s; text-align: center; font-weight: 500;
   }
   .compound-koban-badge:hover { border-color: #9b4dff; background: #ede0ff; }
-  .compound-koban-badge.selected { background: #9b4dff; color: #fff; border-color: #9b4dff; }
+  /* 複数選択：色分け3色 */
+  .compound-koban-badge.sel-0 { background: #0ea8d8; color: #fff; border-color: #0ea8d8; }
+  .compound-koban-badge.sel-1 { background: #3dbf7a; color: #fff; border-color: #2aaa65; }
+  .compound-koban-badge.sel-2 { background: #e08a10; color: #fff; border-color: #c07000; }
+  .compound-koban-badge.sel-3 { background: #9b4dff; color: #fff; border-color: #7a2ee0; }
+  .compound-koban-badge.sel-4 { background: #e03535; color: #fff; border-color: #c01010; }
 
-  /* 路線チェックリスト */
-  .compound-route-section {
-    border-top: 1px solid #c4a0ff; padding-top: 10px; margin-top: 8px;
+  /* 路線ブロック（交番ごとに色分け展開） */
+  .compound-route-block {
+    border-radius: 10px; margin-bottom: 8px; overflow: hidden; border: 1.5px solid;
   }
-  .compound-route-header {
-    font-size: 13px; font-weight: 800; color: #6200cc;
-    letter-spacing: 0.8px; margin-bottom: 6px;
+  .compound-route-block-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; font-size: 13px; font-weight: 700;
   }
+  .compound-route-block .all-sel-btn {
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px;
+    border: 1.5px solid; cursor: pointer; background: var(--surface);
+    font-family: var(--sans);
+  }
+  .compound-route-block.color-0 { border-color: #0ea8d8; }
+  .compound-route-block.color-0 .compound-route-block-head { background: #d4f2fa; color: #0878a0; }
+  .compound-route-block.color-0 .all-sel-btn { border-color: #0ea8d8; color: #0ea8d8; }
+  .compound-route-block.color-1 { border-color: #3dbf7a; }
+  .compound-route-block.color-1 .compound-route-block-head { background: #d4f5e5; color: #0a7a3e; }
+  .compound-route-block.color-1 .all-sel-btn { border-color: #3dbf7a; color: #3dbf7a; }
+  .compound-route-block.color-2 { border-color: #e08a10; }
+  .compound-route-block.color-2 .compound-route-block-head { background: #ffefd4; color: #965800; }
+  .compound-route-block.color-2 .all-sel-btn { border-color: #e08a10; color: #e08a10; }
+  .compound-route-block.color-3 { border-color: #9b4dff; }
+  .compound-route-block.color-3 .compound-route-block-head { background: #ede0ff; color: #6200cc; }
+  .compound-route-block.color-3 .all-sel-btn { border-color: #9b4dff; color: #9b4dff; }
+  .compound-route-block.color-4 { border-color: #e03535; }
+  .compound-route-block.color-4 .compound-route-block-head { background: #ffd9d9; color: #a01010; }
+  .compound-route-block.color-4 .all-sel-btn { border-color: #e03535; color: #e03535; }
+
+  /* 全部/一部トグルボタン */
+  .koban-mode-toggle {
+    display: flex; border-radius: 6px; overflow: hidden;
+    border: 1.5px solid; flex-shrink: 0;
+  }
+  .koban-mode-toggle button {
+    padding: 3px 9px; border: none; font-size: 11px; font-weight: 700;
+    cursor: pointer; font-family: var(--sans); background: var(--surface);
+    color: var(--muted); transition: all .12s;
+  }
+  /* 全部モード時の「全路線」メッセージ */
+  .compound-all-msg {
+    padding: 8px 12px; background: var(--surface2);
+    font-size: 13px; color: var(--muted); text-align: center;
+    font-family: var(--mono);
+  }
+
+  /* 路線チェックリスト行 */
   .compound-route-item {
     display: flex; align-items: center; gap: 8px;
-    padding: 7px 0; border-bottom: 1px solid #e8d8ff; font-size: 14px;
+    padding: 7px 12px; border-top: 1px solid #e8e8e8; font-size: 14px;
+    background: var(--surface);
   }
-  .compound-route-item:last-child { border-bottom: none; }
   .compound-route-item input[type=checkbox] {
-    width: 16px; height: 16px; accent-color: #9b4dff; flex-shrink: 0;
+    width: 16px; height: 16px; flex-shrink: 0;
   }
   .compound-route-label { flex: 1; font-family: var(--mono); color: var(--text); }
   .compound-route-time { color: var(--muted); font-size: 13px; white-space: nowrap; }
 
   /* 選択済みサマリ */
   .compound-selected-summary {
-    margin-top: 10px; padding: 8px 12px;
+    margin-top: 10px; padding: 9px 13px;
     background: #9b4dff; border-radius: 9px; color: #fff;
-    font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap; line-height: 1.8;
   }
   .compound-selected-summary.empty { background: var(--border); color: var(--muted); }
+  .compound-sum-chip {
+    border-radius: 5px; padding: 2px 8px; font-size: 12px; font-weight: 700; white-space: nowrap;
+  }
+  .compound-sum-chip-0 { background: #0ea8d8; color: #fff; }
+  .compound-sum-chip-1 { background: #3dbf7a; color: #fff; }
+  .compound-sum-chip-2 { background: #e08a10; color: #fff; }
+  .compound-sum-chip-3 { background: #9b4dff; color: #fff; }
+  .compound-sum-chip-4 { background: #e03535; color: #fff; }
+  .compound-sum-chip-task { background: #2ecf7a; color: #fff; }
 
-  /* 業務習得パネル */
+  /* ══ 作業内容セクション（黄緑基調） ══ */
+  .task-content-section {
+    background: #f0faf2; border: 1.5px solid #6ecf8a;
+    border-radius: 12px; padding: 11px 12px; margin-bottom: 12px;
+  }
+  .task-content-head {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px;
+  }
+  .task-content-title { font-size: 12px; font-weight: 800; color: #1a7a3e; letter-spacing: 0.8px; }
+  .task-content-add-btn {
+    font-size: 12px; font-weight: 700; color: #2ecf7a;
+    background: var(--surface); border: 1.5px solid #2ecf7a;
+    border-radius: 7px; padding: 4px 12px; cursor: pointer; font-family: var(--sans);
+  }
+  .task-content-item {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1.5px solid #8ee0b8;
+    border-radius: 9px; padding: 9px 11px; margin-bottom: 6px;
+  }
+  .task-content-name { font-size: 14px; font-weight: 700; color: #0a5e2a; flex: 1; }
+  .task-content-time {
+    font-family: var(--mono); font-size: 13px; color: #1a7a3e;
+    background: #c8f5e2; border-radius: 6px; padding: 2px 8px; white-space: nowrap;
+  }
+  .task-content-del {
+    font-size: 14px; color: #8ee0b8; flex-shrink: 0; padding-left: 4px;
+    cursor: pointer; background: none; border: none; font-family: var(--sans);
+  }
+  .task-content-form {
+    background: var(--surface); border: 1.5px dashed #2ecf7a;
+    border-radius: 10px; padding: 11px; margin-bottom: 6px;
+  }
+  .task-content-form-title {
+    font-size: 10px; font-weight: 800; color: #1a7a3e; letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .task-content-type-btns { display: flex; gap: 5px; margin-bottom: 8px; flex-wrap: wrap; }
+  .task-content-type-btn {
+    font-size: 12px; font-weight: 700; padding: 5px 12px;
+    border-radius: 7px; border: 1.5px solid #8ee0b8;
+    background: #e8faf2; color: #1a7a3e; cursor: pointer; font-family: var(--sans);
+    transition: all .12s;
+  }
+  .task-content-type-btn.active { background: #2ecf7a; color: #fff; border-color: #2ecf7a; }
+  .task-content-custom-inp {
+    width: 100%; background: #f0faf2; border: 1.5px solid #8ee0b8;
+    border-radius: 7px; padding: 7px 10px; font-size: 13px; color: #1a7a3e;
+    margin-bottom: 8px; outline: none; font-family: var(--sans); box-sizing: border-box;
+  }
+  .task-content-time-row { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; }
+  .task-content-form-label { font-size: 12px; color: #1a7a3e; white-space: nowrap; font-weight: 700; }
+  .task-content-time-inp {
+    flex: 1; background: #f0faf2; border: 1.5px solid #8ee0b8;
+    border-radius: 7px; padding: 7px 8px;
+    font-family: var(--mono); font-size: 15px; color: #1a7a3e;
+    text-align: center; font-weight: 700; outline: none;
+  }
+  .task-content-reg-btn {
+    background: #2ecf7a; color: #fff; border: none;
+    border-radius: 8px; padding: 9px; font-size: 13px; font-weight: 700;
+    width: 100%; cursor: pointer; font-family: var(--sans);
+  }
+
+  /* 業務習得パネル（単独シフト用・旧来） */
   .training-panel {
     margin-top: 12px; padding: 12px 14px;
-    background: #fff8ee; border: 1.5px solid #f0c060;
+    background: #f0faf2; border: 1.5px solid #6ecf8a;
     border-radius: 12px;
   }
 
@@ -631,6 +747,10 @@
     position: fixed; inset: 0; z-index: 9999;
     background: var(--bg);
     display: flex; align-items: center; justify-content: center;
+    transition: opacity .2s;
+  }
+  #authOverlay.hidden {
+    opacity: 0; pointer-events: none; visibility: hidden;
   }
   .auth-card {
     background: var(--surface); border: 1.5px solid var(--border);
@@ -756,7 +876,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-41</div>
+    <div class="auth-logo">MK-44</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -771,7 +891,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-41 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-44 <span class="logo-sub">スケジュール管理</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1141,17 +1261,70 @@ function getShiftInfo(dateKey) {
   if (rec.shift === 'custom') return { label: rec.customLabel || 'カスタム', start: rec.customStart, end: rec.customEnd, type: 'work' };
   if (rec.shift === 'compound') {
     const routes = rec.compoundRoutes || [];
-    const times = routes.map(r => r.dep_time).concat(routes.map(r => r.arr_time)).filter(Boolean);
-    const routeStart = times.length ? times.reduce((a,b) => a < b ? a : b) : null;
-    const routeEnd   = times.length ? times.reduce((a,b) => a > b ? a : b) : null;
-    // 業務習得がある場合は開始・終了を考慮して全体の勤務時間を決定
-    const tStart = rec.trainingStart || null;
-    const tEnd   = rec.trainingEnd   || null;
-    const allStarts = [routeStart, tStart].filter(Boolean);
-    const allEnds   = [routeEnd,   tEnd  ].filter(Boolean);
-    const start = allStarts.length ? allStarts.reduce((a,b) => a < b ? a : b) : null;
-    const end   = allEnds.length   ? allEnds.reduce((a,b)   => a > b ? a : b) : null;
-    return { label: rec.compoundLabel || '複合業務', start, end, type: 'work' };
+    const tasks  = rec.taskContents  || [];
+    const modes  = rec.compoundKobanModes || {};
+    const kobans = rec.compoundKobans || [];
+    let allTimes = routes.map(r => r.dep_time).concat(routes.map(r => r.arr_time))
+      .concat(tasks.map(t => t.start)).concat(tasks.map(t => t.end)).filter(Boolean);
+    // 全部モードの交番はシフトテーブルの start/end を時刻計算に使用
+    kobans.forEach(n => {
+      if (modes[n] === 'all') {
+        const tbl = getEffectiveShiftTable(dateKey);
+        const s = tbl[String(n).padStart(3,'0') + '交番'];
+        if (s) { allTimes.push(s.start); allTimes.push(s.end); }
+      }
+    });
+    const start = allTimes.length ? allTimes.reduce((a,b) => a < b ? a : b) : null;
+    const end   = allTimes.length ? allTimes.reduce((a,b) => a > b ? a : b) : null;
+    // 各業務の開始時刻を取得して時間軸順にソート
+    const tbl2 = getEffectiveShiftTable(dateKey);
+    const parts = [];
+    // 交番を開始時刻付きで追加
+    kobans.forEach(n => {
+      let startTime = null;
+      if (modes[n] === 'all') {
+        const s = tbl2[String(n).padStart(3,'0') + '交番'];
+        if (s) startTime = s.start;
+      } else {
+        // 一部モード：選択済み路線の最早発車時刻
+        const kobanRoutes = routes.filter(r => {
+          // 路線番号から交番を特定するのは難しいので全選択路線の最早を使う暫定対応
+          return true;
+        });
+        // 各交番に紐づく路線を特定
+        startTime = routes
+          .filter(r => {
+            const effR = (() => {
+              try {
+                const d = new Date(dateKey); const dow = d.getDay();
+                const shu = dow===6?'土曜':dow===0?'日祝':'平日';
+                const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&dateKey>=cfg.effectiveDate; })();
+                const {routes: er} = getEffectiveRoutes(isNew?'new':'cur', shu, n);
+                return er;
+              } catch(e) { return []; }
+            })();
+            return effR.some(er => er.no === r.no);
+          })
+          .map(r => r.dep_time)
+          .filter(Boolean)
+          .sort()[0] || null;
+      }
+      const label = modes[n] === 'all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`;
+      parts.push({ label, startTime });
+    });
+    // 作業内容を開始時刻付きで追加
+    tasks.forEach(t => {
+      parts.push({ label: t.name, startTime: t.start || null });
+    });
+    // 開始時刻でソート（nullは後ろ）
+    parts.sort((a, b) => {
+      if (!a.startTime && !b.startTime) return 0;
+      if (!a.startTime) return 1;
+      if (!b.startTime) return -1;
+      return a.startTime.localeCompare(b.startTime);
+    });
+    const label = parts.length ? parts.map(p => p.label).join('＆') : (rec.compoundLabel || '複合業務');
+    return { label, start, end, type: 'work' };
   }
   if (HOLIDAY_SHIFTS[rec.shift]) return { label: HOLIDAY_SHIFTS[rec.shift], start: null, end: null, type: rec.shift === '503交番' ? 'paid' : rec.shift === '501交番' ? 'holiday' : 'off' };
   const tbl = getEffectiveShiftTable(dateKey);
@@ -1499,13 +1672,14 @@ function renderDay() {
       const tLabel = rec.trainingLabel || '業務習得';
       if (!tStart && !tEnd && !tLabel) return '';
       if (rec.shift === 'training') return ''; // 単独時は上で表示済み
+      if (rec.shift === 'compound') return ''; // 複合業務時はtaskContentsで管理
       const tMin = (tStart && tEnd) ? diffMin(parseTime(tStart), parseTime(tEnd)) : null;
       return `
     <div class="section-label">業務習得</div>
     <div class="day-card">
       <div class="day-card-body">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-          <span style="background:#fff0d4;color:#8a4a00;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;">📚 ${tLabel}</span>
+          <span style="background:#c8f5e2;color:#0a5e2a;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;">📚 ${tLabel}</span>
         </div>
         <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
           <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:22px;">${tStart||'—'}</div></div>
@@ -1526,81 +1700,146 @@ function renderDay() {
     ${(()=>{
       if (!info || info.type !== 'work') return '';
 
-      // ── 複合業務の考察 ──
+      // ── 複合業務の考察（複数交番＋全部/一部対応） ──
       if (rec.shift === 'compound') {
         const routes = rec.compoundRoutes || [];
-        if (!routes.length) return '';
-        const SPECIAL = /栄|名古屋駅|金山/;
-        const highlighted = new Set();
-        routes.forEach((r,i) => {
-          const isSpecial = SPECIAL.test(r.dep_place)||SPECIAL.test(r.arr_place);
-          const isLong = r.ride_min >= 60;
-          const nextInterval = i+1<routes.length ? routes[i+1].interval : null;
-          if ((isSpecial||isLong)&&nextInterval!==null&&nextInterval<10) { highlighted.add(i); highlighted.add(i+1); }
+        const kobans = rec.compoundKobans || [];
+        const tasks  = rec.taskContents  || [];
+        const modes  = rec.compoundKobanModes || {};
+        const COLORS5 = ['#0ea8d8','#3dbf7a','#e08a10','#9b4dff','#e03535'];
+        const BGCOLS  = ['#d4f2fa','#d4f5e5','#ffefd4','#ede0ff','#ffd9d9'];
+        const TXCOLS  = ['#0878a0','#0a7a3e','#965800','#6200cc','#a01010'];
+
+        const isNewTbl = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
+        const dbType2 = isNewTbl ? 'new' : 'cur';
+        const d2 = new Date(key); const dow2 = d2.getDay();
+        const shu2 = dow2===6?'土曜':dow2===0?'日祝':'平日';
+
+        // 全体の勤務時刻（全部モードはシフトテーブルから）
+        let allTimes = routes.map(r=>r.dep_time).concat(routes.map(r=>r.arr_time))
+          .concat(tasks.map(t=>t.start)).concat(tasks.map(t=>t.end)).filter(Boolean);
+        kobans.forEach(n => {
+          if (modes[n] === 'all') {
+            const tbl = getEffectiveShiftTable(key);
+            const s = tbl[String(n).padStart(3,'0') + '交番'];
+            if (s) { allTimes.push(s.start); allTimes.push(s.end); }
+          }
         });
-        let tableHtml = `<table style="width:100%;border-collapse:collapse;font-size:13px;font-family:var(--mono);">
-          <thead><tr style="background:var(--surface2);border-bottom:2px solid var(--border2);">
-            <th style="padding:7px 4px;text-align:left;color:var(--muted);font-weight:700;">路線番号</th>
-            <th style="padding:7px 4px;text-align:left;color:var(--muted);font-weight:700;">出発</th>
-            <th style="padding:7px 4px;text-align:left;color:var(--muted);font-weight:700;">到着</th>
-            <th style="padding:7px 4px;text-align:right;color:var(--muted);font-weight:700;">乗務</th>
-            <th style="padding:7px 4px;text-align:right;color:var(--muted);font-weight:700;">折返</th>
-          </tr></thead><tbody>`;
-        routes.forEach((r,i) => {
-          const hl = highlighted.has(i);
-          const danger = r.interval!==null&&r.interval<10;
-          const bg = hl ? '#fff3e0' : i%2===0 ? 'var(--surface)' : 'var(--surface2)';
-          tableHtml += `<tr style="background:${bg};border-bottom:1px solid var(--border);">
-            <td style="padding:7px 4px;color:#6200cc;font-weight:700;">${r.no}</td>
-            <td style="padding:7px 4px;color:var(--muted);">${r.dep_place}<br><span style="color:var(--text)">${r.dep_time}</span></td>
-            <td style="padding:7px 4px;color:var(--muted);">${r.arr_place}<br><span style="color:var(--text)">${r.arr_time}</span></td>
-            <td style="padding:7px 4px;text-align:right;">${r.ride_min}分</td>
-            <td style="padding:7px 4px;text-align:right;color:${danger?'var(--red)':'var(--muted)'};">${r.interval!==null?r.interval+'分':'—'}</td>
-          </tr>`;
-        });
-        tableHtml += '</tbody></table>';
-        const totalMin = routes.reduce((s,r)=>s+r.ride_min,0);
-        const dangerCount = routes.filter(r=>r.interval!==null&&r.interval<10).length;
-        // 業務習得の情報
-        const tStart = rec.trainingStart || '';
-        const tEnd   = rec.trainingEnd   || '';
-        const tLabel = rec.trainingLabel || '';
-        const tMin   = (tStart && tEnd) ? diffMin(parseTime(tStart), parseTime(tEnd)) : null;
-        // 全体の勤務開始・終了（業務習得を含む）
-        const allStarts = [routes.length?routes[0].dep_time:null, tStart].filter(Boolean);
-        const allEnds   = [routes.length?routes[routes.length-1].arr_time:null, tEnd].filter(Boolean);
-        const totalWorkStart = allStarts.length ? allStarts.reduce((a,b)=>a<b?a:b) : null;
-        const totalWorkEnd   = allEnds.length   ? allEnds.reduce((a,b)=>a>b?a:b)   : null;
+        const totalWorkStart = allTimes.length ? allTimes.reduce((a,b)=>a<b?a:b) : null;
+        const totalWorkEnd   = allTimes.length ? allTimes.reduce((a,b)=>a>b?a:b) : null;
         const totalWorkMin   = (totalWorkStart && totalWorkEnd) ? diffMin(parseTime(totalWorkStart), parseTime(totalWorkEnd)) : null;
-        const trainingCardHtml = (tStart || tEnd || tLabel) ? `
-          <div class="section-label" style="margin-top:12px;">業務習得</div>
-          <div style="background:#fff8ee;border:1.5px solid #f0c060;border-radius:12px;padding:12px 14px;margin-top:4px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-              <span style="background:#fff0d4;color:#8a4a00;border-radius:8px;padding:3px 12px;font-weight:800;font-size:15px;">📚 ${tLabel||'業務習得'}</span>
-            </div>
-            <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
-              <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:22px;">${tStart||'—'}</div></div>
-              <div class="stat-box"><div class="stat-label">終了</div><div class="stat-val" style="font-size:22px;">${tEnd||'—'}</div></div>
-              <div class="stat-box"><div class="stat-label">時間</div><div class="stat-val" style="font-size:22px;">${tMin!==null?fmtMin(tMin):'—'}</div></div>
-            </div>
+        const totalRideMin   = routes.reduce((s,r)=>s+(r.ride_min||0), 0);
+        const dangerCount    = routes.filter(r=>r.interval!==null&&r.interval<10).length;
+
+        // 全業務を時間軸順にソートしてチップ生成
+        const chipParts = [];
+        kobans.forEach((n, i) => {
+          let startTime = null;
+          if (modes[n] === 'all') {
+            const tbl = getEffectiveShiftTable(key);
+            const s = tbl[String(n).padStart(3,'0') + '交番'];
+            if (s) startTime = s.start;
+          } else {
+            const {routes: effR} = getEffectiveRoutes(dbType2, shu2, n);
+            const kobanRoutes = routes.filter(r => effR.some(er => er.no === r.no));
+            startTime = kobanRoutes.map(r => r.dep_time).filter(Boolean).sort()[0] || null;
+          }
+          const label = modes[n] === 'all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`;
+          chipParts.push({ label, startTime, colorBg: BGCOLS[i%5], colorTx: TXCOLS[i%5], isMono: true });
+        });
+        tasks.forEach(t => {
+          chipParts.push({ label: t.name, startTime: t.start || null, colorBg: '#c8f5e2', colorTx: '#0a5e2a', isMono: false });
+        });
+        // 開始時刻順にソート（nullは後ろ）
+        chipParts.sort((a, b) => {
+          if (!a.startTime && !b.startTime) return 0;
+          if (!a.startTime) return 1;
+          if (!b.startTime) return -1;
+          return a.startTime.localeCompare(b.startTime);
+        });
+        const allChips = chipParts.map(p =>
+          `<span style="background:${p.colorBg};color:${p.colorTx};border-radius:7px;padding:3px 12px;font-weight:800;font-size:14px;${p.isMono?'font-family:var(--mono);':''}">${p.label}</span>`
+        ).join('<span style="color:var(--muted);font-size:13px;font-weight:700;padding:0 2px;">＆</span>');
+
+        // 作業内容カード（黄緑）
+        const taskCardHtml = tasks.length ? `
+          <div class="section-label" style="margin-top:12px;">作業内容</div>
+          <div style="background:#f0faf2;border:1.5px solid #6ecf8a;border-radius:12px;padding:12px 14px;margin-top:4px;">
+            ${tasks.map((t,ti) => {
+              const dur = (t.start && t.end) ? diffMin(parseTime(t.start), parseTime(t.end)) : null;
+              const durStr = dur !== null ? `（${fmtMin(dur)}）` : '';
+              const borderStyle = ti < tasks.length-1 ? 'border-bottom:1px solid #8ee0b8;' : '';
+              return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;${borderStyle}">
+                <span style="font-size:15px;font-weight:700;color:#0a5e2a;flex:1;">${t.name}</span>
+                <span style="font-family:var(--mono);font-size:15px;font-weight:700;color:#1a7a3e;">${t.start||'—'} – ${t.end||'—'}</span>
+                <span style="font-size:12px;color:#5aaa7a;background:#c8f5e2;border-radius:5px;padding:2px 7px;">${durStr}</span>
+              </div>`;
+            }).join('')}
           </div>` : '';
+
+        // 交番ごとの路線ブロック
+        let kobanBlocksHtml = kobans.map((kobanNum, ci) => {
+          const bg = BGCOLS[ci%5]; const tx = TXCOLS[ci%5]; const bd = COLORS5[ci%5];
+          const padNum = String(kobanNum).padStart(3,'0');
+          const kd = getKobanDetail(padNum + '交番', key);
+
+          if (modes[kobanNum] === 'all') {
+            // 全部モード：全路線を考察付きで表示
+            const {routes: effR} = getEffectiveRoutes(dbType2, shu2, kobanNum);
+            const danger10 = effR.filter((r,i) => i>0 && r.interval!==null && r.interval<10).length;
+            const spanStr = kd ? (() => { const h=Math.floor(kd.span_min/60); const m=kd.span_min%60; return h+'h'+(m?m+'m':''); })() : '—';
+            return `<div style="border:1.5px solid ${bd};border-radius:10px;margin-bottom:10px;overflow:hidden;">
+              <div style="background:${bg};color:${tx};padding:9px 13px;font-size:14px;font-weight:700;">
+                ${padNum}交番 — 全路線担当（${effR.length}本）
+              </div>
+              ${kd ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 13px;background:var(--surface2);">
+                <div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border);">
+                  <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:3px;">拘束時間</div>
+                  <div style="font-family:var(--mono);font-size:18px;font-weight:700;">${spanStr}</div>
+                </div>
+                <div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border);">
+                  <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:3px;">最長乗務</div>
+                  <div style="font-family:var(--mono);font-size:18px;font-weight:700;">${kd.max_ride}分</div>
+                </div>
+                <div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border);">
+                  <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:3px;">⚠️折返10分未満</div>
+                  <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:${danger10>0?'var(--red)':'var(--text)'};">${danger10}回</div>
+                </div>
+              </div>` : ''}
+              ${buildRouteTable(effR)}
+            </div>`;
+          } else {
+            // 一部モード：選択した路線のみ
+            const {routes: effR} = getEffectiveRoutes(dbType2, shu2, kobanNum);
+            const kobanRoutes = routes.filter(r => effR.some(er => er.no === r.no));
+            if (!kobanRoutes.length) return '';
+            const danger10part = kobanRoutes.filter((r,i) => i>0 && r.interval!==null && r.interval<10).length;
+            return `<div style="border:1.5px solid ${bd};border-radius:10px;margin-bottom:10px;overflow:hidden;">
+              <div style="background:${bg};color:${tx};padding:9px 13px;font-size:14px;font-weight:700;">
+                ${padNum}交番の一部 — ${kobanRoutes.length}本担当
+              </div>
+              ${danger10part>0 ? `<div style="padding:7px 13px;background:#ffeaea;font-size:12px;color:var(--red);font-weight:700;">⚠️ 10分未満折返 ${danger10part}回</div>` : ''}
+              ${buildRouteTable(kobanRoutes)}
+            </div>`;
+          }
+        }).join('');
+
         return `
       <div class="section-label">交番考察（複合業務）</div>
       <div class="day-card">
         <div class="day-card-body">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-            <span style="background:#ede0ff;color:#6200cc;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;font-family:var(--sans)">${rec.compoundLabel||'複合業務'}</span>
-            <span style="background:var(--surface2);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px">${routes.length}本</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+            ${allChips}
           </div>
           <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
-            <div class="stat-box"><div class="stat-label">勤務開始</div><div class="stat-val" style="font-size:22px">${totalWorkStart||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">勤務終了</div><div class="stat-val" style="font-size:22px">${totalWorkEnd||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">合計時間</div><div class="stat-val" style="font-size:22px">${totalWorkMin!==null?fmtMin(totalWorkMin):'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">乗務合計</div><div class="stat-val" style="font-size:22px">${totalMin}分</div></div>
-            <div class="stat-box"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${dangerCount>0?'bad':''}" style="font-size:22px">${dangerCount}回</div></div>
+            <div class="stat-box"><div class="stat-label">勤務開始</div><div class="stat-val" style="font-size:20px">${totalWorkStart||'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">勤務終了</div><div class="stat-val" style="font-size:20px">${totalWorkEnd||'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">合計時間</div><div class="stat-val" style="font-size:20px">${totalWorkMin!==null?fmtMin(totalWorkMin):'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">乗務合計</div><div class="stat-val" style="font-size:20px">${totalRideMin}分</div></div>
+            <div class="stat-box"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${dangerCount>0?'bad':''}" style="font-size:20px">${dangerCount}回</div></div>
           </div>
-          ${trainingCardHtml}
-          ${tableHtml}
+          ${taskCardHtml}
+          ${kobanBlocksHtml}
         </div>
       </div>`;
       }
@@ -1616,7 +1855,7 @@ function renderDay() {
       <div class="day-card">
         <div class="day-card-body">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-            <span style="background:#fff0d4;color:#8a4a00;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;">📚 ${tLabel}</span>
+            <span style="background:#c8f5e2;color:#0a5e2a;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;">📚 ${tLabel}</span>
           </div>
           <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
             <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:22px;">${tStart||'—'}</div></div>
@@ -2171,92 +2410,166 @@ function renderInput() {
   if (rec.shift === 'compound') {
     const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
     const dbType = isNew ? 'new' : 'cur';
-    const db = isNew ? KV_NEW_DATA : KV_CUR_DATA;
     const d = new Date(key); const dow = d.getDay();
     const shu = dow===6?'土曜':dow===0?'日祝':'平日';
 
-    // 選択中交番
-    const selKoban = window._compoundState && window._compoundState.dateKey===key ? window._compoundState.koban : null;
+    // 複数選択交番リスト
+    const selKobans = rec.compoundKobans || [];
 
-    // 交番バッジ
+    // 交番バッジ（複数選択対応）
     const tbl = getEffectiveShiftTable(key);
     const kobanNums = [...new Set(Object.keys(tbl).map(k=>parseInt(k)))].sort((a,b)=>a-b);
     const compSearch = (window._compoundState&&window._compoundState.dateKey===key&&window._compoundState.search)||'';
     const filteredNums = kobanNums.filter(n=>String(n).includes(compSearch));
 
-    let kobanBadges = filteredNums.map(n=>{
-      const isSel = selKoban===n;
-      return `<span class="compound-koban-badge${isSel?' selected':''}" onclick="selectCompoundKoban('${key}',${n})">${n}</span>`;
+    const COLORS = 5;
+    let kobanBadges = filteredNums.map(n => {
+      const idx = selKobans.indexOf(n);
+      const isSel = idx !== -1;
+      const colorCls = isSel ? ` sel-${idx % COLORS}` : '';
+      return `<span class="compound-koban-badge${colorCls}" onclick="toggleCompoundKoban('${key}',${n})">${n}</span>`;
     }).join('');
 
-    // 選択中交番の路線一覧
-    let routeListHtml = '';
-    if (selKoban !== null) {
-      const dbKey = `${shu}_${selKoban}`;
-      const {routes: effRoutes} = getEffectiveRoutes(dbType, shu, selKoban);
-      if (effRoutes.length > 0) {
-        const savedRoutes = rec.compoundRoutes || [];
+    // 各選択交番の路線ブロック
+    let routeBlocksHtml = '';
+    selKobans.forEach((kobanNum, ci) => {
+      const {routes: effRoutes} = getEffectiveRoutes(dbType, shu, kobanNum);
+      if (!effRoutes.length) return;
+      const savedRoutes = rec.compoundRoutes || [];
+      const colorIdx = ci % COLORS;
+      const COLORS5_BD = ['#0ea8d8','#3dbf7a','#e08a10','#9b4dff','#e03535'];
+
+      // 全部モード判定（rec.compoundKobanModes[kobanNum] === 'all'）
+      const modes = rec.compoundKobanModes || {};
+      const isAllMode = modes[kobanNum] === 'all';
+      const btnColorStyle = `border-color:${COLORS5_BD[colorIdx]};color:${COLORS5_BD[colorIdx]};`;
+
+      // ヘッダーラベル
+      const blockLabel = isAllMode ? `${String(kobanNum).padStart(3,'0')}交番` : `${String(kobanNum).padStart(3,'0')}交番の一部`;
+
+      // トグルボタン
+      const toggleHtml = `<div class="koban-mode-toggle" style="border-color:${COLORS5_BD[colorIdx]}">
+        <button style="${isAllMode?`background:${COLORS5_BD[colorIdx]};color:#fff;`:''}" onclick="setKobanMode('${key}',${kobanNum},'all')">全部</button>
+        <button style="${!isAllMode?`background:${COLORS5_BD[colorIdx]};color:#fff;`:''}" onclick="setKobanMode('${key}',${kobanNum},'part')">一部</button>
+      </div>`;
+
+      // 路線リスト（全部モードなら非表示）
+      let routeListHtml = '';
+      if (isAllMode) {
+        routeListHtml = `<div class="compound-all-msg">全路線を担当（${effRoutes.length}本）</div>`;
+      } else {
         const allChecked = effRoutes.every(r => savedRoutes.some(sr => sr.no === r.no));
-        routeListHtml = `<div class="compound-route-section">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <div class="compound-route-header" style="margin-bottom:0;">📋 ${shu} ${selKoban}交番 — 路線を選択</div>
-            <button onclick="selectAllCompoundRoutes('${key}',${selKoban},'${shu}',${!allChecked})"
-              style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:7px;border:1.5px solid #9b4dff;
-              background:${allChecked?'#9b4dff':'var(--surface)'};color:${allChecked?'#fff':'#9b4dff'};cursor:pointer;font-family:var(--sans);">
-              ${allChecked?'✓ 全解除':'全選択'}
-            </button>
-          </div>`;
+        routeListHtml = `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--surface);">
+          <span style="font-size:12px;color:var(--muted);">路線を選択</span>
+          <button class="all-sel-btn" style="${btnColorStyle}" onclick="selectAllCompoundRoutes('${key}',${kobanNum},'${shu}',${!allChecked})">
+            ${allChecked ? '✓ 全解除' : '全選択'}
+          </button>
+        </div>`;
         effRoutes.forEach(r => {
           const checked = savedRoutes.some(sr => sr.no === r.no);
           routeListHtml += `<div class="compound-route-item">
-            <input type="checkbox" id="cr_${r.no}" ${checked?'checked':''} onchange="toggleCompoundRoute('${key}','${selKoban}','${shu}',this)">
+            <input type="checkbox" id="cr_${r.no}" ${checked?'checked':''} onchange="toggleCompoundRoute('${key}',${kobanNum},'${shu}',this)" style="accent-color:${COLORS5_BD[colorIdx]}">
             <label for="cr_${r.no}" class="compound-route-label">${r.dep_place} → ${r.arr_place}</label>
             <span class="compound-route-time">${r.dep_time}〜${r.arr_time}</span>
           </div>`;
         });
-        routeListHtml += `</div>`;
       }
+
+      routeBlocksHtml += `<div class="compound-route-block color-${colorIdx}">
+        <div class="compound-route-block-head">
+          <span>${blockLabel}</span>
+          ${toggleHtml}
+        </div>
+        ${routeListHtml}
+      </div>`;
+    });
+
+    // 作業内容セクション
+    const tasks = rec.taskContents || [];
+    const taskFormOpen = window._taskFormOpen && window._taskFormOpen === key;
+    const taskFormState = window._taskFormState || { type: '業務習得', customName: '', start: '', end: '' };
+    const presetTypes = (rec.taskPresets || ['業務習得', '車庫整理']);
+    let taskItemsHtml = tasks.map((t, i) => `
+      <div class="task-content-item">
+        <span class="task-content-name">${t.name}</span>
+        <span class="task-content-time">${t.start} – ${t.end}</span>
+        <button class="task-content-del" onclick="deleteTaskContent('${key}',${i})">✕</button>
+      </div>`).join('');
+
+    let taskFormHtml = '';
+    if (taskFormOpen) {
+      const isOther = taskFormState.type === 'その他';
+      const typeBtns = [...presetTypes, 'その他'].map(t =>
+        `<button class="task-content-type-btn${taskFormState.type===t?' active':''}" onclick="setTaskFormType('${key}','${t}')">${t}</button>`
+      ).join('');
+      taskFormHtml = `<div class="task-content-form">
+        <div class="task-content-form-title">▼ 新しい作業を追加</div>
+        <div class="task-content-type-btns">${typeBtns}</div>
+        ${isOther ? `<input class="task-content-custom-inp" type="text" placeholder="作業名を入力（例：点呼補助）" value="${taskFormState.customName||''}" oninput="setTaskFormCustom('${key}',this.value)">` : ''}
+        <div class="task-content-time-row">
+          <span class="task-content-form-label">開始</span>
+          <input type="time" class="task-content-time-inp" value="${taskFormState.start||''}" onchange="setTaskFormTime('${key}','start',this.value)">
+          <span class="task-content-form-label">終了</span>
+          <input type="time" class="task-content-time-inp" value="${taskFormState.end||''}" onchange="setTaskFormTime('${key}','end',this.value)">
+        </div>
+        <button class="task-content-reg-btn" onclick="registerTaskContent('${key}')">登録</button>
+      </div>`;
     }
 
-    // 選択済み路線サマリ
+    // サマリ生成（時間軸順にソート）
+    const modes2 = rec.compoundKobanModes || {};
+    const sumParts = [];
+    selKobans.forEach((n, i) => {
+      let startTime = null;
+      if (modes2[n] === 'all') {
+        const tblS = getEffectiveShiftTable(key);
+        const sS = tblS[String(n).padStart(3,'0') + '交番'];
+        if (sS) startTime = sS.start;
+      } else {
+        const savedR = rec.compoundRoutes || [];
+        const {routes: effR2} = getEffectiveRoutes(dbType, shu, n);
+        const kr = savedR.filter(r => effR2.some(er => er.no === r.no));
+        startTime = kr.map(r => r.dep_time).filter(Boolean).sort()[0] || null;
+      }
+      const label = modes2[n] === 'all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`;
+      sumParts.push({ label, startTime, cls: `compound-sum-chip compound-sum-chip-${i%COLORS}` });
+    });
+    tasks.forEach(t => {
+      sumParts.push({ label: t.name, startTime: t.start || null, cls: 'compound-sum-chip compound-sum-chip-task' });
+    });
+    sumParts.sort((a, b) => {
+      if (!a.startTime && !b.startTime) return 0;
+      if (!a.startTime) return 1;
+      if (!b.startTime) return -1;
+      return a.startTime.localeCompare(b.startTime);
+    });
+    const sumChipsHtml = sumParts.map(p => `<span class="${p.cls}">${p.label}</span>`).join('<span style="opacity:.7;font-size:11px;">＆</span>');
     const savedRoutes = rec.compoundRoutes || [];
-    const summaryHtml = savedRoutes.length > 0
-      ? `<div class="compound-selected-summary">🚌 ${savedRoutes.length}本の路線を選択中 （${savedRoutes[0].dep_time}〜${savedRoutes[savedRoutes.length-1].arr_time}）</div>`
-      : `<div class="compound-selected-summary empty">路線が選択されていません</div>`;
+    const summaryHtml = (selKobans.length > 0 || tasks.length > 0)
+      ? `<div class="compound-selected-summary">🚌 ${sumChipsHtml}</div>`
+      : `<div class="compound-selected-summary empty">交番または作業内容を選択してください</div>`;
 
-    const cTLabel = rec.trainingLabel || '';
-    const cTStart = rec.trainingStart || '';
-    const cTEnd   = rec.trainingEnd   || '';
-    const hasCTraining = !!(cTStart || cTEnd || cTLabel);
     compoundPanelHtml = `<div class="compound-panel">
-      <div style="margin-bottom:10px;">
-        <div style="font-size:10px;font-weight:800;color:#6200cc;letter-spacing:1px;margin-bottom:4px;">表示名（例：業務習得＆014交番）</div>
-        <input type="text" placeholder="業務内容を入力…" value="${rec.compoundLabel||''}" id="compoundLabel"
-          style="width:100%;background:var(--surface);border:1.5px solid #c4a0ff;border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;box-sizing:border-box;"
-          oninput="saveCompoundLabel('${key}',this.value)">
-      </div>
-      <div style="border-top:1px solid #c4a0ff;padding-top:10px;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <div style="font-size:10px;font-weight:800;color:#8a4a00;letter-spacing:1px;">📚 業務習得（任意）</div>
-          ${hasCTraining ? `<button onclick="clearTraining('${key}')" style="font-size:10px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;">クリア</button>` : ''}
+      <!-- 作業内容セクション（黄緑） -->
+      <div class="task-content-section">
+        <div class="task-content-head">
+          <span class="task-content-title">📝 作業内容</span>
+          <button class="task-content-add-btn" onclick="toggleTaskForm('${key}')">${taskFormOpen?'▲ 閉じる':'＋ 追加'}</button>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <input type="text" placeholder="内容（OJT等）" value="${cTLabel}" id="trainingLabel"
-            style="flex:1;min-width:80px;background:var(--surface);border:1.5px solid #f0c060;border-radius:8px;padding:7px 10px;color:var(--text);font-family:var(--sans);font-size:12px;outline:none;">
-          <input type="time" value="${cTStart}" id="trainingStart"
-            style="width:100px;background:var(--surface);border:1.5px solid #f0c060;border-radius:8px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;">
-          <input type="time" value="${cTEnd}" id="trainingEnd"
-            style="width:100px;background:var(--surface);border:1.5px solid #f0c060;border-radius:8px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;">
-          <button onclick="saveTraining('${key}')"
-            style="padding:7px 12px;background:#e07a00;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">登録</button>
-        </div>
+        ${taskItemsHtml}
+        ${taskFormHtml}
       </div>
+      <!-- 交番検索 -->
       <div class="compound-search-row">
         <input class="compound-search" type="text" placeholder="交番番号で絞り込み…" value="${compSearch}"
           oninput="filterCompoundKoban('${key}',this.value)">
       </div>
+      <!-- 交番グリッド（複数選択） -->
+      <div style="font-size:10px;font-weight:800;color:#5a8a96;letter-spacing:1px;margin-bottom:7px;">交番を選択（複数可）</div>
       <div class="compound-shift-list">${kobanBadges}</div>
-      ${routeListHtml}
+      <!-- 各交番の路線ブロック -->
+      ${routeBlocksHtml}
+      <!-- サマリ -->
       ${summaryHtml}
     </div>`;
   }
@@ -2603,11 +2916,44 @@ function filterCompoundKoban(dateKey, val) {
   renderInput();
 }
 
-function selectCompoundKoban(dateKey, kobanNum) {
-  if (!window._compoundState) window._compoundState = {};
-  window._compoundState.dateKey = dateKey;
-  window._compoundState.koban = window._compoundState.koban === kobanNum ? null : kobanNum;
+// 全部/一部モード切替
+function setKobanMode(dateKey, kobanNum, mode) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].compoundKobanModes) appData[dateKey].compoundKobanModes = {};
+  appData[dateKey].compoundKobanModes[kobanNum] = mode;
+  // 全部モードに切り替えた場合は路線選択を全クリア→全路線を自動セット
+  if (mode === 'all') {
+    const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&dateKey>=cfg.effectiveDate; })();
+    const d = new Date(dateKey); const dow = d.getDay();
+    const shu = dow===6?'土曜':dow===0?'日祝':'平日';
+    const {routes: effRoutes} = getEffectiveRoutes(isNew?'new':'cur', shu, kobanNum);
+    // 全部モードの交番の路線は saved から削除（全部担当は routes に入れず modes で管理）
+    if (appData[dateKey].compoundRoutes) {
+      appData[dateKey].compoundRoutes = appData[dateKey].compoundRoutes.filter(r =>
+        !effRoutes.some(er => er.no === r.no)
+      );
+    }
+  }
+  saveData(appData);
   renderInput();
+}
+
+
+// 複数交番トグル（追加/削除）
+function toggleCompoundKoban(dateKey, kobanNum) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  let kobans = appData[dateKey].compoundKobans || [];
+  const idx = kobans.indexOf(kobanNum);
+  if (idx === -1) { kobans.push(kobanNum); }
+  else { kobans.splice(idx, 1); }
+  appData[dateKey].compoundKobans = kobans;
+  saveData(appData);
+  renderInput();
+}
+
+// 旧selectCompoundKoban互換（念のため残す）
+function selectCompoundKoban(dateKey, kobanNum) {
+  toggleCompoundKoban(dateKey, kobanNum);
 }
 
 function toggleCompoundRoute(dateKey, kobanNum, shu, checkbox) {
@@ -2622,21 +2968,63 @@ function toggleCompoundRoute(dateKey, kobanNum, shu, checkbox) {
   } else {
     saved = saved.filter(r => r.no !== route.no);
   }
-  // 発車時刻順にソート
   saved.sort((a,b) => a.dep_time.localeCompare(b.dep_time));
   appData[dateKey].compoundRoutes = saved;
   saveData(appData);
-  // サマリだけ更新（再レンダリングせずチェック状態を保持）
-  const sumEl = document.querySelector('.compound-selected-summary');
-  if (sumEl) {
-    if (saved.length > 0) {
-      sumEl.className = 'compound-selected-summary';
-      sumEl.textContent = `🚌 ${saved.length}本の路線を選択中 （${saved[0].dep_time}〜${saved[saved.length-1].arr_time}）`;
-    } else {
-      sumEl.className = 'compound-selected-summary empty';
-      sumEl.textContent = '路線が選択されていません';
-    }
+}
+
+// ── 作業内容（taskContents）管理 ──
+function toggleTaskForm(dateKey) {
+  if (window._taskFormOpen === dateKey) {
+    window._taskFormOpen = null;
+  } else {
+    window._taskFormOpen = dateKey;
+    window._taskFormState = { type: '業務習得', customName: '', start: '', end: '' };
   }
+  renderInput();
+}
+
+function setTaskFormType(dateKey, type) {
+  if (!window._taskFormState) window._taskFormState = {};
+  window._taskFormState.type = type;
+  renderInput();
+}
+
+function setTaskFormCustom(dateKey, val) {
+  if (!window._taskFormState) window._taskFormState = {};
+  window._taskFormState.customName = val;
+}
+
+function setTaskFormTime(dateKey, field, val) {
+  if (!window._taskFormState) window._taskFormState = {};
+  window._taskFormState[field] = val;
+}
+
+function registerTaskContent(dateKey) {
+  const fs = window._taskFormState || {};
+  const name = fs.type === 'その他' ? (fs.customName || 'その他').trim() : fs.type;
+  const start = fs.start || '';
+  const end   = fs.end   || '';
+  if (!name) { showToast('⚠️ 作業名を入力してください'); return; }
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].taskContents) appData[dateKey].taskContents = [];
+  appData[dateKey].taskContents.push({ name, start, end });
+  // 「その他」で新名称なら今後のプリセットに追加
+  if (fs.type === 'その他' && name && !['業務習得','車庫整理'].includes(name)) {
+    if (!appData[dateKey].taskPresets) appData[dateKey].taskPresets = ['業務習得','車庫整理'];
+    if (!appData[dateKey].taskPresets.includes(name)) appData[dateKey].taskPresets.push(name);
+  }
+  window._taskFormOpen = null;
+  window._taskFormState = null;
+  saveData(appData);
+  renderInput();
+}
+
+function deleteTaskContent(dateKey, idx) {
+  if (!appData[dateKey] || !appData[dateKey].taskContents) return;
+  appData[dateKey].taskContents.splice(idx, 1);
+  saveData(appData);
+  renderInput();
 }
 
 function saveTraining(dateKey) {
@@ -2915,7 +3303,7 @@ render();
   const SESSION_KEY = 'mkx_auth_session';
   // localStorageに記憶済み、またはセッション中なら認証スキップ
   if (localStorage.getItem(LOCAL_KEY) === 'ok' || sessionStorage.getItem(SESSION_KEY) === 'ok') {
-    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('authOverlay').classList.add('hidden');
     return;
   }
   document.getElementById('authInput').focus();
@@ -2932,7 +3320,7 @@ function checkAuth() {
     } else {
       sessionStorage.setItem(SESSION_KEY, 'ok'); // セッション中のみ記憶
     }
-    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('authOverlay').classList.add('hidden');
   } else {
     document.getElementById('authError').textContent = 'パスワードが違います';
     document.getElementById('authInput').value = '';
