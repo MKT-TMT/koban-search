@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-40</title>
+<title>スケジュール管理アプリ MK-41</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -151,7 +151,7 @@
 
   .wt-label {
     padding: 8px 12px;
-    font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.5px;
     color: var(--muted);
     background: var(--surface2);
     border-bottom: 1px solid var(--border);
@@ -161,7 +161,7 @@
   .wt-section-row td {
     background: #d4f2fa;
     padding: 5px 12px;
-    font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+    font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
     color: var(--accent); text-transform: uppercase;
     border-bottom: 1px solid var(--border);
     border-top: 1px solid var(--border);
@@ -177,7 +177,7 @@
   .wt-day-header:hover { background: #d4f2fa; }
   .wt-day-header.today { background: #d4f2fa; border-bottom-color: var(--accent); border-left: 2.5px solid var(--accent); border-right: 2.5px solid var(--accent); }
   .wt-day-header.selected-col { background: #e6faef; border-bottom-color: var(--accent2); }
-  .wt-dow { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--muted); }
+  .wt-dow { font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--muted); }
   .wt-day-header.today .wt-dow   { color: var(--accent); }
   .wt-day-header.sat .wt-dow     { color: var(--sky); }
   .wt-day-header.sun .wt-dow     { color: var(--red); }
@@ -188,23 +188,23 @@
   .wt-day-header.today .wt-date-num   { color: var(--accent); }
   .wt-day-header.sat .wt-date-num     { color: var(--sky); }
   .wt-day-header.sun .wt-date-num     { color: var(--red); }
-  .wt-month-label { font-size: 9px; color: var(--muted); margin-top: 3px; }
+  .wt-month-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
   .wt-cell {
-    text-align: center; padding: 7px 5px;
+    text-align: center; padding: 8px 5px;
     border-bottom: 1px solid var(--border);
     border-right: 1px solid var(--border);
-    font-family: var(--mono); font-size: 17px; font-weight: 700;
+    font-family: var(--mono); font-size: 19px; font-weight: 700;
     vertical-align: middle; transition: background .1s; background: var(--surface);
   }
   .wt-cell:hover { background: #e0f7fd; }
   .wt-cell.today-col    { background: #d4f2fa; border-left: 2.5px solid var(--accent); border-right: 2.5px solid var(--accent); }
   .wt-cell.selected-col { background: #e6faef; }
-  .wt-cell.empty        { color: var(--muted); font-size: 15px; }
+  .wt-cell.empty        { color: var(--muted); font-size: 17px; }
 
   .wt-shift-badge {
-    display: inline-block; padding: 4px 10px; border-radius: 7px;
-    font-size: 16px; font-weight: 800; letter-spacing: 0.2px;
+    display: inline-block; padding: 5px 12px; border-radius: 7px;
+    font-size: 19px; font-weight: 800; letter-spacing: 0.2px;
   }
   .wt-shift-badge.work    { background: #c8eef8; color: #0878a0; }
   .wt-shift-badge.holiday { background: #c8f5e2; color: #0f7a48; }
@@ -212,8 +212,8 @@
   .wt-shift-badge.paid    { background: #ffd9d9; color: #c01010; }
 
   .wt-summary-badge {
-    display: inline-block; padding: 3px 8px; border-radius: 6px;
-    font-size: 14px; font-weight: 700; font-family: var(--mono); letter-spacing: 0.2px;
+    display: inline-block; padding: 4px 10px; border-radius: 6px;
+    font-size: 16px; font-weight: 700; font-family: var(--mono); letter-spacing: 0.2px;
   }
   .wt-summary-badge.ok   { background: #c8f5e2; color: #0a6e3e; }
   .wt-summary-badge.warn { background: #fff3cc; color: #8a5c00; }
@@ -233,25 +233,25 @@
     border-radius: 14px 14px 0 0;
     display: flex; align-items: center; gap: 10px;
   }
-  .day-card-icon { font-size: 17px; }
-  .day-card-title { font-size: 14px; font-weight: 700; color: var(--text); }
-  .day-card-sub { font-size: 14px; color: var(--muted); margin-left: auto; font-family: var(--mono); font-weight: 600; }
+  .day-card-icon { font-size: 19px; }
+  .day-card-title { font-size: 16px; font-weight: 700; color: var(--text); }
+  .day-card-sub { font-size: 16px; color: var(--muted); margin-left: auto; font-family: var(--mono); font-weight: 600; }
   .day-card-body { padding: 14px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   .life-row {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 9px 0; border-bottom: 1px solid var(--border);
+    padding: 10px 0; border-bottom: 1px solid var(--border);
   }
   .life-row:last-child { border-bottom: none; }
-  .life-label { font-size: 13px; color: var(--muted); }
+  .life-label { font-size: 15px; color: var(--muted); }
 
   .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
   .stat-box {
     background: var(--surface2); border-radius: 10px; padding: 10px 12px;
     border: 1px solid var(--border); text-align: center;
   }
-  .stat-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
-  .stat-val { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+  .stat-val { font-family: var(--mono); font-size: 26px; font-weight: 700; color: var(--text); }
   .stat-val.good { color: var(--green); }
   .stat-val.warn { color: var(--amber); }
   .stat-val.bad  { color: var(--red); }
@@ -264,11 +264,11 @@
     display: flex; align-items: center; gap: 10px;
     padding: 10px 0 4px;
   }
-  .date-selector-label { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .date-selector-label { font-size: 14px; color: var(--muted); font-weight: 600; white-space: nowrap; }
   .date-input-native {
     flex: 1; background: var(--surface); border: 1.5px solid var(--border2);
     border-radius: 9px; padding: 8px 12px; color: var(--text);
-    font-family: var(--mono); font-size: 14px; font-weight: 500; outline: none;
+    font-family: var(--mono); font-size: 15px; font-weight: 500; outline: none;
     box-shadow: var(--card-shadow); transition: border-color .14s;
   }
   .date-input-native:focus { border-color: var(--accent); }
@@ -283,7 +283,7 @@
     padding: 11px 16px; background: var(--surface2);
     border-bottom: 1px solid var(--border);
     border-radius: 14px 14px 0 0;
-    font-size: 13px; font-weight: 700; color: var(--text);
+    font-size: 15px; font-weight: 700; color: var(--text);
     display: flex; align-items: center; gap: 8px;
   }
   .inp-card-body { padding: 14px 16px; }
@@ -291,8 +291,8 @@
   /* special shift buttons */
   .special-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .special-btn {
-    padding: 7px 14px; border-radius: 8px; cursor: pointer;
-    font-size: 12px; font-weight: 700; border: 1.5px solid var(--border2);
+    padding: 8px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 14px; font-weight: 700; border: 1.5px solid var(--border2);
     background: var(--surface2); color: var(--muted);
     transition: all .14s;
   }
@@ -326,7 +326,7 @@
     margin-bottom: 10px;
   }
   .compound-koban-badge {
-    font-family: var(--mono); font-size: 11px; padding: 6px 8px; border-radius: 7px;
+    font-family: var(--mono); font-size: 13px; padding: 7px 8px; border-radius: 7px;
     cursor: pointer; border: 1.5px solid #c4a0ff; background: var(--surface2);
     color: #6200cc; transition: all .12s; text-align: center; font-weight: 500;
   }
@@ -338,25 +338,25 @@
     border-top: 1px solid #c4a0ff; padding-top: 10px; margin-top: 8px;
   }
   .compound-route-header {
-    font-size: 11px; font-weight: 800; color: #6200cc;
+    font-size: 13px; font-weight: 800; color: #6200cc;
     letter-spacing: 0.8px; margin-bottom: 6px;
   }
   .compound-route-item {
     display: flex; align-items: center; gap: 8px;
-    padding: 6px 0; border-bottom: 1px solid #e8d8ff; font-size: 12px;
+    padding: 7px 0; border-bottom: 1px solid #e8d8ff; font-size: 14px;
   }
   .compound-route-item:last-child { border-bottom: none; }
   .compound-route-item input[type=checkbox] {
     width: 16px; height: 16px; accent-color: #9b4dff; flex-shrink: 0;
   }
   .compound-route-label { flex: 1; font-family: var(--mono); color: var(--text); }
-  .compound-route-time { color: var(--muted); font-size: 11px; white-space: nowrap; }
+  .compound-route-time { color: var(--muted); font-size: 13px; white-space: nowrap; }
 
   /* 選択済みサマリ */
   .compound-selected-summary {
     margin-top: 10px; padding: 8px 12px;
     background: #9b4dff; border-radius: 9px; color: #fff;
-    font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;
   }
   .compound-selected-summary.empty { background: var(--border); color: var(--muted); }
 
@@ -371,20 +371,20 @@
   .shift-search {
     width: 100%; background: var(--surface2); border: 1.5px solid var(--border2);
     border-radius: 9px; padding: 9px 12px; color: var(--text);
-    font-family: var(--mono); font-size: 13px; outline: none; margin-bottom: 10px;
+    font-family: var(--mono); font-size: 15px; outline: none; margin-bottom: 10px;
     transition: border-color .14s; box-shadow: var(--card-shadow);
   }
   .shift-search:focus { border-color: var(--accent); }
   .shift-search::placeholder { color: var(--muted); }
   .shift-list {
-    max-height: 200px; overflow-y: auto;
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 5px;
+    max-height: 220px; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 5px;
   }
   .shift-list::-webkit-scrollbar { width: 4px; }
   .shift-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
   .shift-badge {
-    font-family: var(--mono); font-size: 11px; padding: 6px 8px; border-radius: 7px;
+    font-family: var(--mono); font-size: 13px; padding: 8px 8px; border-radius: 7px;
     cursor: pointer; border: 1.5px solid var(--border); background: var(--surface2);
     color: var(--muted); transition: all .12s; text-align: center; font-weight: 500;
   }
@@ -419,12 +419,12 @@
     padding: 10px 0; border-bottom: 1px solid var(--border);
   }
   .inp-life-row:last-child { border-bottom: none; }
-  .inp-life-label { font-size: 13px; color: var(--muted); }
+  .inp-life-label { font-size: 15px; color: var(--muted); }
   .inp-life-time {
     background: var(--surface2); border: 1.5px solid var(--border2);
     border-radius: 8px; padding: 6px 12px;
-    color: var(--text); font-family: var(--mono); font-size: 22px; font-weight: 700;
-    outline: none; width: 150px; transition: border-color .14s;
+    color: var(--text); font-family: var(--mono); font-size: 26px; font-weight: 700;
+    outline: none; width: 160px; transition: border-color .14s;
     box-shadow: var(--card-shadow);
   }
   .inp-life-time:focus { border-color: var(--accent); }
@@ -460,7 +460,7 @@
   .inp-interval-header {
     padding: 11px 16px; background: #c6f2de;
     border-bottom: 1px solid #8ee0b8;
-    font-size: 13px; font-weight: 700; color: #0a6e3e;
+    font-size: 15px; font-weight: 700; color: #0a6e3e;
     display: flex; align-items: center; gap: 8px;
   }
   .inp-interval-body { padding: 14px 16px; }
@@ -469,19 +469,19 @@
     padding: 9px 0; border-bottom: 1px solid #b8e8d2;
   }
   .inp-interval-row:last-child { border-bottom: none; }
-  .inp-interval-label { font-size: 12px; color: #1a7a50; font-weight: 600; flex: 1; }
+  .inp-interval-label { font-size: 14px; color: #1a7a50; font-weight: 600; flex: 1; }
   .inp-interval-right { display: flex; align-items: center; gap: 8px; }
   .inp-interval-minutes {
     background: var(--surface); border: 1.5px solid #8ee0b8;
     border-radius: 8px; padding: 6px 10px;
-    color: var(--text); font-family: var(--mono); font-size: 13px; font-weight: 500;
-    outline: none; width: 80px; text-align: center; transition: border-color .14s;
+    color: var(--text); font-family: var(--mono); font-size: 15px; font-weight: 500;
+    outline: none; width: 88px; text-align: center; transition: border-color .14s;
     box-shadow: var(--card-shadow);
   }
   .inp-interval-minutes:focus { border-color: var(--accent2); }
   .inp-interval-display {
-    font-family: var(--mono); font-size: 14px; font-weight: 700;
-    color: #0a6e3e; min-width: 52px; text-align: right;
+    font-family: var(--mono); font-size: 16px; font-weight: 700;
+    color: #0a6e3e; min-width: 56px; text-align: right;
   }
 
   /* ══════════════ EXPORT / IMPORT ══════════════ */
@@ -541,7 +541,7 @@
 
   /* ══════════════ SECTION LABEL ══════════════ */
   .section-label {
-    font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+    font-size: 12px; font-weight: 800; letter-spacing: 1.5px;
     color: var(--muted); text-transform: uppercase;
     padding: 0 2px; margin-bottom: 8px; margin-top: 18px;
   }
@@ -564,7 +564,7 @@
   }
   .calc-header {
     background: linear-gradient(135deg, #fff4df, #ffecc8);
-    font-size: 12px; font-weight: 800; color: #8a5c00;
+    font-size: 14px; font-weight: 800; color: #8a5c00;
     padding: 10px 16px; letter-spacing: 0.5px;
     border-bottom: 1px solid #ffd080;
   }
@@ -573,23 +573,23 @@
     display: flex; align-items: center; gap: 8px;
   }
   .calc-label {
-    font-size: 12px; font-weight: 700; color: var(--text);
-    min-width: 110px; flex-shrink: 0;
+    font-size: 14px; font-weight: 700; color: var(--text);
+    min-width: 120px; flex-shrink: 0;
   }
   .calc-sel {
     flex: 1; padding: 7px 8px;
     border: 1.5px solid #ffd080; border-radius: 8px;
     background: var(--surface2); color: var(--text);
-    font-size: 13px; font-family: var(--mono); font-weight: 700;
+    font-size: 15px; font-family: var(--mono); font-weight: 700;
     outline: none; cursor: pointer;
     transition: border-color .14s;
   }
   .calc-sel:focus { border-color: var(--amber); }
-  .calc-sel-wide { max-width: 120px; }
-  .calc-sel-s    { max-width: 70px; }
-  .calc-unit { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+  .calc-sel-wide { max-width: 130px; }
+  .calc-sel-s    { max-width: 80px; }
+  .calc-unit { font-size: 13px; color: var(--muted); flex-shrink: 0; }
   .calc-divider {
-    font-size: 10px; font-weight: 800; color: var(--muted);
+    font-size: 12px; font-weight: 800; color: var(--muted);
     letter-spacing: 1px; padding: 4px 0 2px; margin-top: 4px;
   }
 
@@ -609,9 +609,9 @@
     margin-top: 8px; padding: 11px 14px; border-radius: 10px;
     font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px;
   }
-  .alert-warn .alert-icon { font-size: 20px; flex-shrink: 0; }
+  .alert-warn .alert-icon { font-size: 22px; flex-shrink: 0; }
   .alert-warn .alert-main { font-size: 15px; font-weight: 800; }
-  .alert-warn .alert-sub  { font-size: 12px; font-weight: 600; margin-top: 2px; }
+  .alert-warn .alert-sub  { font-size: 13px; font-weight: 600; margin-top: 2px; }
   .alert-warn.bad  { background: #ffeaea; color: var(--red);  border: 2px solid var(--red); }
   .alert-warn.bad .alert-sub { color: #c01010; }
   .alert-warn.warn { background: #fff4df; color: var(--amber); border: 2px solid var(--amber); }
@@ -673,14 +673,14 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 0 14px;
   }
-  .stats-period-label { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .stats-period-label { font-size: 14px; font-weight: 700; color: var(--muted); }
   .stats-period-toggle {
     display: flex; background: var(--surface2); border-radius: 9px;
     border: 1.5px solid var(--border2); overflow: hidden;
   }
   .stats-period-toggle button {
-    font-family: var(--sans); font-size: 12px; font-weight: 700;
-    padding: 6px 18px; border: none; background: transparent;
+    font-family: var(--sans); font-size: 13px; font-weight: 700;
+    padding: 7px 18px; border: none; background: transparent;
     color: var(--muted); cursor: pointer; transition: all .14s;
   }
   .stats-period-toggle button.active { background: var(--accent); color: #fff; }
@@ -691,23 +691,23 @@
     border-radius: 13px; padding: 14px 10px; text-align: center;
     box-shadow: var(--card-shadow);
   }
-  .stats-avg-icon { font-size: 18px; margin-bottom: 4px; }
-  .stats-avg-label { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
-  .stats-avg-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text); }
+  .stats-avg-icon { font-size: 20px; margin-bottom: 4px; }
+  .stats-avg-label { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .stats-avg-val { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--text); }
   .stats-avg-val.ok   { color: var(--green); }
   .stats-avg-val.warn { color: var(--amber); }
   .stats-avg-val.bad  { color: var(--red); }
-  .stats-avg-sub { font-size: 9px; color: var(--muted); margin-top: 3px; }
-  .stats-avg-count { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .stats-avg-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .stats-avg-count { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
   .stats-alert {
     display: flex; align-items: center; gap: 10px;
     padding: 11px 14px; border-radius: 11px; margin-bottom: 12px;
-    font-size: 13px; font-weight: 700;
+    font-size: 14px; font-weight: 700;
   }
   .stats-alert.bad  { background: #ffeaea; color: var(--red);  border: 1.5px solid var(--red); }
   .stats-alert.warn { background: #fff4df; color: var(--amber); border: 1.5px solid var(--amber); }
-  .stats-alert-icon { font-size: 18px; flex-shrink: 0; }
+  .stats-alert-icon { font-size: 20px; flex-shrink: 0; }
 
   .stats-card {
     background: var(--surface); border: 1.5px solid var(--border);
@@ -717,7 +717,7 @@
   .stats-card-header {
     padding: 11px 16px; background: var(--surface2);
     border-bottom: 1px solid var(--border);
-    font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    font-size: 13px; font-weight: 800; letter-spacing: 1px;
     color: var(--accent); text-transform: uppercase;
     display: flex; align-items: center; gap: 8px;
   }
@@ -727,7 +727,7 @@
   .stats-bar-wrap { display: flex; align-items: flex-end; gap: 4px; height: 80px; padding: 0 0 4px; }
   .stats-bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 3px; height: 100%; justify-content: flex-end; }
   .stats-bar { border-radius: 4px 4px 0 0; width: 100%; transition: opacity .2s; }
-  .stats-bar-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); white-space: nowrap; }
+  .stats-bar-lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
 
   /* ラインチャート */
   .stats-line-wrap { width: 100%; height: 90px; position: relative; }
@@ -735,20 +735,20 @@
 
   /* 凡例 */
   .stats-legend { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
-  .stats-legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); }
+  .stats-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
   .stats-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 
   /* 集計テーブル */
   .stats-summary-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+    padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 15px;
   }
   .stats-summary-row:last-child { border-bottom: none; }
   .stats-summary-label { color: var(--muted); font-weight: 600; }
   .stats-summary-val { font-family: var(--mono); font-weight: 700; color: var(--text); }
   .stats-summary-val.accent { color: var(--accent); }
 
-  .stats-empty { text-align: center; padding: 32px 0; color: var(--muted); font-size: 14px; }
+  .stats-empty { text-align: center; padding: 32px 0; color: var(--muted); font-size: 15px; }
 
 </style>
 </head>
@@ -756,7 +756,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-40</div>
+    <div class="auth-logo">MK-41</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -771,7 +771,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-40 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-41 <span class="logo-sub">スケジュール管理</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -962,8 +962,8 @@ function buildRouteTable(routes) {
     // 発時・着時カラー＆ラッシュバッジ
     const depColor  = depRush.rush ? '#A32D2D' : 'var(--accent)';
     const arrColor  = arrRush.rush ? '#A32D2D' : 'var(--accent)';
-    const depBadge  = depRush.rush ? `<span style="background:#FCEBEB;color:#A32D2D;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:500;margin-left:3px;vertical-align:middle">${depRush.label}</span>` : '';
-    const arrBadge  = arrRush.rush ? `<span style="background:#FCEBEB;color:#A32D2D;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:500;margin-left:3px;vertical-align:middle">${arrRush.label}</span>` : '';
+    const depBadge  = depRush.rush ? `<span style="background:#FCEBEB;color:#A32D2D;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:500;margin-left:3px;vertical-align:middle">${depRush.label}</span>` : '';
+    const arrBadge  = arrRush.rush ? `<span style="background:#FCEBEB;color:#A32D2D;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:500;margin-left:3px;vertical-align:middle">${arrRush.label}</span>` : '';
 
     // 乗務バー・乗務時間カラー
     const barColor  = isRush ? '#A32D2D' : 'var(--accent)';
@@ -973,37 +973,37 @@ function buildRouteTable(routes) {
     let intHtml = '';
     if (r.interval !== null && i > 0) {
       if (r.interval < 10) {
-        intHtml = `<span style="background:#FCEBEB;color:#A32D2D;border-radius:5px;padding:1px 6px;font-size:10px;font-weight:500;margin-left:3px">折返 ${r.interval}分</span>`;
+        intHtml = `<span style="background:#FCEBEB;color:#A32D2D;border-radius:5px;padding:1px 6px;font-size:11px;font-weight:500;margin-left:3px">折返 ${r.interval}分</span>`;
       } else if (r.interval < 20) {
-        intHtml = `<span style="background:#FAEEDA;color:#633806;border-radius:5px;padding:1px 6px;font-size:10px;font-weight:500;margin-left:3px">折返 ${r.interval}分</span>`;
+        intHtml = `<span style="background:#FAEEDA;color:#633806;border-radius:5px;padding:1px 6px;font-size:11px;font-weight:500;margin-left:3px">折返 ${r.interval}分</span>`;
       } else {
-        intHtml = `<span style="color:var(--muted);font-size:10px;margin-left:3px">折返 ${r.interval}分</span>`;
+        intHtml = `<span style="color:var(--muted);font-size:11px;margin-left:3px">折返 ${r.interval}分</span>`;
       }
     }
     const hlStyle = highlighted.has(i) ? 'background:#FBEAF0;' : '';
     return `<tr style="${hlStyle}border-bottom:1px solid var(--border)">
-      <td style="font-family:var(--mono);font-size:11px;color:var(--muted);padding:6px 6px 6px 0;white-space:nowrap">${r.no}</td>
-      <td style="font-size:12px;padding:6px 4px;white-space:nowrap">${r.dep_place}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:${depColor};padding:6px 4px;white-space:nowrap">${r.dep_time}${depBadge}</td>
-      <td style="font-size:12px;padding:6px 4px;white-space:nowrap">${r.arr_place}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:${arrColor};padding:6px 4px;white-space:nowrap">${r.arr_time}${arrBadge}</td>
-      <td style="padding:6px 0 6px 4px;min-width:80px">
+      <td style="font-family:var(--mono);font-size:13px;color:var(--muted);padding:8px 6px 8px 0;white-space:nowrap">${r.no}</td>
+      <td style="font-size:13px;padding:8px 4px;white-space:nowrap">${r.dep_place}</td>
+      <td style="font-family:var(--mono);font-size:13px;color:${depColor};padding:8px 4px;white-space:nowrap">${r.dep_time}${depBadge}</td>
+      <td style="font-size:13px;padding:8px 4px;white-space:nowrap">${r.arr_place}</td>
+      <td style="font-family:var(--mono);font-size:13px;color:${arrColor};padding:8px 4px;white-space:nowrap">${r.arr_time}${arrBadge}</td>
+      <td style="padding:8px 0 8px 4px;min-width:80px">
         <div style="background:#e8f7f9;border-radius:4px;height:7px">
           <div style="background:${barColor};height:7px;border-radius:4px;width:${barW}%;min-width:3px"></div>
         </div>
-        <div style="font-size:10px;color:${rideColor};${rideFW}margin-top:2px">${r.ride_min}分${intHtml}</div>
+        <div style="font-size:11px;color:${rideColor};${rideFW}margin-top:2px">${r.ride_min}分${intHtml}</div>
       </td>
     </tr>`;
   }).join('');
   return `<div style="overflow-x:auto">
-    <table style="width:100%;border-collapse:collapse;font-size:12px">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead><tr style="border-bottom:2px solid var(--border)">
-        <th style="padding:4px 6px 4px 0;color:var(--muted);font-weight:600;text-align:left">路線</th>
-        <th style="padding:4px;color:var(--muted);font-weight:600;text-align:left">出発</th>
-        <th style="padding:4px;color:var(--muted);font-weight:600;text-align:left">発時</th>
-        <th style="padding:4px;color:var(--muted);font-weight:600;text-align:left">到着</th>
-        <th style="padding:4px;color:var(--muted);font-weight:600;text-align:left">着時</th>
-        <th style="padding:4px 0 4px 4px;color:var(--muted);font-weight:600;text-align:left">乗務</th>
+        <th style="padding:5px 6px 5px 0;color:var(--muted);font-weight:600;text-align:left">路線</th>
+        <th style="padding:5px;color:var(--muted);font-weight:600;text-align:left">出発</th>
+        <th style="padding:5px;color:var(--muted);font-weight:600;text-align:left">発時</th>
+        <th style="padding:5px;color:var(--muted);font-weight:600;text-align:left">到着</th>
+        <th style="padding:5px;color:var(--muted);font-weight:600;text-align:left">着時</th>
+        <th style="padding:5px 0 5px 4px;color:var(--muted);font-weight:600;text-align:left">乗務</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
@@ -1438,7 +1438,7 @@ function renderDay() {
   function infoRow(label, val) {
     return `<div class="life-row">
       <span class="life-label">${label}</span>
-      <span style="font-family:var(--mono);font-size:22px;font-weight:700;color:${val ? 'var(--text)' : 'var(--muted)'}">${val || '—'}</span>
+      <span style="font-family:var(--mono);font-size:26px;font-weight:700;color:${val ? 'var(--text)' : 'var(--muted)'}">${val || '—'}</span>
     </div>`;
   }
 
@@ -1505,12 +1505,12 @@ function renderDay() {
     <div class="day-card">
       <div class="day-card-body">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-          <span style="background:#fff0d4;color:#8a4a00;border-radius:9px;padding:4px 14px;font-weight:800;font-size:14px;">📚 ${tLabel}</span>
+          <span style="background:#fff0d4;color:#8a4a00;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;">📚 ${tLabel}</span>
         </div>
         <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
-          <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:20px;">${tStart||'—'}</div></div>
-          <div class="stat-box"><div class="stat-label">終了</div><div class="stat-val" style="font-size:20px;">${tEnd||'—'}</div></div>
-          <div class="stat-box"><div class="stat-label">時間</div><div class="stat-val" style="font-size:20px;">${tMin!==null?fmtMin(tMin):'—'}</div></div>
+          <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:22px;">${tStart||'—'}</div></div>
+          <div class="stat-box"><div class="stat-label">終了</div><div class="stat-val" style="font-size:22px;">${tEnd||'—'}</div></div>
+          <div class="stat-box"><div class="stat-label">時間</div><div class="stat-val" style="font-size:22px;">${tMin!==null?fmtMin(tMin):'—'}</div></div>
         </div>
       </div>
     </div>`;
@@ -1538,24 +1538,24 @@ function renderDay() {
           const nextInterval = i+1<routes.length ? routes[i+1].interval : null;
           if ((isSpecial||isLong)&&nextInterval!==null&&nextInterval<10) { highlighted.add(i); highlighted.add(i+1); }
         });
-        let tableHtml = `<table style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--mono);">
+        let tableHtml = `<table style="width:100%;border-collapse:collapse;font-size:13px;font-family:var(--mono);">
           <thead><tr style="background:var(--surface2);border-bottom:2px solid var(--border2);">
-            <th style="padding:6px 4px;text-align:left;color:var(--muted);font-weight:700;">路線番号</th>
-            <th style="padding:6px 4px;text-align:left;color:var(--muted);font-weight:700;">出発</th>
-            <th style="padding:6px 4px;text-align:left;color:var(--muted);font-weight:700;">到着</th>
-            <th style="padding:6px 4px;text-align:right;color:var(--muted);font-weight:700;">乗務</th>
-            <th style="padding:6px 4px;text-align:right;color:var(--muted);font-weight:700;">折返</th>
+            <th style="padding:7px 4px;text-align:left;color:var(--muted);font-weight:700;">路線番号</th>
+            <th style="padding:7px 4px;text-align:left;color:var(--muted);font-weight:700;">出発</th>
+            <th style="padding:7px 4px;text-align:left;color:var(--muted);font-weight:700;">到着</th>
+            <th style="padding:7px 4px;text-align:right;color:var(--muted);font-weight:700;">乗務</th>
+            <th style="padding:7px 4px;text-align:right;color:var(--muted);font-weight:700;">折返</th>
           </tr></thead><tbody>`;
         routes.forEach((r,i) => {
           const hl = highlighted.has(i);
           const danger = r.interval!==null&&r.interval<10;
           const bg = hl ? '#fff3e0' : i%2===0 ? 'var(--surface)' : 'var(--surface2)';
           tableHtml += `<tr style="background:${bg};border-bottom:1px solid var(--border);">
-            <td style="padding:6px 4px;color:#6200cc;font-weight:700;">${r.no}</td>
-            <td style="padding:6px 4px;color:var(--muted);">${r.dep_place}<br><span style="color:var(--text)">${r.dep_time}</span></td>
-            <td style="padding:6px 4px;color:var(--muted);">${r.arr_place}<br><span style="color:var(--text)">${r.arr_time}</span></td>
-            <td style="padding:6px 4px;text-align:right;">${r.ride_min}分</td>
-            <td style="padding:6px 4px;text-align:right;color:${danger?'var(--red)':'var(--muted)'};">${r.interval!==null?r.interval+'分':'—'}</td>
+            <td style="padding:7px 4px;color:#6200cc;font-weight:700;">${r.no}</td>
+            <td style="padding:7px 4px;color:var(--muted);">${r.dep_place}<br><span style="color:var(--text)">${r.dep_time}</span></td>
+            <td style="padding:7px 4px;color:var(--muted);">${r.arr_place}<br><span style="color:var(--text)">${r.arr_time}</span></td>
+            <td style="padding:7px 4px;text-align:right;">${r.ride_min}分</td>
+            <td style="padding:7px 4px;text-align:right;color:${danger?'var(--red)':'var(--muted)'};">${r.interval!==null?r.interval+'分':'—'}</td>
           </tr>`;
         });
         tableHtml += '</tbody></table>';
@@ -1576,12 +1576,12 @@ function renderDay() {
           <div class="section-label" style="margin-top:12px;">業務習得</div>
           <div style="background:#fff8ee;border:1.5px solid #f0c060;border-radius:12px;padding:12px 14px;margin-top:4px;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-              <span style="background:#fff0d4;color:#8a4a00;border-radius:8px;padding:3px 12px;font-weight:800;font-size:13px;">📚 ${tLabel||'業務習得'}</span>
+              <span style="background:#fff0d4;color:#8a4a00;border-radius:8px;padding:3px 12px;font-weight:800;font-size:15px;">📚 ${tLabel||'業務習得'}</span>
             </div>
             <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
-              <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:18px;">${tStart||'—'}</div></div>
-              <div class="stat-box"><div class="stat-label">終了</div><div class="stat-val" style="font-size:18px;">${tEnd||'—'}</div></div>
-              <div class="stat-box"><div class="stat-label">時間</div><div class="stat-val" style="font-size:18px;">${tMin!==null?fmtMin(tMin):'—'}</div></div>
+              <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:22px;">${tStart||'—'}</div></div>
+              <div class="stat-box"><div class="stat-label">終了</div><div class="stat-val" style="font-size:22px;">${tEnd||'—'}</div></div>
+              <div class="stat-box"><div class="stat-label">時間</div><div class="stat-val" style="font-size:22px;">${tMin!==null?fmtMin(tMin):'—'}</div></div>
             </div>
           </div>` : '';
         return `
@@ -1589,15 +1589,15 @@ function renderDay() {
       <div class="day-card">
         <div class="day-card-body">
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-            <span style="background:#ede0ff;color:#6200cc;border-radius:9px;padding:4px 14px;font-weight:800;font-size:14px;font-family:var(--sans)">${rec.compoundLabel||'複合業務'}</span>
-            <span style="background:var(--surface2);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:12px">${routes.length}本</span>
+            <span style="background:#ede0ff;color:#6200cc;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;font-family:var(--sans)">${rec.compoundLabel||'複合業務'}</span>
+            <span style="background:var(--surface2);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px">${routes.length}本</span>
           </div>
           <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
-            <div class="stat-box"><div class="stat-label">勤務開始</div><div class="stat-val" style="font-size:18px">${totalWorkStart||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">勤務終了</div><div class="stat-val" style="font-size:18px">${totalWorkEnd||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">合計時間</div><div class="stat-val" style="font-size:18px">${totalWorkMin!==null?fmtMin(totalWorkMin):'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">乗務合計</div><div class="stat-val" style="font-size:18px">${totalMin}分</div></div>
-            <div class="stat-box"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${dangerCount>0?'bad':''}" style="font-size:18px">${dangerCount}回</div></div>
+            <div class="stat-box"><div class="stat-label">勤務開始</div><div class="stat-val" style="font-size:22px">${totalWorkStart||'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">勤務終了</div><div class="stat-val" style="font-size:22px">${totalWorkEnd||'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">合計時間</div><div class="stat-val" style="font-size:22px">${totalWorkMin!==null?fmtMin(totalWorkMin):'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">乗務合計</div><div class="stat-val" style="font-size:22px">${totalMin}分</div></div>
+            <div class="stat-box"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${dangerCount>0?'bad':''}" style="font-size:22px">${dangerCount}回</div></div>
           </div>
           ${trainingCardHtml}
           ${tableHtml}
@@ -1616,12 +1616,12 @@ function renderDay() {
       <div class="day-card">
         <div class="day-card-body">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-            <span style="background:#fff0d4;color:#8a4a00;border-radius:9px;padding:4px 14px;font-weight:800;font-size:14px;">📚 ${tLabel}</span>
+            <span style="background:#fff0d4;color:#8a4a00;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;">📚 ${tLabel}</span>
           </div>
           <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
-            <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:20px;">${tStart||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">終了</div><div class="stat-val" style="font-size:20px;">${tEnd||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">時間</div><div class="stat-val" style="font-size:20px;">${tMin!==null?fmtMin(tMin):'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:22px;">${tStart||'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">終了</div><div class="stat-val" style="font-size:22px;">${tEnd||'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">時間</div><div class="stat-val" style="font-size:22px;">${tMin!==null?fmtMin(tMin):'—'}</div></div>
           </div>
         </div>
       </div>`;
@@ -1646,14 +1646,14 @@ function renderDay() {
     <div class="day-card">
       <div class="day-card-body">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-          <span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;font-family:var(--mono)">${info.label}</span>
-          <span style="background:var(--surface2);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:12px">${kd.shu} / ${effectiveRoutes.length}本</span>
+          <span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:4px 14px;font-weight:800;font-size:17px;font-family:var(--mono)">${info.label}</span>
+          <span style="background:var(--surface2);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px">${kd.shu} / ${effectiveRoutes.length}本</span>
         </div>
         <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
-          <div class="stat-box"><div class="stat-label">拘束時間</div><div class="stat-val" style="font-size:18px">${spanStr}</div></div>
-          <div class="stat-box"><div class="stat-label">最長乗務</div><div class="stat-val" style="font-size:18px">${kd.max_ride}分</div></div>
-          <div class="stat-box ${dangerCount10>=3?'bad':''}"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${dangerCount10>0?'bad':''}" style="font-size:18px">${dangerCount10}回</div></div>
-          <div class="stat-box"><div class="stat-label">栄/名駅/金山</div><div class="stat-val" style="font-size:18px">${eiseiCount}/${meiekiCount}/${kanayamaCount}</div></div>
+          <div class="stat-box"><div class="stat-label">拘束時間</div><div class="stat-val" style="font-size:22px">${spanStr}</div></div>
+          <div class="stat-box"><div class="stat-label">最長乗務</div><div class="stat-val" style="font-size:22px">${kd.max_ride}分</div></div>
+          <div class="stat-box ${dangerCount10>=3?'bad':''}"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${dangerCount10>0?'bad':''}" style="font-size:22px">${dangerCount10}回</div></div>
+          <div class="stat-box"><div class="stat-label">栄/名駅/金山</div><div class="stat-val" style="font-size:22px">${eiseiCount}/${meiekiCount}/${kanayamaCount}</div></div>
         </div>
         ${buildRouteTable(effectiveRoutes)}
       </div>
@@ -1711,14 +1711,14 @@ function renderKoban() {
     const danger10 = effRoutes.filter((r,i)=> i>0 && r.interval!==null && r.interval<10).length;
     inspectHtml = `
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;font-family:var(--mono)">${String(kd.koban).padStart(3,'0')}交番</span>
-      <span style="background:var(--surface2);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:12px">${kd.shu} / ${effRoutes.length}本</span>
+      <span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:4px 14px;font-weight:800;font-size:17px;font-family:var(--mono)">${String(kd.koban).padStart(3,'0')}交番</span>
+      <span style="background:var(--surface2);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px">${kd.shu} / ${effRoutes.length}本</span>
     </div>
     <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
-      <div class="stat-box"><div class="stat-label">拘束時間</div><div class="stat-val" style="font-size:18px">${spanStr}</div></div>
-      <div class="stat-box"><div class="stat-label">最長乗務</div><div class="stat-val" style="font-size:18px">${kd.max_ride}分</div></div>
-      <div class="stat-box ${danger10>=3?'bad':''}"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${danger10>0?'bad':''}" style="font-size:18px">${danger10}回</div></div>
-      <div class="stat-box"><div class="stat-label">栄/名駅/金山</div><div class="stat-val" style="font-size:18px">${eisei}/${meiki}/${kana}</div></div>
+      <div class="stat-box"><div class="stat-label">拘束時間</div><div class="stat-val" style="font-size:22px">${spanStr}</div></div>
+      <div class="stat-box"><div class="stat-label">最長乗務</div><div class="stat-val" style="font-size:22px">${kd.max_ride}分</div></div>
+      <div class="stat-box ${danger10>=3?'bad':''}"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${danger10>0?'bad':''}" style="font-size:22px">${danger10}回</div></div>
+      <div class="stat-box"><div class="stat-label">栄/名駅/金山</div><div class="stat-val" style="font-size:22px">${eisei}/${meiki}/${kana}</div></div>
     </div>
     ${buildRouteTable(effRoutes)}`;
   }
