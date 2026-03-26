@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スケジュール管理アプリ MK-45</title>
+<title>TIME TABLE MK-49</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -144,6 +144,12 @@
   .cal-koban-badge.danger { background: #ffd9d9; color: #b00000; border-color: #f0b0b0; }
   .cal-koban-badge.span   { background: var(--surface2); color: var(--muted); border-color: var(--border); }
   .cal-koban-route { font-size: 9px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+  /* IRODORI連携アイコン */
+  .cal-irodori-icons { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 2px; }
+  .cal-irodori-icon  { font-size: 11px; line-height: 1; }
+  .wt-irodori-icons  { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; margin-top: 3px; }
+  .wt-irodori-icon   { font-size: 13px; line-height: 1; }
 
   /* ══════════════ WEEK VIEW ══════════════ */
   .week-view { padding: 0 0 24px; overflow-x: auto; }
@@ -876,7 +882,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-45</div>
+    <div class="auth-logo">MK-49</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -891,7 +897,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-45 <span class="logo-sub">スケジュール管理</span></div>
+  <div class="logo">MK-49 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1168,6 +1174,29 @@ const DOW = ["日","月","火","水","木","金","土"];
 // ══════════════════════════════════════════
 const STORAGE_KEY = 'mkx_data_v2';
 
+// ── IRODORI連携：プライベートアイコンを読み取り専用で参照 ──
+const IRODORI_STORAGE_KEY = 'irodori_data_v1';
+function loadIrodoriData() {
+  // クラウドデータ優先、なければlocalStorage
+  if (window._irodoriCloudData && Object.keys(window._irodoriCloudData).length > 0) return window._irodoriCloudData;
+  try { return JSON.parse(localStorage.getItem(IRODORI_STORAGE_KEY) || '{}'); } catch { return {}; }
+}
+function getIrodoriIcons(dateKey) {
+  const d = loadIrodoriData();
+  const rec = d[dateKey];
+  if (!rec) return [];
+  const icons = [];
+  // プライベート予定のアイコン
+  if (rec.events && rec.events.length) {
+    rec.events.forEach(e => { if (e.icon) icons.push(e.icon); });
+  }
+  // 日記のアイコン
+  if (rec.diary && rec.diary.icons && rec.diary.icons.length) {
+    rec.diary.icons.forEach(d => { if (d.icon) icons.push(d.icon); });
+  }
+  return icons;
+}
+
 function loadData() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
 }
@@ -1274,8 +1303,8 @@ function getShiftInfo(dateKey) {
         if (s) { allTimes.push(s.start); allTimes.push(s.end); }
       }
     });
-    const start = allTimes.length ? allTimes.reduce((a,b) => a < b ? a : b) : null;
-    const end   = allTimes.length ? allTimes.reduce((a,b) => a > b ? a : b) : null;
+    const start = rec.compoundManualStart || (allTimes.length ? allTimes.reduce((a,b) => a < b ? a : b) : null);
+    const end   = rec.compoundManualEnd   || (allTimes.length ? allTimes.reduce((a,b) => a > b ? a : b) : null);
     // 各業務の開始時刻を取得して時間軸順にソート
     const tbl2 = getEffectiveShiftTable(dateKey);
     const parts = [];
@@ -1471,6 +1500,13 @@ function renderCalCell(year, month, day, dateKey, other, todayKey) {
     inner += `<div class="cal-shift ${sc}">${info.label}</div>`;
     if (info.start && !other) inner += `<div class="cal-time">${info.start}–${info.end}</div>`;
   }
+  // IRODORIアイコン表示
+  if (!other) {
+    const irodoriIcons = getIrodoriIcons(dateKey);
+    if (irodoriIcons.length > 0) {
+      inner += `<div class="cal-irodori-icons">${irodoriIcons.map(ic => `<span class="cal-irodori-icon">${ic}</span>`).join('')}</div>`;
+    }
+  }
   return `<div class="${cls}" onclick="selectDate('${dateKey}')">${inner}</div>`;
 }
 
@@ -1582,6 +1618,12 @@ function renderWeek() {
       ${row('🚃 出社', (d,key) => {
         const rec = appData[key];
         return rec && rec.life && rec.life.commute ? cell(key, rec.life.commute) : emptyCell(key);
+      })}
+      ${sectionRow('🌿 IRODORI')}
+      ${row('予定', (d,key) => {
+        const icons = getIrodoriIcons(key);
+        if (!icons.length) return emptyCell(key);
+        return cell(key, `<div class="wt-irodori-icons">${icons.map(ic=>`<span class="wt-irodori-icon">${ic}</span>`).join('')}</div>`);
       })}
     </tbody>
   </table></div></div>`;
@@ -1698,6 +1740,20 @@ function renderDay() {
     </div>
 
     ${(()=>{
+      const irodoriIcons = getIrodoriIcons(key);
+      if (!irodoriIcons.length) return '';
+      return `
+    <div class="section-label">🌿 IRODORIの予定</div>
+    <div class="day-card">
+      <div class="day-card-body" style="padding:14px 16px;">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+          ${irodoriIcons.map(ic => `<span style="font-size:32px;line-height:1;">${ic}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+    })()}
+
+    ${(()=>{
       if (!info || info.type !== 'work') return '';
 
       // ── 複合業務の考察（複数交番＋全部/一部対応） ──
@@ -1725,8 +1781,9 @@ function renderDay() {
             if (s) { allTimes.push(s.start); allTimes.push(s.end); }
           }
         });
-        const totalWorkStart = allTimes.length ? allTimes.reduce((a,b)=>a<b?a:b) : null;
-        const totalWorkEnd   = allTimes.length ? allTimes.reduce((a,b)=>a>b?a:b) : null;
+        const totalWorkStart = rec.compoundManualStart || (allTimes.length ? allTimes.reduce((a,b)=>a<b?a:b) : null);
+        const totalWorkEnd   = rec.compoundManualEnd   || (allTimes.length ? allTimes.reduce((a,b)=>a>b?a:b) : null);
+        const isManualTime   = !!(rec.compoundManualStart || rec.compoundManualEnd);
         const totalWorkMin   = (totalWorkStart && totalWorkEnd) ? diffMin(parseTime(totalWorkStart), parseTime(totalWorkEnd)) : null;
         const totalRideMin   = routes.reduce((s,r)=>s+(r.ride_min||0), 0);
         const dangerCount    = routes.filter(r=>r.interval!==null&&r.interval<10).length;
@@ -1832,8 +1889,8 @@ function renderDay() {
             ${allChips}
           </div>
           <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
-            <div class="stat-box"><div class="stat-label">勤務開始</div><div class="stat-val" style="font-size:20px">${totalWorkStart||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">勤務終了</div><div class="stat-val" style="font-size:20px">${totalWorkEnd||'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">勤務開始${isManualTime&&rec.compoundManualStart?'<span style="font-size:9px;background:#c8eef8;color:#0878a0;border-radius:4px;padding:1px 5px;margin-left:3px;font-weight:700;">手動</span>':''}</div><div class="stat-val" style="font-size:20px">${totalWorkStart||'—'}</div></div>
+            <div class="stat-box"><div class="stat-label">勤務終了${isManualTime&&rec.compoundManualEnd?'<span style="font-size:9px;background:#c8eef8;color:#0878a0;border-radius:4px;padding:1px 5px;margin-left:3px;font-weight:700;">手動</span>':''}</div><div class="stat-val" style="font-size:20px">${totalWorkEnd||'—'}</div></div>
             <div class="stat-box"><div class="stat-label">合計時間</div><div class="stat-val" style="font-size:20px">${totalWorkMin!==null?fmtMin(totalWorkMin):'—'}</div></div>
             <div class="stat-box"><div class="stat-label">乗務合計</div><div class="stat-val" style="font-size:20px">${totalRideMin}分</div></div>
             <div class="stat-box"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${dangerCount>0?'bad':''}" style="font-size:20px">${dangerCount}回</div></div>
@@ -2549,7 +2606,28 @@ function renderInput() {
       ? `<div class="compound-selected-summary">🚌 ${sumChipsHtml}</div>`
       : `<div class="compound-selected-summary empty">交番または作業内容を選択してください</div>`;
 
+    // 手動出社・退社時刻
+    const manualStart = rec.compoundManualStart || '';
+    const manualEnd   = rec.compoundManualEnd   || '';
+
     compoundPanelHtml = `<div class="compound-panel">
+      <!-- 手動出社・退社時刻 -->
+      <div style="background:#f0fafb;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">🕐 実際の出社・退社時刻（任意・手動優先）</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:700;color:var(--text);min-width:42px;">出社</span>
+          <input type="time" value="${manualStart}" class="custom-time-inp"
+            style="border-color:var(--accent);"
+            onchange="saveCompoundManualTime('${key}','start',this.value)">
+          <span style="font-size:12px;font-weight:700;color:var(--text);min-width:42px;">退社</span>
+          <input type="time" value="${manualEnd}" class="custom-time-inp"
+            style="border-color:var(--accent);"
+            onchange="saveCompoundManualTime('${key}','end',this.value)">
+          ${(manualStart||manualEnd)?`<button onclick="clearCompoundManualTime('${key}')"
+            style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;padding:4px 8px;">クリア</button>`:''}
+        </div>
+        ${(manualStart||manualEnd)?`<div style="font-size:11px;color:var(--accent);margin-top:6px;font-weight:600;">✅ 手動入力が有効（自動計算を上書き）</div>`:'<div style="font-size:11px;color:var(--muted);margin-top:6px;">未入力の場合は路線データから自動計算</div>'}
+      </div>
       <!-- 作業内容セクション（黄緑） -->
       <div class="task-content-section">
         <div class="task-content-head">
@@ -2890,6 +2968,44 @@ function saveCompoundLabel(dateKey, val) {
   if (!appData[dateKey]) appData[dateKey] = { life: {} };
   appData[dateKey].compoundLabel = val;
   saveData(appData);
+}
+
+function saveCompoundManualTime(dateKey, field, val) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (field === 'start') appData[dateKey].compoundManualStart = val;
+  if (field === 'end')   appData[dateKey].compoundManualEnd   = val;
+  // 逆算セクションにも反映（出社時刻が入力された場合）
+  if (field === 'start' && val) {
+    const calc = appData[dateKey].calc || {};
+    const a2c = calc.arriveToCommute !== undefined ? calc.arriveToCommute : 90;
+    const c2r = calc.commuteToReady  !== undefined ? calc.commuteToReady  : 90;
+    const r2w = calc.readyToWake     !== undefined ? calc.readyToWake     : 240;
+    const sh  = calc.sleepH          !== undefined ? calc.sleepH          : 6;
+    const sm  = calc.sleepM          !== undefined ? calc.sleepM          : 30;
+    const arriveMin  = parseTime(val);
+    if (arriveMin !== null) {
+      appData[dateKey].calc = Object.assign({}, calc, { arriveTime: val });
+      const commuteMin = (arriveMin - a2c + 1440) % 1440;
+      const readyMin   = (commuteMin - c2r + 1440) % 1440;
+      const wakeMin    = (readyMin   - r2w + 1440) % 1440;
+      const sleepMin   = (wakeMin - (sh*60+sm) + 1440) % 1440;
+      if (!appData[dateKey].life) appData[dateKey].life = {};
+      appData[dateKey].life.commute = fmtMin(commuteMin);
+      appData[dateKey].life.ready   = fmtMin(readyMin);
+      appData[dateKey].life.wake    = fmtMin(wakeMin);
+      appData[dateKey].life.sleep   = fmtMin(sleepMin);
+    }
+  }
+  saveData(appData);
+  renderInput();
+}
+
+function clearCompoundManualTime(dateKey) {
+  if (!appData[dateKey]) return;
+  delete appData[dateKey].compoundManualStart;
+  delete appData[dateKey].compoundManualEnd;
+  saveData(appData);
+  renderInput();
 }
 
 function selectAllCompoundRoutes(dateKey, kobanNum, shu, doSelect) {
@@ -3349,6 +3465,7 @@ function checkAuth() {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const docRef = doc(db, "schedules", "mkdata");
+    const irodoriDocRef = doc(db, "schedules", "irodori_mkdata");
 
     // ローカル保存中フラグ（自分の書き込みによるonSnapshotを無視）
     let isSavingLocally = false;
@@ -3369,20 +3486,40 @@ function checkAuth() {
       }
     }
 
-    // Firestoreからデータを初回取得してマージ（クラウド優先）
+    // TIMETABLEデータ と IRODORIデータ を並列取得してから render
     try {
-      const snap = await getDoc(docRef);
+      const [snap, irodoriSnap] = await Promise.all([
+        getDoc(docRef),
+        getDoc(irodoriDocRef)
+      ]);
+
+      // IRODORIデータをセット
+      if (irodoriSnap.exists()) {
+        window._irodoriCloudData = irodoriSnap.data().appData || {};
+      }
+
+      // TIMETABLEデータをセット
       if (snap.exists()) {
         const cloudData = snap.data().appData || {};
         Object.keys(cloudData).forEach(k => { appData[k] = cloudData[k]; });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-        render();
       }
       setSyncStatus('ok');
     } catch(e) {
       console.warn('初回取得エラー:', e);
       setSyncStatus('offline');
     }
+
+    // 両データ取得完了後に一度だけrender
+    render();
+
+    // リアルタイム購読（他デバイスの変更を反映）
+    onSnapshot(irodoriDocRef, (snap) => {
+      if (snap.exists()) {
+        window._irodoriCloudData = snap.data().appData || {};
+        render();
+      }
+    });
 
     // リアルタイム監視（他デバイスの変更を自動反映）
     // 自分の書き込み起因のsnapshotは無視してUI上書きを防ぐ
