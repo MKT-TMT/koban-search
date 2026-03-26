@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRODORI MK-4</title>
+<title>IRODORI MK-9</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -111,8 +111,9 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .work-pill {
   background:var(--workbg); color:#007c91;
   border:1px solid var(--workbd); border-radius:6px;
-  font-family:var(--mono); font-size:12px; font-weight:700;
-  padding:3px 8px; white-space:nowrap; flex-shrink:0;
+  font-family:var(--mono); font-size:11px; font-weight:700;
+  padding:3px 7px; white-space:nowrap; flex-shrink:0; max-width:180px;
+  overflow:hidden; text-overflow:ellipsis;
 }
 .work-pill.off   { background:#ffd9d9; color:#a01010; border-color:#f0b0b0; }
 .work-pill.paid  { background:#ffd9d9; color:#a01010; border-color:#f0b0b0; }
@@ -402,7 +403,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-4</div>
+    <div class="auth-logo">IRODORI MK-9</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -417,7 +418,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-4 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-9 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -488,11 +489,32 @@ const DOW = ['日','月','火','水','木','金','土'];
 const STORAGE_KEY = 'irodori_data_v1';
 const TT_STORAGE_KEY = 'mkx_data_v2'; // TIMETABLE側のデータキー
 
+// ── TIME TABLE共有：シフトテーブル（TIME TABLEと同一データ） ──
+const TT_SHIFT_TABLE = {
+"001交番":{"start":"06:36","end":"20:57"},"002交番":{"start":"06:23","end":"20:52"},"003交番":{"start":"06:03","end":"18:37"},"004交番":{"start":"05:46","end":"15:08"},"005交番":{"start":"05:38","end":"12:32"},"006交番":{"start":"14:57","end":"23:56"},"007交番":{"start":"12:52","end":"22:42"},"008交番":{"start":"11:47","end":"21:14"},"009交番":{"start":"06:19","end":"20:21"},"010交番":{"start":"05:59","end":"14:27"},"011交番":{"start":"14:51","end":"23:47"},"012交番":{"start":"14:03","end":"23:29"},"013交番":{"start":"13:39","end":"23:20"},"014交番":{"start":"13:55","end":"22:54"},"016交番":{"start":"14:19","end":"23:46"},"017交番":{"start":"13:58","end":"22:57"},"018交番":{"start":"13:37","end":"22:29"},"019交番":{"start":"07:53","end":"21:46"},"020交番":{"start":"06:58","end":"21:02"},"021交番":{"start":"06:30","end":"20:55"},"022交番":{"start":"06:17","end":"19:28"},"023交番":{"start":"06:05","end":"19:18"},"024交番":{"start":"05:44","end":"14:02"},"025交番":{"start":"05:40","end":"14:01"},"026交番":{"start":"11:19","end":"21:26"},"027交番":{"start":"06:40","end":"20:42"},"028交番":{"start":"06:15","end":"20:12"},"029交番":{"start":"05:46","end":"19:58"},"030交番":{"start":"05:37","end":"13:52"},"031交番":{"start":"06:22","end":"20:48"},"032交番":{"start":"05:51","end":"15:21"},"033交番":{"start":"05:50","end":"14:24"},"034交番":{"start":"05:43","end":"14:10"},"035交番":{"start":"05:40","end":"13:33"},"036交番":{"start":"12:58","end":"21:38"},"037交番":{"start":"06:38","end":"20:56"},"038交番":{"start":"06:16","end":"20:15"},"039交番":{"start":"06:07","end":"14:22"},"040交番":{"start":"05:43","end":"13:39"},"042交番":{"start":"14:37","end":"23:50"},"043交番":{"start":"14:39","end":"22:23"},"044交番":{"start":"11:39","end":"21:44"},"046交番":{"start":"06:34","end":"20:23"},"047交番":{"start":"06:26","end":"19:42"},"048交番":{"start":"05:50","end":"19:24"},"049交番":{"start":"05:37","end":"19:24"},"050交番":{"start":"05:31","end":"19:02"},
+"201交番":{"start":"08:43","end":"20:58"},"202交番":{"start":"08:17","end":"20:30"},"203交番":{"start":"06:19","end":"19:58"},"204交番":{"start":"05:44","end":"16:33"},"205交番":{"start":"05:41","end":"13:08"},"206交番":{"start":"14:52","end":"23:57"},"207交番":{"start":"11:56","end":"22:22"},"211交番":{"start":"14:03","end":"23:49"},"212交番":{"start":"13:40","end":"23:18"},"213交番":{"start":"12:33","end":"22:55"},"214交番":{"start":"12:19","end":"22:54"},"215交番":{"start":"08:56","end":"21:56"},"216交番":{"start":"10:33","end":"23:47"},"217交番":{"start":"09:40","end":"22:08"},"218交番":{"start":"09:10","end":"21:45"},"219交番":{"start":"08:00","end":"21:28"},"222交番":{"start":"06:19","end":"20:03"},"223交番":{"start":"05:53","end":"19:02"},"224交番":{"start":"05:51","end":"18:29"},"227交番":{"start":"07:30","end":"20:19"},"228交番":{"start":"06:45","end":"19:50"},"229交番":{"start":"06:23","end":"17:21"},"233交番":{"start":"05:52","end":"18:30"},"235交番":{"start":"05:43","end":"15:28"},"239交番":{"start":"07:07","end":"19:26"},"240交番":{"start":"05:43","end":"15:08"},"241交番":{"start":"12:05","end":"23:43"},"242交番":{"start":"10:44","end":"23:29"},"243交番":{"start":"09:01","end":"22:44"},"244交番":{"start":"08:40","end":"21:55"},"245交番":{"start":"08:38","end":"21:33"},"246交番":{"start":"07:16","end":"20:07"},"247交番":{"start":"05:50","end":"19:19"},"248交番":{"start":"05:35","end":"19:16"},"249交番":{"start":"05:37","end":"18:24"},"250交番":{"start":"05:31","end":"17:58"},
+"402交番":{"start":"06:38","end":"20:30"},"403交番":{"start":"06:19","end":"19:50"},"404交番":{"start":"05:44","end":"17:21"},"405交番":{"start":"05:41","end":"13:08"},"406交番":{"start":"13:54","end":"23:57"},"407交番":{"start":"11:56","end":"22:22"},"408交番":{"start":"08:00","end":"20:58"},"409交番":{"start":"06:23","end":"19:55"},"412交番":{"start":"13:40","end":"23:18"},"413交番":{"start":"12:19","end":"22:54"},"414交番":{"start":"08:43","end":"22:44"},"415交番":{"start":"08:17","end":"19:02"},"416交番":{"start":"11:05","end":"23:47"},"417交番":{"start":"10:03","end":"22:08"},"418交番":{"start":"09:10","end":"21:45"},"419交番":{"start":"08:50","end":"21:55"},"420交番":{"start":"08:38","end":"21:28"},"423交番":{"start":"06:19","end":"20:03"},"425交番":{"start":"05:53","end":"14:04"},"426交番":{"start":"09:40","end":"21:56"},"427交番":{"start":"07:30","end":"20:19"},"428交番":{"start":"06:45","end":"19:58"},"429交番":{"start":"05:51","end":"19:17"},"433交番":{"start":"05:52","end":"18:30"},"435交番":{"start":"05:43","end":"15:08"},"436交番":{"start":"11:33","end":"23:49"},"437交番":{"start":"10:33","end":"22:55"},"438交番":{"start":"08:56","end":"21:33"},"439交番":{"start":"07:07","end":"19:26"},"440交番":{"start":"05:43","end":"14:58"},"442交番":{"start":"12:03","end":"23:43"},"443交番":{"start":"10:56","end":"23:29"},"446交番":{"start":"07:16","end":"20:07"},"447交番":{"start":"05:50","end":"19:19"},"448交番":{"start":"05:35","end":"19:16"},"449交番":{"start":"05:37","end":"18:24"},"450交番":{"start":"05:31","end":"17:58"}
+};
+const TT_NEW_SHIFT_TABLE = {
+"001交番":{"start":"14:56","end":"23:58"},"002交番":{"start":"14:18","end":"23:47"},"003交番":{"start":"13:39","end":"23:20"},"004交番":{"start":"12:56","end":"22:45"},"005交番":{"start":"10:39","end":"21:46"},"006交番":{"start":"07:01","end":"20:43"},"007交番":{"start":"06:26","end":"19:43"},"008交番":{"start":"06:04","end":"19:24"},"009交番":{"start":"05:55","end":"19:04"},"010交番":{"start":"05:37","end":"17:06"},"011交番":{"start":"13:03","end":"22:45"},"012交番":{"start":"12:56","end":"22:06"},"013交番":{"start":"12:23","end":"21:48"},"014交番":{"start":"06:58","end":"21:26"},"015交番":{"start":"06:39","end":"21:18"},"016交番":{"start":"06:22","end":"20:43"},"017交番":{"start":"06:07","end":"20:21"},"018交番":{"start":"05:51","end":"17:30"},"019交番":{"start":"05:40","end":"12:53"},"020交番":{"start":"05:38","end":"12:39"},"021交番":{"start":"06:38","end":"20:56"},"022交番":{"start":"06:36","end":"20:55"},"023交番":{"start":"06:05","end":"19:06"},"024交番":{"start":"05:46","end":"17:55"},"025交番":{"start":"05:31","end":"11:38"},"026交番":{"start":"06:23","end":"20:48"},"027交番":{"start":"06:19","end":"20:25"},"028交番":{"start":"05:58","end":"18:41"},"029交番":{"start":"05:50","end":"13:53"},"030交番":{"start":"05:46","end":"13:08"},"031交番":{"start":"15:24","end":"22:29"},"032交番":{"start":"14:51","end":"23:47"},"033交番":{"start":"13:56","end":"23:31"},"034交番":{"start":"13:18","end":"22:56"},"035交番":{"start":"11:56","end":"22:23"},"036交番":{"start":"07:33","end":"21:27"},"037交番":{"start":"06:43","end":"20:28"},"038交番":{"start":"06:34","end":"20:23"},"039交番":{"start":"06:06","end":"19:25"},"040交番":{"start":"05:50","end":"17:55"},"041交番":{"start":"14:45","end":"22:59"},"042交番":{"start":"12:18","end":"21:38"},"043交番":{"start":"06:40","end":"20:59"},"046交番":{"start":"06:15","end":"20:21"},"047交番":{"start":"06:03","end":"20:00"},"048交番":{"start":"05:59","end":"19:15"},"049交番":{"start":"05:43","end":"14:04"},"050交番":{"start":"05:37","end":"13:15"},"051交番":{"start":"06:30","end":"20:52"},"054交番":{"start":"05:43","end":"13:53"},"055交番":{"start":"05:40","end":"12:41"},
+"201交番":{"start":"12:43","end":"23:57"},"202交番":{"start":"11:43","end":"23:47"},"203交番":{"start":"13:40","end":"23:18"},"204交番":{"start":"12:50","end":"22:43"},"205交番":{"start":"10:40","end":"21:43"},"206交番":{"start":"07:04","end":"20:11"},"207交番":{"start":"07:16","end":"19:51"},"208交番":{"start":"06:11","end":"19:09"},"209交番":{"start":"05:44","end":"19:00"},"210交番":{"start":"05:37","end":"17:07"},"211交番":{"start":"11:33","end":"22:48"},"212交番":{"start":"09:44","end":"22:05"},"213交番":{"start":"09:50","end":"21:55"},"214交番":{"start":"08:36","end":"21:28"},"215交番":{"start":"06:39","end":"17:15"},"216交番":{"start":"07:33","end":"20:58"},"218交番":{"start":"05:51","end":"17:25"},"219交番":{"start":"05:44","end":"14:28"},"220交番":{"start":"05:41","end":"13:09"},"221交番":{"start":"08:00","end":"20:30"},"222交番":{"start":"06:43","end":"20:57"},"223交番":{"start":"08:40","end":"19:02"},"224交番":{"start":"05:46","end":"19:07"},"225交番":{"start":"05:31","end":"14:40"},"226交番":{"start":"06:23","end":"19:26"},"227交番":{"start":"06:19","end":"20:19"},"228交番":{"start":"05:58","end":"18:31"},"229交番":{"start":"05:50","end":"14:02"},"231交番":{"start":"11:51","end":"22:08"},"232交番":{"start":"11:56","end":"23:45"},"233交番":{"start":"13:50","end":"23:32"},"234交番":{"start":"13:01","end":"22:54"},"235交番":{"start":"10:03","end":"22:24"},"236交番":{"start":"08:09","end":"21:28"},"237交番":{"start":"06:37","end":"20:16"},"238交番":{"start":"06:54","end":"20:23"},"239交番":{"start":"06:50","end":"19:19"},"240交番":{"start":"05:50","end":"17:55"},"241交番":{"start":"11:01","end":"22:56"},"242交番":{"start":"09:43","end":"21:33"},"249交番":{"start":"05:43","end":"14:18"},
+"401交番":{"start":"12:43","end":"23:57"},"402交番":{"start":"11:43","end":"23:47"},"403交番":{"start":"13:40","end":"23:18"},"404交番":{"start":"12:50","end":"22:43"},"405交番":{"start":"10:40","end":"21:43"},"406交番":{"start":"07:04","end":"20:11"},"407交番":{"start":"07:16","end":"19:51"},"408交番":{"start":"06:11","end":"19:09"},"409交番":{"start":"05:44","end":"19:00"},"410交番":{"start":"05:37","end":"17:07"},"411交番":{"start":"11:33","end":"22:48"},"412交番":{"start":"09:44","end":"22:05"},"413交番":{"start":"09:50","end":"21:55"},"414交番":{"start":"08:36","end":"21:28"},"415交番":{"start":"06:39","end":"17:15"},"416交番":{"start":"07:33","end":"20:58"},"418交番":{"start":"05:51","end":"17:31"},"419交番":{"start":"05:44","end":"14:28"},"420交番":{"start":"05:41","end":"13:09"},"421交番":{"start":"06:38","end":"20:30"},"422交番":{"start":"06:43","end":"20:57"},"423交番":{"start":"08:46","end":"19:02"},"424交番":{"start":"05:46","end":"19:07"},"425交番":{"start":"05:31","end":"14:40"},"426交番":{"start":"06:23","end":"19:26"},"427交番":{"start":"06:19","end":"20:19"},"428交番":{"start":"05:58","end":"18:31"},"429交番":{"start":"05:50","end":"14:02"},"431交番":{"start":"11:51","end":"22:08"},"432交番":{"start":"11:56","end":"23:45"},"433交番":{"start":"13:50","end":"23:32"},"434交番":{"start":"13:01","end":"22:54"},"435交番":{"start":"10:03","end":"22:24"},"436交番":{"start":"08:09","end":"21:28"},"437交番":{"start":"06:37","end":"20:16"},"438交番":{"start":"06:54","end":"20:23"},"439交番":{"start":"06:50","end":"19:19"},"440交番":{"start":"05:50","end":"17:55"},"441交番":{"start":"11:01","end":"22:56"},"442交番":{"start":"09:43","end":"21:33"},"443交番":{"start":"08:09","end":"20:59"},"449交番":{"start":"05:43","end":"14:18"}
+};
+const TT_NEW_KOBAN_KEY = 'mkx_new_koban_v1';
+function getTTEffectiveShiftTable(dateKey) {
+  try {
+    const cfg = JSON.parse(localStorage.getItem(TT_NEW_KOBAN_KEY) || 'null');
+    if (cfg && cfg.effectiveDate && dateKey >= cfg.effectiveDate) return TT_NEW_SHIFT_TABLE;
+  } catch(e) {}
+  return TT_SHIFT_TABLE;
+}
+
 function loadData() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
 }
 function loadTTData() {
-  // TIMETABLE（MK-46）のデータを読み取り専用で参照
+  // クラウドデータ優先、なければlocalStorage
+  if (window._ttCloudData && Object.keys(window._ttCloudData).length > 0) return window._ttCloudData;
   try { return JSON.parse(localStorage.getItem(TT_STORAGE_KEY) || '{}'); } catch { return {}; }
 }
 
@@ -552,14 +574,28 @@ function getTTShiftInfo(dateKey) {
     const kobans = rec.compoundKobans || [];
     const tasks  = rec.taskContents  || [];
     const modes  = rec.compoundKobanModes || {};
+    const tbl = getTTEffectiveShiftTable(dateKey);
+    let allTimes = [];
+    kobans.forEach(n => {
+      if (modes[n] === 'all') {
+        const s = tbl[String(n).padStart(3,'0') + '交番'];
+        if (s) { allTimes.push(s.start); allTimes.push(s.end); }
+      }
+    });
+    tasks.forEach(t => { if(t.start) allTimes.push(t.start); if(t.end) allTimes.push(t.end); });
+    const start = rec.compoundManualStart || (allTimes.length ? allTimes.reduce((a,b) => a < b ? a : b) : null);
+    const end   = rec.compoundManualEnd   || (allTimes.length ? allTimes.reduce((a,b) => a > b ? a : b) : null);
     const kobanLabels = kobans.map(n => modes[n]==='all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`);
     const taskLabels  = tasks.map(t => t.name);
     const label = [...kobanLabels,...taskLabels].join('＆') || '複合業務';
-    return { label, start:null, end:null, type:'work' };
+    return { label, start, end, type:'work' };
   }
-  // 通常交番（シフトテーブルは持たないので番号と時間のみ）
+  // 通常交番：シフトテーブルから時間を取得
   if (rec.shift && rec.shift.includes('交番')) {
-    return { label: rec.shift, start:null, end:null, type:'work', shiftId: rec.shift };
+    const tbl = getTTEffectiveShiftTable(dateKey);
+    const s = tbl[rec.shift];
+    if (s) return { label: rec.shift, start: s.start, end: s.end, type:'work' };
+    return { label: rec.shift, start:null, end:null, type:'work' };
   }
   return null;
 }
@@ -658,20 +694,11 @@ function renderMonth() {
         const cls = ttInfo.type === 'paid' ? 'work-pill paid' : 'work-pill off';
         workPillHtml = `<span class="${cls}">${ttInfo.label}</span>`;
       } else {
-        const ttData = loadTTData();
-        const rec = ttData[key];
-        const shiftId = rec && rec.shift ? rec.shift : '';
-        // シフトテーブルから時刻取得を試みる
-        const ttAll = loadTTData();
-        const shiftRec = ttAll[key];
-        let timeStr = '';
-        if (shiftRec && shiftRec.shift && shiftRec.shift !== 'compound') {
-          // シフトIDから時刻はTIMETABLEのlocalStorageに時刻データがあれば使用
-          // なければ番号のみ
-          const shortId = ttInfo.label.replace('交番','');
-          timeStr = shortId;
-        } else {
-          timeStr = ttInfo.label;
+        let timeStr = ttInfo.label;
+        if (ttInfo.start && ttInfo.end) {
+          timeStr = `${ttInfo.label} ${ttInfo.start}–${ttInfo.end}`;
+        } else if (ttInfo.start) {
+          timeStr = `${ttInfo.label} ${ttInfo.start}〜`;
         }
         workPillHtml = `<span class="work-pill">${timeStr}</span>`;
       }
@@ -1202,8 +1229,8 @@ function checkAuth() {
 
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
-    // IRODORIは専用ドキュメント（TIMETABLEのmkdataとは分離）
-    const docRef = doc(db, "schedules", "irodori_mkdata");
+    const docRef   = doc(db, "schedules", "irodori_mkdata");
+    const ttDocRef = doc(db, "schedules", "mkdata");
 
     let isSavingLocally = false;
 
@@ -1216,19 +1243,45 @@ function checkAuth() {
       else                     { dot.style.background='#e03535'; txt.textContent='オフライン'; }
     }
 
+    // IRODORIデータ と TTデータ を並列取得してから render
     try {
-      const snap = await getDoc(docRef);
+      const [snap, ttSnap] = await Promise.all([
+        getDoc(docRef),
+        getDoc(ttDocRef)
+      ]);
+
+      // TTデータをセット
+      if (ttSnap.exists()) {
+        window._ttCloudData = ttSnap.data().appData || {};
+      }
+
+      // IRODORIデータをセット
       if (snap.exists()) {
         const cloudData = snap.data().appData || {};
         Object.keys(cloudData).forEach(k => { appData[k] = cloudData[k]; });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-        render();
+      } else {
+        // クラウドにデータがない場合、ローカルデータをアップロード
+        if (Object.keys(appData).length > 0) {
+          await setDoc(docRef, { appData }, { merge: true });
+        }
       }
       setSyncStatus('ok');
     } catch(e) {
       console.warn('IRODORI初回取得エラー:', e);
       setSyncStatus('offline');
     }
+
+    // 両データ取得完了後に一度だけrender
+    render();
+
+    // リアルタイム購読（他デバイスの変更を反映）
+    onSnapshot(ttDocRef, (snap) => {
+      if (snap.exists()) {
+        window._ttCloudData = snap.data().appData || {};
+        render();
+      }
+    });
 
     onSnapshot(docRef, (snap) => {
       if (isSavingLocally) return;
