@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-49</title>
+<title>TIME TABLE MK-50</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -882,7 +882,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-49</div>
+    <div class="auth-logo">MK-50</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -897,7 +897,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-49 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-50 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -2161,7 +2161,7 @@ function renderKoban() {
         <div style="display:flex;gap:8px;margin-bottom:12px">${shuBtns}</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:13px;color:var(--muted);white-space:nowrap">交番選択</span>
-          <select onchange="window._kobanState.key=this.value;renderKoban()"
+          <select onchange="window._kobanState.key=this.value;renderKoban()" oninput="window._kobanState.key=this.value;renderKoban()"
             style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--mono);background:var(--surface);color:var(--text)">
             ${kobanOptions}
           </select>
@@ -2177,7 +2177,7 @@ function renderKoban() {
         <div style="display:flex;gap:6px;margin-bottom:10px">${editDbBtns}</div>
         <div style="display:flex;gap:6px;margin-bottom:10px">${editShuBtns}</div>
         <div style="margin-bottom:12px">
-          <select onchange="window._kobanState.editKobanNum=this.value;window._kobanState.editOpenNo=null;renderKoban()"
+          <select onchange="window._kobanState.editKobanNum=this.value;window._kobanState.editOpenNo=null;renderKoban()" oninput="window._kobanState.editKobanNum=this.value;window._kobanState.editOpenNo=null;renderKoban()"
             style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--mono);background:var(--surface);color:var(--text)">
             ${kobanSelectOpts}
           </select>
@@ -2770,39 +2770,39 @@ function renderInput() {
     <div class="calc-body">
       <div class="calc-row">
         <span class="calc-label">🏢 会社到着</span>
-        <select class="calc-sel calc-sel-wide" id="calc_arrive" onchange="onCalcChange('${key}')">
+        <select class="calc-sel calc-sel-wide" id="calc_arrive" onchange="onCalcChange('${key}')" oninput="onCalcChange('${key}')">
           ${arriveOpts}
         </select>
       </div>
       <div class="calc-divider">▼ 各区間の所要時間</div>
       <div class="calc-row">
         <span class="calc-label">到着 → 出社</span>
-        <select class="calc-sel" id="calc_a2c" onchange="onCalcChange('${key}')">
+        <select class="calc-sel" id="calc_a2c" onchange="onCalcChange('${key}')" oninput="onCalcChange('${key}')">
           ${minOpts(DEF_ARRIVE_TO_COMMUTE)}
         </select>
         <span class="calc-unit">分</span>
       </div>
       <div class="calc-row">
         <span class="calc-label">出社 → 準備完了</span>
-        <select class="calc-sel" id="calc_c2r" onchange="onCalcChange('${key}')">
+        <select class="calc-sel" id="calc_c2r" onchange="onCalcChange('${key}')" oninput="onCalcChange('${key}')">
           ${minOpts(DEF_COMMUTE_TO_READY)}
         </select>
         <span class="calc-unit">分</span>
       </div>
       <div class="calc-row">
         <span class="calc-label">準備完了 → 起床</span>
-        <select class="calc-sel" id="calc_r2w" onchange="onCalcChange('${key}')">
+        <select class="calc-sel" id="calc_r2w" onchange="onCalcChange('${key}')" oninput="onCalcChange('${key}')">
           ${minOpts(DEF_READY_TO_WAKE)}
         </select>
         <span class="calc-unit">分</span>
       </div>
       <div class="calc-row">
         <span class="calc-label">睡眠時間</span>
-        <select class="calc-sel calc-sel-s" id="calc_sh" onchange="onCalcChange('${key}')">
+        <select class="calc-sel calc-sel-s" id="calc_sh" onchange="onCalcChange('${key}')" oninput="onCalcChange('${key}')">
           ${sleepHOpts}
         </select>
         <span class="calc-unit">時間</span>
-        <select class="calc-sel calc-sel-s" id="calc_sm" onchange="onCalcChange('${key}')">
+        <select class="calc-sel calc-sel-s" id="calc_sm" onchange="onCalcChange('${key}')" oninput="onCalcChange('${key}')">
           ${sleepMOpts}
         </select>
         <span class="calc-unit">分</span>
