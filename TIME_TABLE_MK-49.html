@@ -61,8 +61,8 @@
     border: 1px solid var(--border);
   }
   .tab {
-    font-family: var(--sans); font-size: 12px; font-weight: 600;
-    padding: 5px 14px; border-radius: 7px; cursor: pointer;
+    font-family: var(--sans); font-size: 15px; font-weight: 700;
+    padding: 9px 18px; border-radius: 7px; cursor: pointer;
     border: none; background: transparent; color: var(--muted);
     transition: all .16s ease; letter-spacing: 0.3px;
   }
@@ -77,15 +77,15 @@
   .nav-title { font-size: 19px; font-weight: 700; color: var(--text); }
   .nav-btns { display: flex; gap: 6px; }
   .nav-btn {
-    height: 34px; border-radius: 8px;
+    height: 44px; border-radius: 8px;
     border: 1px solid var(--border2);
-    background: var(--surface); color: var(--text); cursor: pointer; font-size: 15px;
+    background: var(--surface); color: var(--text); cursor: pointer; font-size: 20px;
     display: flex; align-items: center; justify-content: center;
-    transition: all .14s; user-select: none; padding: 0 10px;
+    transition: all .14s; user-select: none; padding: 0 14px;
     box-shadow: var(--card-shadow);
   }
   .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: #e0f7fd; }
-  .today-btn { font-size: 11px; font-family: var(--sans); font-weight: 600; letter-spacing: 0.4px; }
+  .today-btn { font-size: 14px; font-family: var(--sans); font-weight: 700; letter-spacing: 0.4px; }
 
   /* ══════════════ MONTH VIEW ══════════════ */
   .month-grid { padding: 0 14px 20px; }
@@ -299,8 +299,8 @@
   /* special shift buttons */
   .special-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .special-btn {
-    padding: 8px 16px; border-radius: 8px; cursor: pointer;
-    font-size: 14px; font-weight: 700; border: 1.5px solid var(--border2);
+    padding: 12px 18px; border-radius: 10px; cursor: pointer;
+    font-size: 16px; font-weight: 700; border: 1.5px solid var(--border2);
     background: var(--surface2); color: var(--muted);
     transition: all .14s;
   }
@@ -682,15 +682,14 @@
   /* ══════════════ REVERSE CALC SECTION ══════════════ */
   .calc-section {
     background: var(--surface); border-radius: 14px;
-    border: 1.5px solid #ffd080;
-    box-shadow: 0 2px 10px rgba(224,138,16,.12);
+    border: 1.5px solid #b8e08a;
     overflow: hidden; margin-bottom: 20px;
   }
   .calc-header {
-    background: linear-gradient(135deg, #fff4df, #ffecc8);
-    font-size: 14px; font-weight: 800; color: #8a5c00;
+    background: #edfad0;
+    font-size: 14px; font-weight: 800; color: #3a6e10;
     padding: 10px 16px; letter-spacing: 0.5px;
-    border-bottom: 1px solid #ffd080;
+    border-bottom: 1px solid #b8e08a;
   }
   .calc-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
   .calc-row {
@@ -702,20 +701,73 @@
   }
   .calc-sel {
     flex: 1; padding: 7px 8px;
-    border: 1.5px solid #ffd080; border-radius: 8px;
-    background: var(--surface2); color: var(--text);
+    border: 1.5px solid #b8e08a; border-radius: 8px;
+    background: #edfad0; color: #3a6e10;
     font-size: 15px; font-family: var(--mono); font-weight: 700;
     outline: none; cursor: pointer;
     transition: border-color .14s;
   }
-  .calc-sel:focus { border-color: var(--amber); }
+  .calc-sel:focus { border-color: #7ab830; }
   .calc-sel-wide { max-width: 130px; }
   .calc-sel-s    { max-width: 80px; }
-  .calc-unit { font-size: 13px; color: var(--muted); flex-shrink: 0; }
+  .calc-unit { font-size: 13px; color: #5a9e1a; flex-shrink: 0; font-weight: 700; }
   .calc-divider {
     font-size: 12px; font-weight: 800; color: var(--muted);
     letter-spacing: 1px; padding: 4px 0 2px; margin-top: 4px;
   }
+
+  /* 生活時刻＋逆算 2列レイアウト */
+  .life-calc-card {
+    background: var(--surface); border: 1.5px solid #b8e08a;
+    border-radius: 14px; overflow: hidden; margin-bottom: 12px;
+  }
+  .life-calc-header {
+    background: #edfad0; padding: 10px 14px;
+    font-size: 12px; font-weight: 800; color: #3a6e10;
+    border-bottom: 1.5px solid #b8e08a; letter-spacing: 0.5px;
+    display: flex; gap: 0;
+  }
+  .life-calc-col-hd {
+    flex: 1; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    text-align: center; padding: 6px 0;
+  }
+  .life-calc-col-hd.left  { color: var(--muted); border-right: 1px solid #b8e08a; }
+  .life-calc-col-hd.right { color: #3a6e10; }
+  .life-calc-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+  }
+  .life-calc-left  { border-right: 1px solid #b8e08a; }
+  .life-calc-right { background: #fff; }
+  .lc-row {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 10px 12px; border-bottom: 1px solid #d8efc0; min-height: 66px;
+  }
+  .lc-row:last-child { border-bottom: none; }
+  .lc-label { font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+  .lc-inp {
+    font-family: var(--mono); font-size: 15px; font-weight: 700;
+    border: 1.5px solid #b8e08a; border-radius: 8px;
+    padding: 6px 8px; color: var(--text); background: var(--surface);
+    outline: none; width: 100%;
+  }
+  .lc-inp:focus { border-color: #7ab830; }
+  .lc-calc-row {
+    display: flex; flex-direction: column; justify-content: center; gap: 5px;
+    padding: 10px 12px; border-bottom: 1px solid #d8efc0; min-height: 66px;
+    background: #fff;
+  }
+  .lc-calc-row:last-child { border-bottom: none; }
+  .lc-calc-label { font-size: 11px; font-weight: 800; color: #5a9e1a; letter-spacing: 0.5px; }
+  .lc-calc-inner { display: flex; align-items: center; gap: 5px; }
+  .lc-calc-sel {
+    font-family: var(--mono); font-size: 14px; font-weight: 700;
+    border: 1.5px solid #b8e08a; border-radius: 7px;
+    padding: 5px 6px; background: #edfad0; color: #3a6e10; outline: none;
+  }
+  .lc-calc-sel:focus { border-color: #7ab830; }
+  .lc-calc-sel-wide { width: 80px; }
+  .lc-calc-sel-s    { width: 50px; }
+  .lc-calc-unit { font-size: 12px; color: #5a9e1a; font-weight: 700; }
 
   /* ══════════════ TOAST ══════════════ */
   .toast {
@@ -1731,14 +1783,58 @@ function renderDay() {
 
     ${(()=>{
       if (!info || info.type !== 'work') return '';
-      if (rec.shift === 'compound' || rec.shift === 'training' || rec.shift === 'custom') return '';
-      const tbl = getEffectiveShiftTable(key);
-      const entry = tbl[rec.shift];
-      if (!entry) return '';
       const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
       const dbType = isNew ? 'new' : 'cur';
       const d = new Date(key); const dow = d.getDay();
       const shu = dow===6?'土曜':dow===0?'日祝':'平日';
+
+      // ── 複合業務 ──
+      if (rec.shift === 'compound') {
+        const kobans = rec.compoundKobans || [];
+        const modes  = rec.compoundKobanModes || {};
+        const pd     = rec.compoundPartialData || {};
+        if (!kobans.length) return '';
+        let blocksHtml = '';
+        kobans.forEach(n => {
+          const isAll = modes[n] !== 'part';
+          const {routes: allRoutes} = getEffectiveRoutes(dbType, shu, n);
+          let displayRoutes = [];
+          if (isAll) {
+            displayRoutes = allRoutes;
+          } else {
+            const tripNos = (pd[n] && pd[n].tripNos) || [];
+            displayRoutes = tripNos.map(no => allRoutes.find(r => r.no === no)).filter(Boolean);
+          }
+          if (!displayRoutes.length) return;
+          const modeLabel = isAll ? '全部' : '一部';
+          const codeStr = String(n).padStart(3,'0');
+          const rowsHtml = displayRoutes.map(r => `
+            <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+              <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border:1px solid var(--border);border-radius:4px;padding:2px 7px;white-space:nowrap;">${r.no}</span>
+              <span style="font-size:12px;color:var(--text);flex:1;min-width:100px;">${r.dep_place} → ${r.arr_place}</span>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;">${r.dep_time} dep › ${r.arr_time} arr</span>
+            </div>`).join('');
+          blocksHtml += `
+            <div style="margin-bottom:10px;">
+              <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">CODE ${codeStr}（${modeLabel}）</div>
+              ${rowsHtml}
+            </div>`;
+        });
+        if (!blocksHtml) return '';
+        return `
+    <div class="section-label">TRIP</div>
+    <div class="day-card">
+      <div class="day-card-body" style="padding:10px 16px;">
+        ${blocksHtml}
+      </div>
+    </div>`;
+      }
+
+      // ── 通常シフト ──
+      if (rec.shift === 'training' || rec.shift === 'custom') return '';
+      const tbl = getEffectiveShiftTable(key);
+      const entry = tbl[rec.shift];
+      if (!entry) return '';
       const kobanNum = parseInt(rec.shift.replace('交番','').trim(), 10);
       const {routes} = getEffectiveRoutes(dbType, shu, kobanNum);
       if (!routes || !routes.length) return '';
@@ -2269,32 +2365,9 @@ function renderInput() {
     { field:'ready',   label:'🚿 準備完了' },
     { field:'commute', label:'🚃 出社' },
   ];
-  let lifeHtml = '';
 
-  // 就寝行
-  const sleepVal = life.sleep || '';
-  lifeHtml += `<div class="inp-life-row">
-    <span class="inp-life-label">💤 就寝</span>
-    <input type="time" value="${sleepVal}" class="inp-life-time" id="life_sleep"
-      onchange="onLifeChange('${key}','sleep',this.value)"
-      onfocus="this.style.borderColor='var(--accent)'"
-      onblur="this.style.borderColor='var(--border2)'">
-  </div>`;
-
-  lifeFields.forEach(f => {
-    const val = life[f.field] || '';
-    lifeHtml += `<div class="inp-life-row">
-      <span class="inp-life-label">${f.label}</span>
-      <input type="time" value="${val}" class="inp-life-time" id="life_${f.field}"
-        onchange="onLifeChange('${key}','${f.field}',this.value)"
-        onfocus="this.style.borderColor='var(--accent)'"
-        onblur="this.style.borderColor='var(--border2)'">
-    </div>`;
-  });
-
-  // ── 逆算セクション ──
+  // ── 逆算値 ──
   const calc = rec.calc || {};
-  // デフォルト値
   const DEF_ARRIVE_TO_COMMUTE = calc.arriveToCommute !== undefined ? calc.arriveToCommute : 90;
   const DEF_COMMUTE_TO_READY  = calc.commuteToReady  !== undefined ? calc.commuteToReady  : 90;
   const DEF_READY_TO_WAKE     = calc.readyToWake     !== undefined ? calc.readyToWake     : 240;
@@ -2302,7 +2375,7 @@ function renderInput() {
   const DEF_SLEEP_M           = calc.sleepM          !== undefined ? calc.sleepM          : 30;
   const DEF_ARRIVE            = calc.arriveTime      !== undefined ? calc.arriveTime      : '';
 
-  // 到着時刻プルダウン（0:00〜23:55 5分刻み）
+  // 到着時刻プルダウン
   let arriveOpts = '<option value="">--</option>';
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 5) {
@@ -2310,62 +2383,83 @@ function renderInput() {
       arriveOpts += `<option value="${v}"${DEF_ARRIVE===v?' selected':''}>${v}</option>`;
     }
   }
-
-  // 分プルダウン（0〜300、5分刻み）
   function minOpts(cur) {
     let o = '';
     for (let i = 0; i <= 300; i += 5) o += `<option value="${i}"${cur===i?' selected':''}>${i}</option>`;
     return o;
   }
-  // 睡眠時間：時間（1〜12）＋分（0〜55、5分刻み）
   let sleepHOpts = '';
   for (let i = 1; i <= 12; i++) sleepHOpts += `<option value="${i}"${DEF_SLEEP_H===i?' selected':''}>${i}</option>`;
   let sleepMOpts = '';
   for (let i = 0; i < 60; i += 5) sleepMOpts += `<option value="${i}"${DEF_SLEEP_M===i?' selected':''}>${i}</option>`;
 
-  const calcSectionHtml = `
-  <div class="calc-section">
-    <div class="calc-header">🏢 逆算設定（会社到着時刻から逆算）</div>
-    <div class="calc-body">
-      <div class="calc-row">
-        <span class="calc-label">🏢 会社到着</span>
-        <select class="calc-sel calc-sel-wide" id="calc_arrive" onchange="onCalcChange('${key}')">
-          ${arriveOpts}
-        </select>
+  // 左列（時刻入力）の行データ
+  const leftRows = [
+    { id:'life_sleep',   field:'sleep',   label:'💤 就寝',    val: life.sleep   || '' },
+    { id:'life_wake',    field:'wake',    label:'☀️ 起床',    val: life.wake    || '' },
+    { id:'life_ready',   field:'ready',   label:'🚿 準備完了', val: life.ready   || '' },
+    { id:'life_commute', field:'commute', label:'🚃 出社',    val: life.commute || '' },
+    { id:'calc_arrive',  field:null,      label:'🏢 会社到着', val: DEF_ARRIVE,  isSelect: true },
+  ];
+  const leftHtml = leftRows.map(r => `
+    <div class="lc-row">
+      <div class="lc-label">${r.label}</div>
+      ${r.isSelect
+        ? `<select class="lc-inp" id="${r.id}" onchange="onCalcChange('${key}')">
+             ${arriveOpts}
+           </select>`
+        : `<input type="time" value="${r.val}" class="lc-inp" id="${r.id}"
+             onchange="onLifeChange('${key}','${r.field}',this.value)"
+             onfocus="this.style.borderColor='#7ab830'"
+             onblur="this.style.borderColor='#b8e08a'">`
+      }
+    </div>`).join('');
+
+  // 右列（逆算設定）の行
+  const rightHtml = `
+    <div class="lc-calc-row">
+      <div class="lc-calc-label">睡眠時間</div>
+      <div class="lc-calc-inner">
+        <select class="lc-calc-sel lc-calc-sel-s" id="calc_sh" onchange="onCalcChange('${key}')">${sleepHOpts}</select>
+        <span class="lc-calc-unit">時間</span>
+        <select class="lc-calc-sel lc-calc-sel-s" id="calc_sm" onchange="onCalcChange('${key}')">${sleepMOpts}</select>
+        <span class="lc-calc-unit">分</span>
       </div>
-      <div class="calc-divider">▼ 各区間の所要時間</div>
-      <div class="calc-row">
-        <span class="calc-label">到着 → 出社</span>
-        <select class="calc-sel" id="calc_a2c" onchange="onCalcChange('${key}')">
-          ${minOpts(DEF_ARRIVE_TO_COMMUTE)}
-        </select>
-        <span class="calc-unit">分</span>
+    </div>
+    <div class="lc-calc-row">
+      <div class="lc-calc-label">起床 → 準備完了</div>
+      <div class="lc-calc-inner">
+        <select class="lc-calc-sel lc-calc-sel-wide" id="calc_r2w" onchange="onCalcChange('${key}')">${minOpts(DEF_READY_TO_WAKE)}</select>
+        <span class="lc-calc-unit">分</span>
       </div>
-      <div class="calc-row">
-        <span class="calc-label">出社 → 準備完了</span>
-        <select class="calc-sel" id="calc_c2r" onchange="onCalcChange('${key}')">
-          ${minOpts(DEF_COMMUTE_TO_READY)}
-        </select>
-        <span class="calc-unit">分</span>
+    </div>
+    <div class="lc-calc-row">
+      <div class="lc-calc-label">準備完了 → 出社</div>
+      <div class="lc-calc-inner">
+        <select class="lc-calc-sel lc-calc-sel-wide" id="calc_c2r" onchange="onCalcChange('${key}')">${minOpts(DEF_COMMUTE_TO_READY)}</select>
+        <span class="lc-calc-unit">分</span>
       </div>
-      <div class="calc-row">
-        <span class="calc-label">準備完了 → 起床</span>
-        <select class="calc-sel" id="calc_r2w" onchange="onCalcChange('${key}')">
-          ${minOpts(DEF_READY_TO_WAKE)}
-        </select>
-        <span class="calc-unit">分</span>
+    </div>
+    <div class="lc-calc-row">
+      <div class="lc-calc-label">出社 → 会社到着</div>
+      <div class="lc-calc-inner">
+        <select class="lc-calc-sel lc-calc-sel-wide" id="calc_a2c" onchange="onCalcChange('${key}')">${minOpts(DEF_ARRIVE_TO_COMMUTE)}</select>
+        <span class="lc-calc-unit">分</span>
       </div>
-      <div class="calc-row">
-        <span class="calc-label">睡眠時間</span>
-        <select class="calc-sel calc-sel-s" id="calc_sh" onchange="onCalcChange('${key}')">
-          ${sleepHOpts}
-        </select>
-        <span class="calc-unit">時間</span>
-        <select class="calc-sel calc-sel-s" id="calc_sm" onchange="onCalcChange('${key}')">
-          ${sleepMOpts}
-        </select>
-        <span class="calc-unit">分</span>
-      </div>
+    </div>
+    <div class="lc-calc-row">
+      <div class="lc-calc-label" style="color:var(--muted);font-size:10px;">会社到着時刻は左列で設定</div>
+    </div>`;
+
+  const lifeCalcHtml = `
+  <div class="life-calc-card">
+    <div class="life-calc-header">
+      <div class="life-calc-col-hd left">🕐 時刻入力</div>
+      <div class="life-calc-col-hd right">🔁 逆算設定</div>
+    </div>
+    <div class="life-calc-grid">
+      <div class="life-calc-left">${leftHtml}</div>
+      <div class="life-calc-right">${rightHtml}</div>
     </div>
   </div>`;
 
@@ -2389,14 +2483,8 @@ function renderInput() {
       </div>
     </div>
 
-    <div class="section-label">生活時刻の記録</div>
-    <div class="inp-card">
-      <div class="inp-card-header">🕐 時刻入力</div>
-      <div class="inp-card-body">${lifeHtml}</div>
-    </div>
-
-    <div class="section-label">逆算</div>
-    ${calcSectionHtml}
+    <div class="section-label">生活時刻の記録 ＆ 逆算設定</div>
+    ${lifeCalcHtml}
   </div>`;
 }
 
