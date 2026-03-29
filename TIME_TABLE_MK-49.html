@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-48</title>
+<title>TIME TABLE MK-58</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -126,15 +126,17 @@
   .cal-cell.today.sun .cal-date { color: #fff; }
 
   .cal-shift {
-    font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
-    padding: 2px 5px; border-radius: 4px; display: inline-block;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
+    padding: 2px 5px; border-radius: 4px; display: block;
     margin-bottom: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .cal-shift.work    { background: #c8eef8; color: #0878a0; }
-  .cal-shift.holiday { background: #c8f5e2; color: #0f7a48; }
-  .cal-shift.off     { background: #ffefd4; color: #b86800; }
+  .cal-shift.holiday { background: #ffd9d9; color: #c01010; }
+  .cal-shift.off     { background: #ffd9d9; color: #c01010; }
   .cal-shift.paid    { background: #ffd9d9; color: #c01010; }
-  .cal-time { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .cal-shift.task    { background: #d4f5e5; color: #0a5e2a; }
+  .cal-shift.task2   { background: #fff3cc; color: #8a5c00; }
+  .cal-time { font-family: var(--mono); font-size: 11px; color: var(--muted); }
   .cal-koban-info { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 2px; }
   .cal-koban-badge {
     font-family: var(--mono); font-size: 9px; padding: 1px 5px;
@@ -213,8 +215,8 @@
     font-size: 19px; font-weight: 800; letter-spacing: 0.2px;
   }
   .wt-shift-badge.work    { background: #c8eef8; color: #0878a0; }
-  .wt-shift-badge.holiday { background: #c8f5e2; color: #0f7a48; }
-  .wt-shift-badge.off     { background: #ffefd4; color: #b86800; }
+  .wt-shift-badge.holiday { background: #ffd9d9; color: #c01010; }
+  .wt-shift-badge.off     { background: #ffd9d9; color: #c01010; }
   .wt-shift-badge.paid    { background: #ffd9d9; color: #c01010; }
 
   .wt-summary-badge {
@@ -742,8 +744,8 @@
   /* ══════════════ RESPONSIVE ══════════════ */
   @media (max-width: 600px) {
     .cal-cell { min-height: 58px; padding: 4px; }
-    .cal-shift { font-size: 10px; }
-    .cal-time { font-size: 9px; }
+    .cal-shift { font-size: 11px; }
+    .cal-time { font-size: 10px; }
     .nav-title { font-size: 17px; }
     .tab { padding: 5px 10px; font-size: 11px; }
   }
@@ -882,7 +884,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-47</div>
+    <div class="auth-logo">MK-58</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -897,7 +899,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-47 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-58 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -912,7 +914,6 @@
     <button class="tab" onclick="switchView('day')">日</button>
     <button class="tab" onclick="switchView('input')">入力</button>
     <button class="tab" onclick="switchView('stats')">📊</button>
-    <button class="tab" onclick="switchView('koban')">交番</button>
   </div>
 </div>
 
@@ -948,33 +949,6 @@
   </div>
 </div>
 
-<!-- 新交番管理モーダル -->
-<div class="modal-overlay" id="newKobanModal" onclick="if(event.target===this)closeModal('newKobanModal')">
-  <div class="modal-box" style="width:min(96vw,560px)">
-    <div class="modal-title">🔄 新交番管理</div>
-    <div id="nkStatus" style="margin-bottom:10px;font-size:12px;"></div>
-
-    <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">施行日（この日以降に新交番を使用）</div>
-    <input type="date" id="nkEffectiveDate" style="width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:9px;font-size:14px;font-family:var(--sans);background:var(--surface2);color:var(--text);outline:none;box-sizing:border-box;margin-bottom:14px;">
-
-    <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">使用中の新交番テーブル</div>
-    <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
-      新交番テーブルはアプリに組み込み済みです（平日51件・土曜42件・日祝41件）。<br>
-      施行日を設定するだけで自動的に切り替わります。
-    </div>
-    <div id="nkTablePreview" style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:11px;font-family:var(--mono);max-height:120px;overflow-y:auto;margin-bottom:14px;color:var(--muted);">
-      平日: 001〜055番台 （51件）<br>
-      土曜: 401〜455番台 （42件）<br>
-      日祝: 201〜255番台 （41件）
-    </div>
-
-    <div class="modal-btns">
-      <button class="modal-btn modal-btn-green" onclick="saveNewKoban()">✅ 施行日を保存</button>
-      <button class="modal-btn" style="background:#ffeaea;color:#c01010;border:none;font-weight:700;" onclick="clearNewKoban()">🗑️ 設定を削除</button>
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal('newKobanModal')">閉じる</button>
-    </div>
-  </div>
-</div>
 
 <div class="nav-row">
   <div class="nav-title" id="navTitle"></div>
@@ -1289,18 +1263,21 @@ function getShiftInfo(dateKey) {
   if (!rec || !rec.shift) return null;
   if (rec.shift === 'custom') return { label: rec.customLabel || 'カスタム', start: rec.customStart, end: rec.customEnd, type: 'work' };
   if (rec.shift === 'compound') {
-    const routes = rec.compoundRoutes || [];
     const tasks  = rec.taskContents  || [];
     const modes  = rec.compoundKobanModes || {};
     const kobans = rec.compoundKobans || [];
-    let allTimes = routes.map(r => r.dep_time).concat(routes.map(r => r.arr_time))
-      .concat(tasks.map(t => t.start)).concat(tasks.map(t => t.end)).filter(Boolean);
-    // 全部モードの交番はシフトテーブルの start/end を時刻計算に使用
+    const partialData = rec.compoundPartialData || {};
+    let allTimes = tasks.map(t => t.start).concat(tasks.map(t => t.end)).filter(Boolean);
+    // 全部モードはシフトテーブルの start/end、一部モードは手入力データを使用
     kobans.forEach(n => {
       if (modes[n] === 'all') {
         const tbl = getEffectiveShiftTable(dateKey);
         const s = tbl[String(n).padStart(3,'0') + '交番'];
         if (s) { allTimes.push(s.start); allTimes.push(s.end); }
+      } else {
+        const pd = partialData[n] || {};
+        if (pd.start) allTimes.push(pd.start);
+        if (pd.end) allTimes.push(pd.end);
       }
     });
     const start = rec.compoundManualStart || (allTimes.length ? allTimes.reduce((a,b) => a < b ? a : b) : null);
@@ -1308,37 +1285,16 @@ function getShiftInfo(dateKey) {
     // 各業務の開始時刻を取得して時間軸順にソート
     const tbl2 = getEffectiveShiftTable(dateKey);
     const parts = [];
-    // 交番を開始時刻付きで追加
     kobans.forEach(n => {
       let startTime = null;
       if (modes[n] === 'all') {
         const s = tbl2[String(n).padStart(3,'0') + '交番'];
         if (s) startTime = s.start;
       } else {
-        // 一部モード：選択済み路線の最早発車時刻
-        const kobanRoutes = routes.filter(r => {
-          // 路線番号から交番を特定するのは難しいので全選択路線の最早を使う暫定対応
-          return true;
-        });
-        // 各交番に紐づく路線を特定
-        startTime = routes
-          .filter(r => {
-            const effR = (() => {
-              try {
-                const d = new Date(dateKey); const dow = d.getDay();
-                const shu = dow===6?'土曜':dow===0?'日祝':'平日';
-                const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&dateKey>=cfg.effectiveDate; })();
-                const {routes: er} = getEffectiveRoutes(isNew?'new':'cur', shu, n);
-                return er;
-              } catch(e) { return []; }
-            })();
-            return effR.some(er => er.no === r.no);
-          })
-          .map(r => r.dep_time)
-          .filter(Boolean)
-          .sort()[0] || null;
+        const pd = partialData[n] || {};
+        startTime = pd.start || null;
       }
-      const label = modes[n] === 'all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`;
+      const label = modes[n] === 'all' ? `${String(n).padStart(3,'0')}` : `${String(n).padStart(3,'0')}一部`;
       parts.push({ label, startTime });
     });
     // 作業内容を開始時刻付きで追加
@@ -1358,7 +1314,7 @@ function getShiftInfo(dateKey) {
   if (HOLIDAY_SHIFTS[rec.shift]) return { label: HOLIDAY_SHIFTS[rec.shift], start: null, end: null, type: rec.shift === '503交番' ? 'paid' : rec.shift === '501交番' ? 'holiday' : 'off' };
   const tbl = getEffectiveShiftTable(dateKey);
   const s = tbl[rec.shift];
-  if (s) return { label: rec.shift, start: s.start, end: s.end, type: 'work' };
+  if (s) return { label: rec.shift.replace('交番',''), start: s.start, end: s.end, type: 'work' };
   return null;
 }
 function getIntervalHours(dateKey) {
@@ -1432,8 +1388,6 @@ function updateNavTitle() {
     } else {
       el.textContent = `${statsCursor.getFullYear()}年 — 統計`;
     }
-  } else if (view === 'koban') {
-    el.textContent = '交番考察';
   } else {
     const d = new Date(selectedDate);
     el.textContent = `入力 — ${d.getMonth()+1}月${d.getDate()}日`;
@@ -1446,7 +1400,6 @@ function render() {
   else if (view === 'week')  renderWeek();
   else if (view === 'day')   renderDay();
   else if (view === 'stats') renderStats();
-  else if (view === 'koban') renderKoban();
   else                       renderInput();
 }
 
@@ -1487,6 +1440,7 @@ function renderCalCell(year, month, day, dateKey, other, todayKey) {
   const isToday = dateKey === todayKey;
   const isSel = dateKey === selectedDate;
   const info = getShiftInfo(dateKey);
+  const rec = appData[dateKey] || {};
   let cls = 'cal-cell';
   if (other) cls += ' other-month';
   if (isToday) cls += ' today';
@@ -1495,12 +1449,48 @@ function renderCalCell(year, month, day, dateKey, other, todayKey) {
   if (dow === 6) cls += ' sat';
 
   let inner = `<div class="cal-date">${day}</div>`;
-  if (info) {
-    let sc = info.type === 'work' ? 'work' : info.type === 'holiday' ? 'holiday' : info.type === 'paid' ? 'paid' : 'off';
+
+  if (info && !other) {
+    if (info.type !== 'work') {
+      // 休日系：1行だけ
+      inner += `<div class="cal-shift off">${info.label}</div>`;
+    } else if (rec.shift === 'compound') {
+      // 複合業務：taskContents → compound kobans の順に縦積み
+      const tasks = rec.taskContents || [];
+      const kobans = rec.compoundKobans || [];
+      const modes = rec.compoundKobanModes || {};
+      // タスク（業務習得系）
+      tasks.forEach((t, i) => {
+        const cls2 = i % 2 === 0 ? 'task' : 'task2';
+        inner += `<div class="cal-shift ${cls2}">${t.name}</div>`;
+      });
+      // CODEたち
+      kobans.forEach(n => {
+        const lbl = modes[n] === 'all' ? `${String(n).padStart(3,'0')}` : `${String(n).padStart(3,'0')}一部`;
+        inner += `<div class="cal-shift work">${lbl}</div>`;
+      });
+      if (info.start) inner += `<div class="cal-time">${info.start}–${info.end}</div>`;
+    } else {
+      // 通常シフト（trainingも含む）
+      const tasks = rec.taskContents || [];
+      // 業務習得パネルのラベル
+      if (rec.trainingLabel || rec.trainingStart) {
+        inner += `<div class="cal-shift task">${rec.trainingLabel || '業務習得'}</div>`;
+      }
+      tasks.forEach((t, i) => {
+        const cls2 = i % 2 === 0 ? 'task' : 'task2';
+        inner += `<div class="cal-shift ${cls2}">${t.name}</div>`;
+      });
+      inner += `<div class="cal-shift work">${info.label}</div>`;
+      if (info.start) inner += `<div class="cal-time">${info.start}–${info.end}</div>`;
+    }
+  } else if (info && other) {
+    // 前後月セルは簡略表示
+    const sc = info.type === 'work' ? 'work' : 'off';
     inner += `<div class="cal-shift ${sc}">${info.label}</div>`;
-    if (info.start && !other) inner += `<div class="cal-time">${info.start}–${info.end}</div>`;
   }
-  // IRODORIアイコン表示
+
+  // IRODORIアイコン
   if (!other) {
     const irodoriIcons = getIrodoriIcons(dateKey);
     if (irodoriIcons.length > 0) {
@@ -1567,7 +1557,7 @@ function renderWeek() {
     <thead>${headerRow}</thead>
     <tbody>
       ${sectionRow('シフト情報')}
-      ${row('交番', (d,key) => {
+      ${row('CODE', (d,key) => {
         const info = getShiftInfo(key);
         if (!info) return emptyCell(key);
         const bc = info.type === 'work' ? 'work' : info.type === 'holiday' ? 'holiday' : info.type === 'paid' ? 'paid' : 'off';
@@ -1668,7 +1658,7 @@ function renderDay() {
       </div>
       <div class="day-card-body">
         <div class="life-row">
-          <span class="life-label">交番</span>
+          <span class="life-label">CODE</span>
           ${info ? `<span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:5px 16px;font-weight:800;font-size:20px;font-family:var(--mono);letter-spacing:1px;display:inline-block;">${info.label}</span>` : '<span style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--muted)">—</span>'}
         </div>
         ${infoRow('勤務開始', info && info.start ? info.start : '')}
@@ -1740,6 +1730,34 @@ function renderDay() {
     </div>
 
     ${(()=>{
+      if (!info || info.type !== 'work') return '';
+      if (rec.shift === 'compound' || rec.shift === 'training' || rec.shift === 'custom') return '';
+      const tbl = getEffectiveShiftTable(key);
+      const entry = tbl[rec.shift];
+      if (!entry) return '';
+      const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
+      const dbType = isNew ? 'new' : 'cur';
+      const d = new Date(key); const dow = d.getDay();
+      const shu = dow===6?'土曜':dow===0?'日祝':'平日';
+      const kobanNum = parseInt(rec.shift.replace('交番','').trim(), 10);
+      const {routes} = getEffectiveRoutes(dbType, shu, kobanNum);
+      if (!routes || !routes.length) return '';
+      const rowsHtml = routes.map(r => `
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+          <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border:1px solid var(--border);border-radius:4px;padding:2px 7px;white-space:nowrap;">${r.no}</span>
+          <span style="font-size:12px;color:var(--text);flex:1;min-width:120px;">${r.dep_place} → ${r.arr_place}</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;">${r.dep_time} dep › ${r.arr_time} arr</span>
+        </div>`).join('');
+      return `
+    <div class="section-label">TRIP</div>
+    <div class="day-card">
+      <div class="day-card-body" style="padding:10px 16px;">
+        ${rowsHtml}
+      </div>
+    </div>`;
+    })()}
+
+    ${(()=>{
       const irodoriIcons = getIrodoriIcons(key);
       if (!irodoriIcons.length) return '';
       return `
@@ -1756,150 +1774,6 @@ function renderDay() {
     ${(()=>{
       if (!info || info.type !== 'work') return '';
 
-      // ── 複合業務の考察（複数交番＋全部/一部対応） ──
-      if (rec.shift === 'compound') {
-        const routes = rec.compoundRoutes || [];
-        const kobans = rec.compoundKobans || [];
-        const tasks  = rec.taskContents  || [];
-        const modes  = rec.compoundKobanModes || {};
-        const COLORS5 = ['#0ea8d8','#3dbf7a','#e08a10','#9b4dff','#e03535'];
-        const BGCOLS  = ['#d4f2fa','#d4f5e5','#ffefd4','#ede0ff','#ffd9d9'];
-        const TXCOLS  = ['#0878a0','#0a7a3e','#965800','#6200cc','#a01010'];
-
-        const isNewTbl = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
-        const dbType2 = isNewTbl ? 'new' : 'cur';
-        const d2 = new Date(key); const dow2 = d2.getDay();
-        const shu2 = dow2===6?'土曜':dow2===0?'日祝':'平日';
-
-        // 全体の勤務時刻（全部モードはシフトテーブルから）
-        let allTimes = routes.map(r=>r.dep_time).concat(routes.map(r=>r.arr_time))
-          .concat(tasks.map(t=>t.start)).concat(tasks.map(t=>t.end)).filter(Boolean);
-        kobans.forEach(n => {
-          if (modes[n] === 'all') {
-            const tbl = getEffectiveShiftTable(key);
-            const s = tbl[String(n).padStart(3,'0') + '交番'];
-            if (s) { allTimes.push(s.start); allTimes.push(s.end); }
-          }
-        });
-        const totalWorkStart = rec.compoundManualStart || (allTimes.length ? allTimes.reduce((a,b)=>a<b?a:b) : null);
-        const totalWorkEnd   = rec.compoundManualEnd   || (allTimes.length ? allTimes.reduce((a,b)=>a>b?a:b) : null);
-        const isManualTime   = !!(rec.compoundManualStart || rec.compoundManualEnd);
-        const totalWorkMin   = (totalWorkStart && totalWorkEnd) ? diffMin(parseTime(totalWorkStart), parseTime(totalWorkEnd)) : null;
-        const totalRideMin   = routes.reduce((s,r)=>s+(r.ride_min||0), 0);
-        const dangerCount    = routes.filter(r=>r.interval!==null&&r.interval<10).length;
-
-        // 全業務を時間軸順にソートしてチップ生成
-        const chipParts = [];
-        kobans.forEach((n, i) => {
-          let startTime = null;
-          if (modes[n] === 'all') {
-            const tbl = getEffectiveShiftTable(key);
-            const s = tbl[String(n).padStart(3,'0') + '交番'];
-            if (s) startTime = s.start;
-          } else {
-            const {routes: effR} = getEffectiveRoutes(dbType2, shu2, n);
-            const kobanRoutes = routes.filter(r => effR.some(er => er.no === r.no));
-            startTime = kobanRoutes.map(r => r.dep_time).filter(Boolean).sort()[0] || null;
-          }
-          const label = modes[n] === 'all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`;
-          chipParts.push({ label, startTime, colorBg: BGCOLS[i%5], colorTx: TXCOLS[i%5], isMono: true });
-        });
-        tasks.forEach(t => {
-          chipParts.push({ label: t.name, startTime: t.start || null, colorBg: '#c8f5e2', colorTx: '#0a5e2a', isMono: false });
-        });
-        // 開始時刻順にソート（nullは後ろ）
-        chipParts.sort((a, b) => {
-          if (!a.startTime && !b.startTime) return 0;
-          if (!a.startTime) return 1;
-          if (!b.startTime) return -1;
-          return a.startTime.localeCompare(b.startTime);
-        });
-        const allChips = chipParts.map(p =>
-          `<span style="background:${p.colorBg};color:${p.colorTx};border-radius:7px;padding:3px 12px;font-weight:800;font-size:14px;${p.isMono?'font-family:var(--mono);':''}">${p.label}</span>`
-        ).join('<span style="color:var(--muted);font-size:13px;font-weight:700;padding:0 2px;">＆</span>');
-
-        // 作業内容カード（黄緑）
-        const taskCardHtml = tasks.length ? `
-          <div class="section-label" style="margin-top:12px;">作業内容</div>
-          <div style="background:#f0faf2;border:1.5px solid #6ecf8a;border-radius:12px;padding:12px 14px;margin-top:4px;">
-            ${tasks.map((t,ti) => {
-              const dur = (t.start && t.end) ? diffMin(parseTime(t.start), parseTime(t.end)) : null;
-              const durStr = dur !== null ? `（${fmtMin(dur)}）` : '';
-              const borderStyle = ti < tasks.length-1 ? 'border-bottom:1px solid #8ee0b8;' : '';
-              return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;${borderStyle}">
-                <span style="font-size:15px;font-weight:700;color:#0a5e2a;flex:1;">${t.name}</span>
-                <span style="font-family:var(--mono);font-size:15px;font-weight:700;color:#1a7a3e;">${t.start||'—'} – ${t.end||'—'}</span>
-                <span style="font-size:12px;color:#5aaa7a;background:#c8f5e2;border-radius:5px;padding:2px 7px;">${durStr}</span>
-              </div>`;
-            }).join('')}
-          </div>` : '';
-
-        // 交番ごとの路線ブロック
-        let kobanBlocksHtml = kobans.map((kobanNum, ci) => {
-          const bg = BGCOLS[ci%5]; const tx = TXCOLS[ci%5]; const bd = COLORS5[ci%5];
-          const padNum = String(kobanNum).padStart(3,'0');
-          const kd = getKobanDetail(padNum + '交番', key);
-
-          if (modes[kobanNum] === 'all') {
-            // 全部モード：全路線を考察付きで表示
-            const {routes: effR} = getEffectiveRoutes(dbType2, shu2, kobanNum);
-            const danger10 = effR.filter((r,i) => i>0 && r.interval!==null && r.interval<10).length;
-            const spanStr = kd ? (() => { const h=Math.floor(kd.span_min/60); const m=kd.span_min%60; return h+'h'+(m?m+'m':''); })() : '—';
-            return `<div style="border:1.5px solid ${bd};border-radius:10px;margin-bottom:10px;overflow:hidden;">
-              <div style="background:${bg};color:${tx};padding:9px 13px;font-size:14px;font-weight:700;">
-                ${padNum}交番 — 全路線担当（${effR.length}本）
-              </div>
-              ${kd ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 13px;background:var(--surface2);">
-                <div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border);">
-                  <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:3px;">拘束時間</div>
-                  <div style="font-family:var(--mono);font-size:18px;font-weight:700;">${spanStr}</div>
-                </div>
-                <div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border);">
-                  <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:3px;">最長乗務</div>
-                  <div style="font-family:var(--mono);font-size:18px;font-weight:700;">${kd.max_ride}分</div>
-                </div>
-                <div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border);">
-                  <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:3px;">⚠️折返10分未満</div>
-                  <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:${danger10>0?'var(--red)':'var(--text)'};">${danger10}回</div>
-                </div>
-              </div>` : ''}
-              ${buildRouteTable(effR)}
-            </div>`;
-          } else {
-            // 一部モード：選択した路線のみ
-            const {routes: effR} = getEffectiveRoutes(dbType2, shu2, kobanNum);
-            const kobanRoutes = routes.filter(r => effR.some(er => er.no === r.no));
-            if (!kobanRoutes.length) return '';
-            const danger10part = kobanRoutes.filter((r,i) => i>0 && r.interval!==null && r.interval<10).length;
-            return `<div style="border:1.5px solid ${bd};border-radius:10px;margin-bottom:10px;overflow:hidden;">
-              <div style="background:${bg};color:${tx};padding:9px 13px;font-size:14px;font-weight:700;">
-                ${padNum}交番の一部 — ${kobanRoutes.length}本担当
-              </div>
-              ${danger10part>0 ? `<div style="padding:7px 13px;background:#ffeaea;font-size:12px;color:var(--red);font-weight:700;">⚠️ 10分未満折返 ${danger10part}回</div>` : ''}
-              ${buildRouteTable(kobanRoutes)}
-            </div>`;
-          }
-        }).join('');
-
-        return `
-      <div class="section-label">交番考察（複合業務）</div>
-      <div class="day-card">
-        <div class="day-card-body">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
-            ${allChips}
-          </div>
-          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
-            <div class="stat-box"><div class="stat-label">勤務開始${isManualTime&&rec.compoundManualStart?'<span style="font-size:9px;background:#c8eef8;color:#0878a0;border-radius:4px;padding:1px 5px;margin-left:3px;font-weight:700;">手動</span>':''}</div><div class="stat-val" style="font-size:20px">${totalWorkStart||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">勤務終了${isManualTime&&rec.compoundManualEnd?'<span style="font-size:9px;background:#c8eef8;color:#0878a0;border-radius:4px;padding:1px 5px;margin-left:3px;font-weight:700;">手動</span>':''}</div><div class="stat-val" style="font-size:20px">${totalWorkEnd||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">合計時間</div><div class="stat-val" style="font-size:20px">${totalWorkMin!==null?fmtMin(totalWorkMin):'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">乗務合計</div><div class="stat-val" style="font-size:20px">${totalRideMin}分</div></div>
-            <div class="stat-box"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${dangerCount>0?'bad':''}" style="font-size:20px">${dangerCount}回</div></div>
-          </div>
-          ${taskCardHtml}
-          ${kobanBlocksHtml}
-        </div>
-      </div>`;
-      }
 
       // ── 業務習得の考察（単独シフト時）──
       if (rec.shift === 'training') {
@@ -1923,284 +1797,11 @@ function renderDay() {
       </div>`;
       }
 
-      // ── 通常交番の考察 ──
-      const kd = getKobanDetail(info.label, key);
-      if (!kd) return '';
-      const spanH = Math.floor(kd.span_min/60);
-      const spanM = kd.span_min % 60;
-      const spanStr = spanH + 'h' + (spanM ? spanM + 'm' : '');
-      const places = kd.routes.map(r=>r.dep_place+r.arr_place).join('');
-      const eiseiCount = (places.match(/栄/g)||[]).length;
-      const meiekiCount = (places.match(/名古屋駅/g)||[]).length;
-      const kanayamaCount = (places.match(/金山/g)||[]).length;
-      const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
-      const dbType = isNew ? 'new' : 'cur';
-      const {routes: effectiveRoutes} = getEffectiveRoutes(dbType, kd.shu, kd.koban);
-      const dangerCount10 = effectiveRoutes.filter((r,i)=> i>0 && r.interval!==null && r.interval<10).length;
-      return `
-    <div class="section-label">交番考察</div>
-    <div class="day-card">
-      <div class="day-card-body">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-          <span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:4px 14px;font-weight:800;font-size:17px;font-family:var(--mono)">${info.label}</span>
-          <span style="background:var(--surface2);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px">${kd.shu} / ${effectiveRoutes.length}本</span>
-        </div>
-        <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
-          <div class="stat-box"><div class="stat-label">拘束時間</div><div class="stat-val" style="font-size:22px">${spanStr}</div></div>
-          <div class="stat-box"><div class="stat-label">最長乗務</div><div class="stat-val" style="font-size:22px">${kd.max_ride}分</div></div>
-          <div class="stat-box ${dangerCount10>=3?'bad':''}"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${dangerCount10>0?'bad':''}" style="font-size:22px">${dangerCount10}回</div></div>
-          <div class="stat-box"><div class="stat-label">栄/名駅/金山</div><div class="stat-val" style="font-size:22px">${eiseiCount}/${meiekiCount}/${kanayamaCount}</div></div>
-        </div>
-        ${buildRouteTable(effectiveRoutes)}
-      </div>
-    </div>`;
+      return '';
     })()}
   </div>`;
 }
 
-// ══════════════════════════════════════════
-// KOBAN VIEW
-// ══════════════════════════════════════════
-function renderKoban() {
-  const c = document.getElementById('viewContainer');
-
-  if (!window._kobanState) window._kobanState = { shu: '平日', key: null, regDate: fmtDate(new Date()) };
-  const st = window._kobanState;
-
-  const todayKey = fmtDate(new Date());
-  const cfg = loadNewKobanConfig();
-  const useNew = cfg && cfg.effectiveDate && todayKey >= cfg.effectiveDate;
-  const dataset = useNew ? KV_NEW_DATA : KV_CUR_DATA;
-
-  // ── 交番プルダウン用データ ──
-  const shuKeys = Object.keys(dataset).filter(k => k.startsWith(st.shu + '_')).sort((a,b) =>
-    parseInt(a.split('_')[1]) - parseInt(b.split('_')[1]));
-  if (!st.key || !dataset[st.key]) st.key = shuKeys[0] || null;
-  const kd = st.key ? dataset[st.key] : null;
-
-  const shuBtns = ['平日','土曜','日祝'].map(s => {
-    const active = st.shu === s;
-    return `<button onclick="window._kobanState.shu='${s}';window._kobanState.key=null;renderKoban()"
-      style="padding:6px 16px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);
-      background:${active?'var(--accent)':'var(--surface2)'};color:${active?'#fff':'var(--text)'}">${s}</button>`;
-  }).join('');
-
-  const kobanOptions = shuKeys.map(k => {
-    const d = dataset[k];
-    const kobanNum = String(d.koban).padStart(3,'0');
-    const tbl = useNew ? NEW_SHIFT_TABLE : SHIFT_TABLE;
-    const si = tbl[kobanNum + '交番'];
-    const timeStr = si ? ` ${si.start}–${si.end}` : '';
-    return `<option value="${k}" ${k===st.key?'selected':''}>${kobanNum}交番${timeStr}</option>`;
-  }).join('');
-
-  // ── セクションA: 考察 ──
-  let inspectHtml = '';
-  if (kd) {
-    const spanH = Math.floor(kd.span_min/60), spanM = kd.span_min%60;
-    const spanStr = spanH + 'h' + (spanM ? spanM+'m' : '');
-    const {routes: effRoutes} = getEffectiveRoutes(useNew ? 'new' : 'cur', kd.shu, kd.koban);
-    const places = effRoutes.map(r => r.dep_place+r.arr_place).join('');
-    const eisei = (places.match(/栄/g)||[]).length;
-    const meiki = (places.match(/名古屋駅/g)||[]).length;
-    const kana  = (places.match(/金山/g)||[]).length;
-    const danger10 = effRoutes.filter((r,i)=> i>0 && r.interval!==null && r.interval<10).length;
-    inspectHtml = `
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:4px 14px;font-weight:800;font-size:17px;font-family:var(--mono)">${String(kd.koban).padStart(3,'0')}交番</span>
-      <span style="background:var(--surface2);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px">${kd.shu} / ${effRoutes.length}本</span>
-    </div>
-    <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
-      <div class="stat-box"><div class="stat-label">拘束時間</div><div class="stat-val" style="font-size:22px">${spanStr}</div></div>
-      <div class="stat-box"><div class="stat-label">最長乗務</div><div class="stat-val" style="font-size:22px">${kd.max_ride}分</div></div>
-      <div class="stat-box ${danger10>=3?'bad':''}"><div class="stat-label">⚠️10分未満折返</div><div class="stat-val ${danger10>0?'bad':''}" style="font-size:22px">${danger10}回</div></div>
-      <div class="stat-box"><div class="stat-label">栄/名駅/金山</div><div class="stat-val" style="font-size:22px">${eisei}/${meiki}/${kana}</div></div>
-    </div>
-    ${buildRouteTable(effRoutes)}`;
-  }
-
-  // ── セクションC: 新交番設定 ──
-  const newKobanCfg = loadNewKobanConfig();
-  const newKobanStatusHtml = newKobanCfg && newKobanCfg.effectiveDate
-    ? `<div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:10px 14px">
-        <div style="flex:1">
-          <div style="font-size:12px;font-weight:700;color:var(--text)">施行日：${newKobanCfg.effectiveDate}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">設定済み · 施行日以降は新交番テーブルを使用</div>
-        </div>
-        <button onclick="openNewKobanModal()" style="padding:6px 14px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);background:var(--surface);color:var(--text)">変更</button>
-        <button onclick="clearNewKoban();renderKoban()" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);background:var(--surface);color:var(--red)">削除</button>
-      </div>`
-    : `<div style="background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:10px">
-        <div style="font-size:12px;color:var(--muted)">未設定 — 現行交番テーブルを使用中</div>
-      </div>
-      <button onclick="openNewKobanModal()" style="width:100%;padding:10px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)">🔄 新交番の施行日を設定</button>`;
-
-  // ── セクションD: 交番データ編集 ──
-  const editDb = st.editDb || 'new';
-  const editShu = st.editShu || '平日';
-  const editKobanNum = st.editKobanNum || '';
-  const editOpenNo = st.editOpenNo || null; // 編集フォームを開いている路線番号
-
-  // 交番番号リスト（データから生成、未入力交番も含む全交番リスト）
-  const allKobanNums = (() => {
-    const db = editDb === 'new' ? KV_NEW_DATA : KV_CUR_DATA;
-    const known = Object.keys(db)
-      .filter(k => k.startsWith(editShu+'_'))
-      .map(k => parseInt(k.split('_')[1]))
-      .filter(n => !isNaN(n));
-    // NEW_SHIFT_TABLE由来の交番も追加
-    const typeMap = { '平日':'weekday', '土曜':'saturday', '日祝':'sunday' };
-    const typeVal = typeMap[editShu];
-    Object.entries(NEW_SHIFT_TABLE).forEach(([label, entry]) => {
-      if (entry.type === typeVal) {
-        const n = parseInt(label.replace('交番',''));
-        if (!isNaN(n) && !known.includes(n)) known.push(n);
-      }
-    });
-    known.sort((a,b)=>a-b);
-    return known;
-  })();
-
-  const edits = loadKobanEdits();
-  const editDataKey = `${editDb}:${editShu}_${editKobanNum}`;
-
-  // 選択交番のルート一覧
-  let editRoutes = [];
-  let editIsModified = false;
-  if (editKobanNum !== '') {
-    const res = getEffectiveRoutes(editDb, editShu, Number(editKobanNum));
-    editRoutes = res.routes;
-    editIsModified = res.isModified || !!edits[editDataKey];
-  }
-
-  const editShuBtns = ['平日','土曜','日祝'].map(s =>
-    `<button onclick="window._kobanState.editShu='${s}';window._kobanState.editKobanNum='';window._kobanState.editOpenNo=null;renderKoban()"
-      style="flex:1;padding:7px 4px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);
-      background:${editShu===s?'var(--accent)':'var(--surface2)'};color:${editShu===s?'#fff':'var(--text)'}">
-      ${s}</button>`
-  ).join('');
-
-  const editDbBtns = [['new','新交番'],['cur','現行']].map(([val,label]) =>
-    `<button onclick="window._kobanState.editDb='${val}';window._kobanState.editKobanNum='';window._kobanState.editOpenNo=null;renderKoban()"
-      style="flex:1;padding:7px 4px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);
-      background:${editDb===val?'var(--accent)':'var(--surface2)'};color:${editDb===val?'#fff':'var(--text)'}">
-      ${label}</button>`
-  ).join('');
-
-  const kobanSelectOpts = ['<option value="">-- 交番を選択 --</option>',
-    ...allKobanNums.map(n => {
-      const hasData = editRoutes.length > 0 && editKobanNum === String(n);
-      const dbChk = editDb === 'new' ? KV_NEW_DATA : KV_CUR_DATA;
-      const hasBaseData = !!dbChk[`${editShu}_${n}`];
-      const tag = !hasBaseData ? '（未入力）' : '';
-      return `<option value="${n}" ${editKobanNum===String(n)?'selected':''}>${String(n).padStart(3,'0')}交番 ${tag}</option>`;
-    })
-  ].join('');
-
-  // 路線一覧行
-  const buildEditRouteRows = () => {
-    if (!editKobanNum) return '<div style="color:var(--muted);font-size:13px;padding:10px 0">交番を選択してください</div>';
-    if (editRoutes.length === 0) return '<div style="color:var(--muted);font-size:13px;padding:10px 0;text-align:center">路線データがありません</div>';
-    const diff = (edits[editDataKey]||{}).routes || {};
-    return editRoutes.map(r => {
-      const isNew = !((editDb==='new'?KV_NEW_DATA:KV_CUR_DATA)[`${editShu}_${editKobanNum}`]||{routes:[]}).routes.find(x=>x.no===r.no);
-      const isMod = !isNew && diff[r.no] && diff[r.no] !== null;
-      const tagHtml = isNew
-        ? `<span style="background:#EAF3DE;color:#3B6D11;border-radius:5px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:4px">新規</span>`
-        : isMod ? `<span style="background:#FAEEDA;color:#633806;border-radius:5px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:4px">修正</span>` : '';
-      const isOpen = editOpenNo === r.no;
-      const hlBg = isNew ? 'background:#EAF3DE22;' : isMod ? 'background:#FAEEDA22;' : '';
-      const formHtml = isOpen ? `
-        <div style="background:var(--surface2);border-radius:10px;padding:10px;margin-top:6px">
-          ${[
-            ['路線番号', 'no', r.no, 'text'],
-            ['出発地', 'dep_place', r.dep_place, 'text'],
-            ['発車時刻', 'dep_time', r.dep_time, 'time'],
-            ['到着地', 'arr_place', r.arr_place, 'text'],
-            ['到着時刻', 'arr_time', r.arr_time, 'time'],
-            ['乗務(分)', 'ride_min', r.ride_min, 'number'],
-            ['折返(分)', 'interval', r.interval??'', 'number'],
-          ].map(([lbl,field,val,type]) =>
-            `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-              <span style="font-size:10px;color:var(--muted);width:52px;flex-shrink:0">${lbl}</span>
-              <input id="ef_${field}" type="${type}" value="${val}" placeholder="${lbl}"
-                style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;font-family:var(--mono);color:var(--text)">
-            </div>`
-          ).join('')}
-          <div style="display:flex;gap:6px;margin-top:6px">
-            <button onclick="saveRouteEdit(${JSON.stringify(editDataKey)},${JSON.stringify(r.no)})"
-              style="flex:1;padding:7px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)">保存</button>
-            <button onclick="deleteRouteEdit(${JSON.stringify(editDataKey)},${JSON.stringify(r.no)},${isNew})"
-              style="padding:7px 12px;background:#FCEBEB;border:none;border-radius:8px;color:#A32D2D;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)">${isNew?'削除':'修正取消'}</button>
-          </div>
-        </div>` : '';
-      return `<div style="${hlBg}border-radius:6px;padding:6px 4px;margin:0 -4px;border-bottom:1px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0">${r.no}${tagHtml}</span>
-          <span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.dep_place} → ${r.arr_place}</span>
-          <span style="font-family:var(--mono);font-size:11px;color:var(--accent);flex-shrink:0">${r.dep_time}</span>
-          <button onclick="toggleRouteEdit(${JSON.stringify(r.no)})"
-            style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:var(--sans);color:var(--muted)">${isOpen?'閉じる':'編集'}</button>
-        </div>
-        ${formHtml}
-      </div>`;
-    }).join('');
-  };
-
-  const resetLink = editIsModified
-    ? `<div style="text-align:right;margin-top:8px">
-        <button onclick="resetKobanEdit('${editDataKey}')"
-          style="background:none;border:none;font-size:11px;color:var(--red);cursor:pointer;font-family:var(--sans)">この交番の修正をすべてリセット</button>
-      </div>` : '';
-
-  c.innerHTML = `
-  <div class="day-view">
-    <div class="section-label">交番考察</div>
-    <div class="day-card">
-      <div class="day-card-body">
-        <div style="display:flex;gap:8px;margin-bottom:12px">${shuBtns}</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:13px;color:var(--muted);white-space:nowrap">交番選択</span>
-          <select onchange="window._kobanState.key=this.value;renderKoban()"
-            style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--mono);background:var(--surface);color:var(--text)">
-            ${kobanOptions}
-          </select>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px">${useNew?'📗 新交番データ':'📘 現行交番データ'}</div>
-        ${kd ? `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">${inspectHtml}</div>` : ''}
-      </div>
-    </div>
-
-    <div class="section-label" style="margin-top:8px">交番データを編集</div>
-    <div class="day-card">
-      <div class="day-card-body">
-        <div style="display:flex;gap:6px;margin-bottom:10px">${editDbBtns}</div>
-        <div style="display:flex;gap:6px;margin-bottom:10px">${editShuBtns}</div>
-        <div style="margin-bottom:12px">
-          <select onchange="window._kobanState.editKobanNum=this.value;window._kobanState.editOpenNo=null;renderKoban()"
-            style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--mono);background:var(--surface);color:var(--text)">
-            ${kobanSelectOpts}
-          </select>
-        </div>
-        <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:8px">路線一覧</div>
-        ${buildEditRouteRows()}
-        ${editKobanNum ? `
-        <button onclick="openNewRouteForm('${editDataKey}')"
-          style="width:100%;margin-top:10px;padding:9px;border:1px dashed var(--border2);border-radius:10px;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans)">
-          ＋ 路線を追加
-        </button>` : ''}
-        ${resetLink}
-      </div>
-    </div>
-
-    <div class="section-label" style="margin-top:8px">新交番設定</div>
-    <div class="day-card">
-      <div class="day-card-body">
-        ${newKobanStatusHtml}
-      </div>
-    </div>
-  </div>`;
-}
 
 // ══════════════════════════════════════════
 // STATS VIEW
@@ -2469,77 +2070,9 @@ function renderInput() {
     const dbType = isNew ? 'new' : 'cur';
     const d = new Date(key); const dow = d.getDay();
     const shu = dow===6?'土曜':dow===0?'日祝':'平日';
-
-    // 複数選択交番リスト
     const selKobans = rec.compoundKobans || [];
-
-    // 交番バッジ（複数選択対応）
-    const tbl = getEffectiveShiftTable(key);
-    const kobanNums = [...new Set(Object.keys(tbl).map(k=>parseInt(k)))].sort((a,b)=>a-b);
-    const compSearch = (window._compoundState&&window._compoundState.dateKey===key&&window._compoundState.search)||'';
-    const filteredNums = kobanNums.filter(n=>String(n).includes(compSearch));
-
-    const COLORS = 5;
-    let kobanBadges = filteredNums.map(n => {
-      const idx = selKobans.indexOf(n);
-      const isSel = idx !== -1;
-      const colorCls = isSel ? ` sel-${idx % COLORS}` : '';
-      return `<span class="compound-koban-badge${colorCls}" onclick="toggleCompoundKoban('${key}',${n})">${n}</span>`;
-    }).join('');
-
-    // 各選択交番の路線ブロック
-    let routeBlocksHtml = '';
-    selKobans.forEach((kobanNum, ci) => {
-      const {routes: effRoutes} = getEffectiveRoutes(dbType, shu, kobanNum);
-      if (!effRoutes.length) return;
-      const savedRoutes = rec.compoundRoutes || [];
-      const colorIdx = ci % COLORS;
-      const COLORS5_BD = ['#0ea8d8','#3dbf7a','#e08a10','#9b4dff','#e03535'];
-
-      // 全部モード判定（rec.compoundKobanModes[kobanNum] === 'all'）
-      const modes = rec.compoundKobanModes || {};
-      const isAllMode = modes[kobanNum] === 'all';
-      const btnColorStyle = `border-color:${COLORS5_BD[colorIdx]};color:${COLORS5_BD[colorIdx]};`;
-
-      // ヘッダーラベル
-      const blockLabel = isAllMode ? `${String(kobanNum).padStart(3,'0')}交番` : `${String(kobanNum).padStart(3,'0')}交番の一部`;
-
-      // トグルボタン
-      const toggleHtml = `<div class="koban-mode-toggle" style="border-color:${COLORS5_BD[colorIdx]}">
-        <button style="${isAllMode?`background:${COLORS5_BD[colorIdx]};color:#fff;`:''}" onclick="setKobanMode('${key}',${kobanNum},'all')">全部</button>
-        <button style="${!isAllMode?`background:${COLORS5_BD[colorIdx]};color:#fff;`:''}" onclick="setKobanMode('${key}',${kobanNum},'part')">一部</button>
-      </div>`;
-
-      // 路線リスト（全部モードなら非表示）
-      let routeListHtml = '';
-      if (isAllMode) {
-        routeListHtml = `<div class="compound-all-msg">全路線を担当（${effRoutes.length}本）</div>`;
-      } else {
-        const allChecked = effRoutes.every(r => savedRoutes.some(sr => sr.no === r.no));
-        routeListHtml = `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--surface);">
-          <span style="font-size:12px;color:var(--muted);">路線を選択</span>
-          <button class="all-sel-btn" style="${btnColorStyle}" onclick="selectAllCompoundRoutes('${key}',${kobanNum},'${shu}',${!allChecked})">
-            ${allChecked ? '✓ 全解除' : '全選択'}
-          </button>
-        </div>`;
-        effRoutes.forEach(r => {
-          const checked = savedRoutes.some(sr => sr.no === r.no);
-          routeListHtml += `<div class="compound-route-item">
-            <input type="checkbox" id="cr_${r.no}" ${checked?'checked':''} onchange="toggleCompoundRoute('${key}',${kobanNum},'${shu}',this)" style="accent-color:${COLORS5_BD[colorIdx]}">
-            <label for="cr_${r.no}" class="compound-route-label">${r.dep_place} → ${r.arr_place}</label>
-            <span class="compound-route-time">${r.dep_time}〜${r.arr_time}</span>
-          </div>`;
-        });
-      }
-
-      routeBlocksHtml += `<div class="compound-route-block color-${colorIdx}">
-        <div class="compound-route-block-head">
-          <span>${blockLabel}</span>
-          ${toggleHtml}
-        </div>
-        ${routeListHtml}
-      </div>`;
-    });
+    const modes = rec.compoundKobanModes || {};
+    const partialData = rec.compoundPartialData || {};
 
     // 作業内容セクション
     const tasks = rec.taskContents || [];
@@ -2552,7 +2085,6 @@ function renderInput() {
         <span class="task-content-time">${t.start} – ${t.end}</span>
         <button class="task-content-del" onclick="deleteTaskContent('${key}',${i})">✕</button>
       </div>`).join('');
-
     let taskFormHtml = '';
     if (taskFormOpen) {
       const isOther = taskFormState.type === 'その他';
@@ -2573,62 +2105,56 @@ function renderInput() {
       </div>`;
     }
 
-    // サマリ生成（時間軸順にソート）
-    const modes2 = rec.compoundKobanModes || {};
-    const sumParts = [];
-    selKobans.forEach((n, i) => {
-      let startTime = null;
-      if (modes2[n] === 'all') {
-        const tblS = getEffectiveShiftTable(key);
-        const sS = tblS[String(n).padStart(3,'0') + '交番'];
-        if (sS) startTime = sS.start;
-      } else {
-        const savedR = rec.compoundRoutes || [];
-        const {routes: effR2} = getEffectiveRoutes(dbType, shu, n);
-        const kr = savedR.filter(r => effR2.some(er => er.no === r.no));
-        startTime = kr.map(r => r.dep_time).filter(Boolean).sort()[0] || null;
+    // 追加済みCODEリスト
+    let addedCodesHtml = selKobans.map((n, ci) => {
+      const isAll = modes[n] !== 'part';
+      const modeLabel = isAll ? '全部' : '一部';
+      const pd = partialData[n] || {};
+      // 一部モード時のTRIPリスト
+      const tripNos = pd.tripNos || [];
+      let tripListHtml = '';
+      if (!isAll && tripNos.length > 0) {
+        const {routes: effR} = getEffectiveRoutes(dbType, shu, n);
+        tripListHtml = tripNos.map((no, ti) => {
+          const r = effR.find(r=>r.no===no);
+          return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border);">
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border:1px solid var(--border);border-radius:4px;padding:2px 6px;">${no}</span>
+            <span style="font-size:11px;color:var(--text);flex:1;">${r ? r.dep_place+'→'+r.arr_place : '?'}</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">${r ? r.dep_time+' dep' : ''}</span>
+            <button onclick="removeCompoundTrip('${key}',${n},${ti})" style="color:var(--red);background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;">✕</button>
+          </div>`;
+        }).join('');
       }
-      const label = modes2[n] === 'all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`;
-      sumParts.push({ label, startTime, cls: `compound-sum-chip compound-sum-chip-${i%COLORS}` });
-    });
-    tasks.forEach(t => {
-      sumParts.push({ label: t.name, startTime: t.start || null, cls: 'compound-sum-chip compound-sum-chip-task' });
-    });
-    sumParts.sort((a, b) => {
-      if (!a.startTime && !b.startTime) return 0;
-      if (!a.startTime) return 1;
-      if (!b.startTime) return -1;
-      return a.startTime.localeCompare(b.startTime);
-    });
-    const sumChipsHtml = sumParts.map(p => `<span class="${p.cls}">${p.label}</span>`).join('<span style="opacity:.7;font-size:11px;">＆</span>');
-    const savedRoutes = rec.compoundRoutes || [];
-    const summaryHtml = (selKobans.length > 0 || tasks.length > 0)
-      ? `<div class="compound-selected-summary">🚌 ${sumChipsHtml}</div>`
-      : `<div class="compound-selected-summary empty">交番または作業内容を選択してください</div>`;
+      // 一部モード時のTRIP入力
+      const tripInputHtml = !isAll ? `
+        <div style="background:var(--surface2);border-top:1px solid var(--border);padding:8px 10px;">
+          <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">TRIP 番号を追加</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="tripInp_${n}" maxlength="6" placeholder="例: 02201"
+              style="font-family:var(--mono);font-size:15px;font-weight:700;width:110px;border:1.5px solid var(--border2);border-radius:7px;padding:6px 8px;color:var(--text);background:var(--surface);outline:none;"
+              oninput="previewTrip('${key}',${n},this.value)" id="tripInp_${n}">
+            <button onclick="addCompoundTrip('${key}',${n})"
+              style="font-family:var(--sans);font-size:12px;font-weight:700;padding:7px 14px;border:1.5px solid var(--accent);border-radius:7px;background:var(--surface);color:var(--accent);cursor:pointer;">＋ 追加</button>
+          </div>
+          <div id="tripPreview_${n}" style="font-size:11px;color:var(--accent);margin-top:4px;font-family:var(--mono);"></div>
+          ${tripListHtml ? `<div style="margin-top:6px;">${tripListHtml}</div>` : ''}
+        </div>` : '';
+      return `<div style="background:var(--surface);border:1.5px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);">
+          <span style="font-family:var(--mono);font-size:16px;font-weight:800;color:#0878a0;background:#c8eef8;border-radius:6px;padding:3px 10px;">${String(n).padStart(3,'0')}</span>
+          <span style="font-size:12px;color:var(--muted);">${modeLabel}</span>
+          <button onclick="removeCompoundKoban('${key}',${n})" style="margin-left:auto;color:var(--red);background:none;border:none;cursor:pointer;font-size:13px;font-weight:700;">✕</button>
+        </div>
+        ${tripInputHtml}
+      </div>`;
+    }).join('');
 
-    // 手動出社・退社時刻
+    // 手動出社・退社
     const manualStart = rec.compoundManualStart || '';
     const manualEnd   = rec.compoundManualEnd   || '';
 
     compoundPanelHtml = `<div class="compound-panel">
-      <!-- 手動出社・退社時刻 -->
-      <div style="background:#f0fafb;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:12px;">
-        <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">🕐 実際の出社・退社時刻（任意・手動優先）</div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span style="font-size:12px;font-weight:700;color:var(--text);min-width:42px;">出社</span>
-          <input type="time" value="${manualStart}" class="custom-time-inp"
-            style="border-color:var(--accent);"
-            onchange="saveCompoundManualTime('${key}','start',this.value)">
-          <span style="font-size:12px;font-weight:700;color:var(--text);min-width:42px;">退社</span>
-          <input type="time" value="${manualEnd}" class="custom-time-inp"
-            style="border-color:var(--accent);"
-            onchange="saveCompoundManualTime('${key}','end',this.value)">
-          ${(manualStart||manualEnd)?`<button onclick="clearCompoundManualTime('${key}')"
-            style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;padding:4px 8px;">クリア</button>`:''}
-        </div>
-        ${(manualStart||manualEnd)?`<div style="font-size:11px;color:var(--accent);margin-top:6px;font-weight:600;">✅ 手動入力が有効（自動計算を上書き）</div>`:'<div style="font-size:11px;color:var(--muted);margin-top:6px;">未入力の場合は路線データから自動計算</div>'}
-      </div>
-      <!-- 作業内容セクション（黄緑） -->
+      <!-- 作業内容 -->
       <div class="task-content-section">
         <div class="task-content-head">
           <span class="task-content-title">📝 作業内容</span>
@@ -2637,18 +2163,41 @@ function renderInput() {
         ${taskItemsHtml}
         ${taskFormHtml}
       </div>
-      <!-- 交番検索 -->
-      <div class="compound-search-row">
-        <input class="compound-search" type="text" placeholder="交番番号で絞り込み…" value="${compSearch}"
-          oninput="filterCompoundKoban('${key}',this.value)">
+      <!-- CODE直接入力 -->
+      <div style="margin-top:10px;">
+        <div style="font-size:10px;font-weight:800;color:#5a8a96;letter-spacing:1px;margin-bottom:8px;">CODE 直接入力で追加</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <input type="text" id="compCodeInp" maxlength="3" placeholder="000"
+            style="font-family:var(--mono);font-size:24px;font-weight:800;width:80px;text-align:center;border:2px solid #9b4dff;border-radius:10px;padding:7px 8px;color:#6200cc;background:#ede0ff;outline:none;letter-spacing:2px;">
+          <div style="display:flex;border:1.5px solid #9b4dff;border-radius:8px;overflow:hidden;">
+            <button id="compModeAll" onclick="setCompInputMode('all')"
+              style="font-family:var(--sans);font-size:13px;font-weight:700;padding:6px 14px;border:none;background:#9b4dff;color:#fff;cursor:pointer;">全部</button>
+            <button id="compModePart" onclick="setCompInputMode('part')"
+              style="font-family:var(--sans);font-size:13px;font-weight:700;padding:6px 14px;border:none;background:var(--surface);color:#9b4dff;cursor:pointer;">一部</button>
+          </div>
+          <button onclick="addCompoundKobanDirect('${key}')"
+            style="font-family:var(--sans);font-size:13px;font-weight:700;padding:7px 16px;border:1.5px solid #9b4dff;border-radius:8px;background:var(--surface);color:#6200cc;cursor:pointer;">＋ 追加</button>
+        </div>
+        <div id="compCodePreview" style="font-size:11px;color:var(--accent);font-family:var(--mono);margin-bottom:8px;"></div>
+        <!-- 追加済みCODE -->
+        ${addedCodesHtml || `<div style="font-size:12px;color:var(--muted);padding:8px 0;">CODEを追加してください</div>`}
       </div>
-      <!-- 交番グリッド（複数選択） -->
-      <div style="font-size:10px;font-weight:800;color:#5a8a96;letter-spacing:1px;margin-bottom:7px;">交番を選択（複数可）</div>
-      <div class="compound-shift-list">${kobanBadges}</div>
-      <!-- 各交番の路線ブロック -->
-      ${routeBlocksHtml}
-      <!-- サマリ -->
-      ${summaryHtml}
+      <!-- 手動時刻 -->
+      <div style="background:#f0fafb;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;margin-top:10px;">
+        <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">🕐 出社・退社時刻（任意）</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:700;color:var(--text);">出社</span>
+          <input type="time" value="${manualStart}" class="custom-time-inp" style="border-color:var(--accent);" onchange="saveCompoundManualTime('${key}','start',this.value)">
+          <span style="font-size:12px;font-weight:700;color:var(--text);">退社</span>
+          <input type="time" value="${manualEnd}" class="custom-time-inp" style="border-color:var(--accent);" onchange="saveCompoundManualTime('${key}','end',this.value)">
+          ${(manualStart||manualEnd)?`<button onclick="clearCompoundManualTime('${key}')" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;">クリア</button>`:''}
+        </div>
+      </div>
+      <!-- 決定ボタン -->
+      <button onclick="decideCompound('${key}')"
+        style="margin-top:12px;width:100%;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--sans);box-shadow:0 3px 12px rgba(14,168,216,.3);">
+        ✅ このスケジュールで決定
+      </button>
     </div>`;
   }
 
@@ -2686,14 +2235,24 @@ function renderInput() {
     </div>` : ''}
   </div>` : '';
 
-  let shiftListHtml = `<input class="shift-search" type="text" placeholder="交番番号を検索… (例: 028)" id="shiftSearch" oninput="filterShifts(this.value)">
-  <div class="shift-list" id="shiftList">`;
-  allShiftIds.forEach(id => {
-    const s = getEffectiveShiftTable(key)[id];
-    const sel = rec.shift === id;
-    shiftListHtml += `<span class="shift-badge${sel?' selected':''}" onclick="setShift('${key}','${id}')" title="${s.start}–${s.end}">${id.replace('交番','')}</span>`;
-  });
-  shiftListHtml += '</div>';
+  const codeVal = rec.shift && rec.shift.includes('交番') ? rec.shift.replace('交番','') : '';
+  const codeTimeStr = (() => {
+    if (!codeVal) return '';
+    const tbl = getEffectiveShiftTable(key);
+    const s = tbl[codeVal.padStart(3,'0') + '交番'];
+    return s ? `${s.start} – ${s.end}` : '';
+  })();
+  const shiftListHtml = `
+  <div style="margin-top:4px;">
+    <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">CODE 直接入力</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <input type="text" id="codeDirectInput" maxlength="3" placeholder="000"
+        value="${codeVal}"
+        oninput="onCodeDirectInput('${key}',this.value)"
+        style="font-family:var(--mono);font-size:28px;font-weight:800;width:90px;text-align:center;border:2px solid var(--accent);border-radius:10px;padding:8px 10px;color:#0878a0;background:#E6F1FB;outline:none;letter-spacing:2px;">
+      <div id="codeDirectTime" style="font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;">${codeTimeStr ? '▶ ' + codeTimeStr : ''}</div>
+    </div>
+  </div>`;
 
   const isCustom = rec.shift === 'custom';
   const customHtml = `
@@ -2819,7 +2378,7 @@ function renderInput() {
 
     <div class="section-label">シフト設定</div>
     <div class="inp-card">
-      <div class="inp-card-header">📋 交番・勤務区分</div>
+      <div class="inp-card-header">📋 業務番号・勤務区分</div>
       <div class="inp-card-body">
         ${selBarHtml}
         ${specialHtml}
@@ -3008,22 +2567,6 @@ function clearCompoundManualTime(dateKey) {
   renderInput();
 }
 
-function selectAllCompoundRoutes(dateKey, kobanNum, shu, doSelect) {
-  if (!appData[dateKey]) appData[dateKey] = { life: {} };
-  const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&dateKey>=cfg.effectiveDate; })();
-  const {routes: effRoutes} = getEffectiveRoutes(isNew?'new':'cur', shu, kobanNum);
-  let saved = appData[dateKey].compoundRoutes || [];
-  if (doSelect) {
-    effRoutes.forEach(r => { if (!saved.some(s => s.no === r.no)) saved.push(r); });
-  } else {
-    const nos = new Set(effRoutes.map(r => r.no));
-    saved = saved.filter(r => !nos.has(r.no));
-  }
-  saved.sort((a,b) => a.dep_time.localeCompare(b.dep_time));
-  appData[dateKey].compoundRoutes = saved;
-  saveData(appData);
-  renderInput();
-}
 
 function filterCompoundKoban(dateKey, val) {
   if (!window._compoundState) window._compoundState = {};
@@ -3054,6 +2597,15 @@ function setKobanMode(dateKey, kobanNum, mode) {
   renderInput();
 }
 
+// 一部モード手入力の保存
+function savePartialField(dateKey, kobanNum, field, value) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].compoundPartialData) appData[dateKey].compoundPartialData = {};
+  if (!appData[dateKey].compoundPartialData[kobanNum]) appData[dateKey].compoundPartialData[kobanNum] = {};
+  appData[dateKey].compoundPartialData[kobanNum][field] = value;
+  saveData(appData);
+}
+
 
 // 複数交番トグル（追加/削除）
 function toggleCompoundKoban(dateKey, kobanNum) {
@@ -3072,22 +2624,6 @@ function selectCompoundKoban(dateKey, kobanNum) {
   toggleCompoundKoban(dateKey, kobanNum);
 }
 
-function toggleCompoundRoute(dateKey, kobanNum, shu, checkbox) {
-  if (!appData[dateKey]) appData[dateKey] = { life: {} };
-  const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&dateKey>=cfg.effectiveDate; })();
-  const {routes: effRoutes} = getEffectiveRoutes(isNew?'new':'cur', shu, kobanNum);
-  const route = effRoutes.find(r => r.no === checkbox.id.replace('cr_',''));
-  if (!route) return;
-  let saved = appData[dateKey].compoundRoutes || [];
-  if (checkbox.checked) {
-    if (!saved.some(r => r.no === route.no)) saved.push(route);
-  } else {
-    saved = saved.filter(r => r.no !== route.no);
-  }
-  saved.sort((a,b) => a.dep_time.localeCompare(b.dep_time));
-  appData[dateKey].compoundRoutes = saved;
-  saveData(appData);
-}
 
 // ── 作業内容（taskContents）管理 ──
 function toggleTaskForm(dateKey) {
@@ -3213,6 +2749,135 @@ function filterShifts(q) {
   });
 }
 
+// ── MK-58: CODE直接入力 ──
+function onCodeDirectInput(dateKey, val) {
+  const v = val.trim();
+  const timeEl = document.getElementById('codeDirectTime');
+  if (v.length === 3) {
+    const tbl = getEffectiveShiftTable(dateKey);
+    const s = tbl[v.padStart(3,'0') + '交番'];
+    if (s) {
+      if (timeEl) timeEl.textContent = '▶ ' + s.start + ' – ' + s.end;
+      setShift(dateKey, v.padStart(3,'0') + '交番');
+      return;
+    }
+  }
+  if (timeEl) timeEl.textContent = v.length === 3 ? '⚠ 該当なし' : '';
+}
+
+// 複合業務パネル: 全部/一部モード切替ボタン
+window._compInputMode = 'all';
+function setCompInputMode(mode) {
+  window._compInputMode = mode;
+  const btnAll  = document.getElementById('compModeAll');
+  const btnPart = document.getElementById('compModePart');
+  if (btnAll && btnPart) {
+    if (mode === 'all') {
+      btnAll.style.background = '#9b4dff'; btnAll.style.color = '#fff';
+      btnPart.style.background = 'var(--surface)'; btnPart.style.color = '#9b4dff';
+    } else {
+      btnPart.style.background = '#9b4dff'; btnPart.style.color = '#fff';
+      btnAll.style.background = 'var(--surface)'; btnAll.style.color = '#9b4dff';
+    }
+  }
+  const el = document.getElementById('compCodeInp');
+  if (el) {
+    const preview = document.getElementById('compCodePreview');
+    const v = el.value.trim();
+    if (preview && v.length === 3) {
+      const tbl = getEffectiveShiftTable(selectedDate);
+      const s = tbl[v.padStart(3,'0') + '交番'];
+      preview.textContent = s ? (mode === 'all' ? '▶ ' + s.start + ' – ' + s.end : '▶ 一部担当') : '⚠ 該当なし';
+    }
+  }
+}
+
+function addCompoundKobanDirect(dateKey) {
+  const el = document.getElementById('compCodeInp');
+  if (!el) return;
+  const v = el.value.trim().padStart(3,'0');
+  const tbl = getEffectiveShiftTable(dateKey);
+  if (!tbl[v + '交番']) { alert('CODE ' + v + ' は存在しません'); return; }
+  const n = parseInt(v, 10);
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  let kobans = appData[dateKey].compoundKobans || [];
+  if (!kobans.includes(n)) kobans.push(n);
+  appData[dateKey].compoundKobans = kobans;
+  if (!appData[dateKey].compoundKobanModes) appData[dateKey].compoundKobanModes = {};
+  appData[dateKey].compoundKobanModes[n] = window._compInputMode || 'all';
+  saveData(appData);
+  el.value = '';
+  const preview = document.getElementById('compCodePreview');
+  if (preview) preview.textContent = '';
+  renderInput();
+}
+
+function removeCompoundKoban(dateKey, kobanNum) {
+  if (!appData[dateKey]) return;
+  appData[dateKey].compoundKobans = (appData[dateKey].compoundKobans || []).filter(n => n !== kobanNum);
+  saveData(appData);
+  renderInput();
+}
+
+function previewTrip(dateKey, kobanNum, val) {
+  const previewEl = document.getElementById('tripPreview_' + kobanNum);
+  if (!previewEl) return;
+  const v = val.trim();
+  if (!v) { previewEl.textContent = ''; return; }
+  const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&dateKey>=cfg.effectiveDate; })();
+  const dbType = isNew ? 'new' : 'cur';
+  const d = new Date(dateKey); const dow = d.getDay();
+  const shu = dow===6?'土曜':dow===0?'日祝':'平日';
+  const {routes} = getEffectiveRoutes(dbType, shu, kobanNum);
+  const r = routes.find(r => r.no === v);
+  if (r) {
+    previewEl.textContent = '▶ ' + r.dep_place + ' → ' + r.arr_place + ' ' + r.dep_time + ' dep';
+    previewEl.style.color = 'var(--accent)';
+  } else {
+    previewEl.textContent = '⚠ TRIP ' + v + ' は見つかりません';
+    previewEl.style.color = 'var(--red)';
+  }
+}
+
+function addCompoundTrip(dateKey, kobanNum) {
+  const el = document.getElementById('tripInp_' + kobanNum);
+  if (!el) return;
+  const no = el.value.trim();
+  if (!no) return;
+  const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&dateKey>=cfg.effectiveDate; })();
+  const dbType = isNew ? 'new' : 'cur';
+  const d = new Date(dateKey); const dow = d.getDay();
+  const shu = dow===6?'土曜':dow===0?'日祝':'平日';
+  const {routes} = getEffectiveRoutes(dbType, shu, kobanNum);
+  if (!routes.find(r => r.no === no)) { alert('TRIP ' + no + ' は見つかりません'); return; }
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].compoundPartialData) appData[dateKey].compoundPartialData = {};
+  if (!appData[dateKey].compoundPartialData[kobanNum]) appData[dateKey].compoundPartialData[kobanNum] = {};
+  const pd = appData[dateKey].compoundPartialData[kobanNum];
+  if (!pd.tripNos) pd.tripNos = [];
+  if (!pd.tripNos.includes(no)) pd.tripNos.push(no);
+  // 開始・終了時刻を自動計算
+  const tripRoutes = pd.tripNos.map(n => routes.find(r => r.no === n)).filter(Boolean);
+  const times = tripRoutes.map(r => r.dep_time).filter(Boolean).sort();
+  const endTimes = tripRoutes.map(r => r.arr_time).filter(Boolean).sort();
+  if (times.length) pd.start = times[0];
+  if (endTimes.length) pd.end = endTimes[endTimes.length-1];
+  saveData(appData);
+  renderInput();
+}
+
+function removeCompoundTrip(dateKey, kobanNum, idx) {
+  if (!appData[dateKey]?.compoundPartialData?.[kobanNum]?.tripNos) return;
+  appData[dateKey].compoundPartialData[kobanNum].tripNos.splice(idx, 1);
+  saveData(appData);
+  renderInput();
+}
+
+function decideCompound(dateKey) {
+  saveData(appData);
+  switchView('day');
+}
+
 function printWeek() {
   const table = document.querySelector('.week-table');
   if (!table) return;
@@ -3306,107 +2971,6 @@ function closeModal(id) {
 // 新交番管理
 // ══════════════════════════════════════════
 // ── 交番データ編集ヘルパー ──
-function saveRouteEdit(dataKey, origNo) {
-  const get = id => document.getElementById('ef_'+id);
-  if (!get('no')) return;
-  const newRoute = {
-    no: get('no').value.trim(),
-    dep_place: get('dep_place').value.trim(),
-    dep_time: get('dep_time').value.trim(),
-    arr_place: get('arr_place').value.trim(),
-    arr_time: get('arr_time').value.trim(),
-    ride_min: parseInt(get('ride_min').value) || 0,
-    interval: get('interval').value !== '' ? parseInt(get('interval').value) : null,
-  };
-  const edits = loadKobanEdits();
-  if (!edits[dataKey]) edits[dataKey] = {};
-  if (!edits[dataKey].routes) edits[dataKey].routes = {};
-  if (newRoute.no !== origNo) {
-    edits[dataKey].routes[origNo] = null; // 旧番号を削除
-  }
-  edits[dataKey].routes[newRoute.no] = newRoute;
-  saveKobanEdits(edits);
-  window._kobanState.editOpenNo = null;
-  renderKoban();
-}
-
-function deleteRouteEdit(dataKey, no, isNew) {
-  const edits = loadKobanEdits();
-  if (!edits[dataKey]) edits[dataKey] = {};
-  if (!edits[dataKey].routes) edits[dataKey].routes = {};
-  if (isNew === true || isNew === 'true') {
-    delete edits[dataKey].routes[no];
-  } else {
-    edits[dataKey].routes[no] = null; // 削除マーク
-  }
-  saveKobanEdits(edits);
-  window._kobanState.editOpenNo = null;
-  renderKoban();
-}
-
-function resetKobanEdit(dataKey) {
-  if (!confirm('この交番の修正をすべてリセットしますか？')) return;
-  const edits = loadKobanEdits();
-  delete edits[dataKey];
-  saveKobanEdits(edits);
-  window._kobanState.editOpenNo = null;
-  renderKoban();
-}
-
-function openNewRouteForm(dataKey) {
-  // 新規追加フォームを一時的に開く（新規noを生成して追加）
-  const edits = loadKobanEdits();
-  if (!edits[dataKey]) edits[dataKey] = {};
-  if (!edits[dataKey].routes) edits[dataKey].routes = {};
-  const tmpNo = 'NEW_' + Date.now();
-  edits[dataKey].routes[tmpNo] = {
-    no: tmpNo, dep_place: '', dep_time: '', arr_place: '', arr_time: '', ride_min: 0, interval: null
-  };
-  saveKobanEdits(edits);
-  window._kobanState.editOpenNo = tmpNo;
-  renderKoban();
-}
-
-function openNewKobanModal() {
-  const cfg = loadNewKobanConfig();
-  const statusEl = document.getElementById('nkStatus');
-  const dateEl   = document.getElementById('nkEffectiveDate');
-  if (cfg && cfg.effectiveDate) {
-    dateEl.value = cfg.effectiveDate;
-    statusEl.innerHTML = `<span style="background:#d4f9e8;color:#0a7a40;padding:4px 10px;border-radius:7px;font-weight:700;">✅ 施行日設定済：${cfg.effectiveDate} 以降に新交番を使用中</span>`;
-  } else {
-    dateEl.value = '';
-    statusEl.innerHTML = `<span style="background:#fff4df;color:#8a5c00;padding:4px 10px;border-radius:7px;font-weight:700;">⚠️ 未設定 — 現在は現行交番を使用中</span>`;
-  }
-  document.getElementById('newKobanModal').classList.add('show');
-}
-
-function saveNewKoban() {
-  const dateEl = document.getElementById('nkEffectiveDate');
-  const d = dateEl.value;
-  if (!d) { showToast('⚠️ 施行日を入力してください'); return; }
-  saveNewKobanConfig({ effectiveDate: d });
-  closeModal('newKobanModal');
-  render();
-  showToast(`✅ 施行日を ${d} に設定しました`);
-}
-
-function clearNewKoban() {
-  if (!confirm('新交番の設定を削除し、現行交番に戻しますか？')) return;
-  localStorage.removeItem(NEW_KOBAN_KEY);
-  closeModal('newKobanModal');
-  render();
-  showToast('🗑️ 新交番設定を削除しました');
-}
-
-// ── 路線編集フォーム開閉トグル ──
-function toggleRouteEdit(no) {
-  const st = window._kobanState || {};
-  st.editOpenNo = (st.editOpenNo === no) ? null : no;
-  window._kobanState = st;
-  renderKoban();
-}
-
 // ── Init ──
 render();
 
@@ -3465,14 +3029,7 @@ function checkAuth() {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const docRef = doc(db, "schedules", "mkdata");
-    // IRODORI側データをリアルタイム購読
     const irodoriDocRef = doc(db, "schedules", "irodori_mkdata");
-    onSnapshot(irodoriDocRef, (snap) => {
-      if (snap.exists()) {
-        window._irodoriCloudData = snap.data().appData || {};
-        render();
-      }
-    });
 
     // ローカル保存中フラグ（自分の書き込みによるonSnapshotを無視）
     let isSavingLocally = false;
@@ -3493,20 +3050,40 @@ function checkAuth() {
       }
     }
 
-    // Firestoreからデータを初回取得してマージ（クラウド優先）
+    // TIMETABLEデータ と IRODORIデータ を並列取得してから render
     try {
-      const snap = await getDoc(docRef);
+      const [snap, irodoriSnap] = await Promise.all([
+        getDoc(docRef),
+        getDoc(irodoriDocRef)
+      ]);
+
+      // IRODORIデータをセット
+      if (irodoriSnap.exists()) {
+        window._irodoriCloudData = irodoriSnap.data().appData || {};
+      }
+
+      // TIMETABLEデータをセット
       if (snap.exists()) {
         const cloudData = snap.data().appData || {};
         Object.keys(cloudData).forEach(k => { appData[k] = cloudData[k]; });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-        render();
       }
       setSyncStatus('ok');
     } catch(e) {
       console.warn('初回取得エラー:', e);
       setSyncStatus('offline');
     }
+
+    // 両データ取得完了後に一度だけrender
+    render();
+
+    // リアルタイム購読（他デバイスの変更を反映）
+    onSnapshot(irodoriDocRef, (snap) => {
+      if (snap.exists()) {
+        window._irodoriCloudData = snap.data().appData || {};
+        render();
+      }
+    });
 
     // リアルタイム監視（他デバイスの変更を自動反映）
     // 自分の書き込み起因のsnapshotは無視してUI上書きを防ぐ
