@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRODORI MK-9</title>
+<title>IRODORI MK-11</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -80,48 +80,53 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   padding:0 2px; margin-bottom:8px; margin-top:16px;
 }
 
-/* ══ 月表示（1日1行リスト） ══ */
-.month-list { padding:0 14px 80px; }
-.day-row {
-  display:flex; align-items:center; gap:10px;
-  padding:9px 12px; background:var(--surface);
-  border-radius:10px; margin-bottom:5px;
-  border:1.5px solid var(--border); cursor:pointer;
-  box-shadow:var(--shadow); transition:border-color .13s;
+/* ══ 月表示（7列グリッド） ══ */
+.month-grid { padding: 0 10px 80px; }
+.dow-row { display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px; }
+.dow-cell {
+  text-align:center; font-size:11px; font-weight:700;
+  padding:6px 0; color:var(--muted); letter-spacing:0.8px;
 }
-.day-row:hover { border-color:var(--green2); }
-.day-row.today { border-color:var(--green); background:var(--surface2); }
-.day-row.selected { border-color:var(--green2); background:#d4f5e5; }
-
-.date-col { min-width:44px; text-align:center; flex-shrink:0; }
-.date-col .dow { font-size:10px; font-weight:700; color:var(--muted); }
-.date-col .num { font-family:var(--mono); font-size:20px; font-weight:600; color:var(--text); line-height:1.1; }
-.day-row.sun .date-col .dow,
-.day-row.sun .date-col .num { color:var(--red); }
-.day-row.sat .date-col .dow,
-.day-row.sat .date-col .num { color:var(--work); }
-.day-row.today .date-col .num {
+.dow-cell.sat { color:var(--work); }
+.dow-cell.sun { color:var(--red); }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-cell {
+  background:var(--surface); border-radius:9px; padding:5px 4px 6px;
+  min-height:70px; cursor:pointer;
+  border:1.5px solid var(--border);
+  transition:border-color .13s, box-shadow .13s;
+  box-shadow:var(--shadow);
+}
+.cal-cell:hover { border-color:var(--green2); box-shadow:0 3px 14px rgba(46,207,122,.18); }
+.cal-cell.other-month { opacity:.38; box-shadow:none; }
+.cal-cell.today { border-color:var(--green); box-shadow:0 0 0 2px rgba(46,207,122,.22); }
+.cal-cell.selected { border-color:var(--green2); background:#e6faef; }
+.cal-cell.sun .cal-date { color:var(--red); }
+.cal-cell.sat .cal-date { color:var(--work); }
+.cal-date {
+  font-family:var(--mono); font-size:12px; font-weight:600;
+  margin-bottom:3px; color:var(--text);
+}
+.cal-cell.today .cal-date {
   background:var(--green); color:#fff;
-  border-radius:6px; padding:1px 5px; display:inline-block;
+  width:20px; height:20px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:3px; font-size:11px;
 }
-.day-row.today.sun .date-col .num,
-.day-row.today.sat .date-col .num { color:#fff; }
-
-/* 仕事バッジ */
-.work-pill {
-  background:var(--workbg); color:#007c91;
-  border:1px solid var(--workbd); border-radius:6px;
-  font-family:var(--mono); font-size:11px; font-weight:700;
-  padding:3px 7px; white-space:nowrap; flex-shrink:0; max-width:180px;
-  overflow:hidden; text-overflow:ellipsis;
+.cal-cell.today.sat .cal-date,
+.cal-cell.today.sun .cal-date { color:#fff; }
+.cal-shift {
+  font-size:11px; font-weight:700; letter-spacing:0.2px;
+  padding:2px 4px; border-radius:4px; display:block;
+  margin-bottom:2px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
-.work-pill.off   { background:#ffd9d9; color:#a01010; border-color:#f0b0b0; }
-.work-pill.paid  { background:#ffd9d9; color:#a01010; border-color:#f0b0b0; }
-.work-pill.none  { background:var(--surface2); color:var(--muted); border-color:var(--border); font-style:italic; font-size:11px; }
-
-/* プライベートアイコン列 */
-.priv-icons { display:flex; gap:4px; flex:1; flex-wrap:wrap; align-items:center; }
-.priv-icon  { font-size:18px; line-height:1; }
+.cal-shift.work    { background:#c8eef8; color:#007c91; }
+.cal-shift.off     { background:#ffd9d9; color:#a01010; }
+.cal-shift.paid    { background:#ffd9d9; color:#a01010; }
+.cal-shift.task    { background:#d4f5e5; color:#0a5e2a; }
+.cal-shift.task2   { background:#fff3cc; color:#8a5c00; }
+.cal-irodori-icons { display:flex; flex-wrap:wrap; gap:1px; margin-top:2px; }
+.cal-irodori-icon  { font-size:11px; line-height:1; }
 
 /* ══ 日表示 ══ */
 .day-view { padding:0 14px 80px; max-width:620px; margin:0 auto; }
@@ -403,7 +408,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-9</div>
+    <div class="auth-logo">IRODORI MK-11</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -418,7 +423,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-9 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-11 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -426,7 +431,6 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   <div class="tab-bar">
     <button class="tab active" onclick="switchView('month')">📅 月</button>
     <button class="tab" onclick="switchView('day')">📋 日</button>
-    <button class="tab" onclick="switchView('input')">➕ 入力</button>
     <button class="tab" onclick="switchView('diary')">📓 日記</button>
   </div>
 </div>
@@ -456,6 +460,8 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 // ══════════════════════════════════════════
 const ICON_CATEGORIES = [
   { label:'🍽️ 食事・カフェ', icons:[
+    {icon:'🌅',label:'モーニング'},{icon:'🥗',label:'ランチ'},{icon:'🍷',label:'ディナー'},
+    {icon:'🥐',label:'パン'},
     {icon:'🍜',label:'外食'},{icon:'🍱',label:'和食'},{icon:'🥟',label:'中華'},
     {icon:'🍽️',label:'ビュッフェ'},{icon:'☕',label:'カフェ'},{icon:'🍺',label:'飲み'},
     {icon:'🍣',label:'寿司'},{icon:'🍕',label:'洋食'},{icon:'🍖',label:'焼肉'},
@@ -476,8 +482,9 @@ const ICON_CATEGORIES = [
     {icon:'🎃',label:'ハロウィン'},{icon:'🎄',label:'クリスマス'},{icon:'🎊',label:'お祝い'},
   ]},
   { label:'🎯 その他・行動', icons:[
-    {icon:'🏥',label:'病院'},{icon:'🎬',label:'映画'},{icon:'🎤',label:'カラオケ'},
-    {icon:'⛳',label:'ゴルフ'},{icon:'🔧',label:'DIY'},{icon:'💇',label:'散髪'},
+    {icon:'🪔',label:'法事'},{icon:'🏥',label:'病院'},{icon:'🎬',label:'映画'},
+    {icon:'🎤',label:'カラオケ'},{icon:'⛳',label:'ゴルフ'},{icon:'🔧',label:'DIY'},
+    {icon:'💇',label:'散髪'},
   ]},
 ];
 
@@ -613,10 +620,10 @@ function getTTLife(dateKey) {
 function switchView(v) {
   view = v;
   document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['month','day','input','diary'][i] === v);
+    t.classList.toggle('active', ['month','day','diary'][i] === v);
   });
   const fab = document.getElementById('fab');
-  fab.style.display = (v === 'input' || v === 'diary') ? 'none' : 'flex';
+  fab.style.display = (v === 'diary') ? 'none' : 'flex';
   render();
 }
 
@@ -648,8 +655,6 @@ function updateNavTitle() {
   } else if (view === 'day') {
     const d = parseDate(selectedDate);
     el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
-  } else if (view === 'input') {
-    el.textContent = '予定を入力';
   } else {
     el.textContent = '日記';
   }
@@ -657,10 +662,9 @@ function updateNavTitle() {
 
 function render() {
   updateNavTitle();
-  if (view === 'month')     renderMonth();
-  else if (view === 'day')  renderDay();
-  else if (view === 'input') renderInput();
-  else                       renderDiary();
+  if (view === 'month')    renderMonth();
+  else if (view === 'day') renderDay();
+  else                     renderDiary();
 }
 
 // ══════════════════════════════════════════
@@ -669,59 +673,96 @@ function render() {
 function renderMonth() {
   const c = document.getElementById('viewContainer');
   const year = cursor.getFullYear(), month = cursor.getMonth();
+  const startDow = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const todayKey = fmtDate(today);
 
-  let html = '<div class="month-list">';
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dt  = new Date(year, month, d);
-    const key = fmtDate(dt);
-    const dow = dt.getDay();
-    const isToday = key === todayKey;
-    const isSel   = key === selectedDate;
+  let html = '<div class="month-grid"><div class="dow-row">';
+  ['日','月','火','水','木','金','土'].forEach((d,i) => {
+    html += `<div class="dow-cell ${i===0?'sun':i===6?'sat':''}">${d}</div>`;
+  });
+  html += '</div><div class="cal-grid">';
 
-    let rowCls = 'day-row';
-    if (dow === 0) rowCls += ' sun';
-    if (dow === 6) rowCls += ' sat';
-    if (isToday)   rowCls += ' today';
-    if (isSel && !isToday) rowCls += ' selected';
-
-    // TIMETABLE連携
-    const ttInfo = getTTShiftInfo(key);
-    let workPillHtml = '';
-    if (ttInfo) {
-      if (ttInfo.type === 'off' || ttInfo.type === 'paid') {
-        const cls = ttInfo.type === 'paid' ? 'work-pill paid' : 'work-pill off';
-        workPillHtml = `<span class="${cls}">${ttInfo.label}</span>`;
-      } else {
-        let timeStr = ttInfo.label;
-        if (ttInfo.start && ttInfo.end) {
-          timeStr = `${ttInfo.label} ${ttInfo.start}–${ttInfo.end}`;
-        } else if (ttInfo.start) {
-          timeStr = `${ttInfo.label} ${ttInfo.start}〜`;
-        }
-        workPillHtml = `<span class="work-pill">${timeStr}</span>`;
-      }
-    } else {
-      workPillHtml = `<span class="work-pill none">—</span>`;
-    }
-
-    // プライベートアイコン
-    const rec = appData[key] || {};
-    const events = rec.events || [];
-    const iconHtml = events.map(e => `<span class="priv-icon">${e.icon}</span>`).join('');
-
-    html += `<div class="${rowCls}" onclick="selectDate('${key}')">
-      <div class="date-col">
-        <div class="dow">${DOW[dow]}</div>
-        <div class="num">${d}</div>
-      </div>
-      ${workPillHtml}
-      <div class="priv-icons">${iconHtml}</div>
-    </div>`;
+  // 前月末日
+  const prevDays = new Date(year, month, 0).getDate();
+  for (let i = startDow-1; i >= 0; i--) {
+    const d2 = prevDays - i;
+    html += renderCalCell(year, month-1, d2, fmtDate(new Date(year, month-1, d2)), true, todayKey);
   }
-  html += '</div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    html += renderCalCell(year, month, d, fmtDate(new Date(year, month, d)), false, todayKey);
+  }
+  const total = startDow + daysInMonth;
+  const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let d = 1; d <= rem; d++) {
+    html += renderCalCell(year, month+1, d, fmtDate(new Date(year, month+1, d)), true, todayKey);
+  }
+  html += '</div></div>';
   c.innerHTML = html;
+}
+
+function renderCalCell(year, month, day, dateKey, other, todayKey) {
+  const dow = new Date(year, month, day).getDay();
+  const isToday = dateKey === todayKey;
+  const isSel = dateKey === selectedDate;
+  const ttInfo = getTTShiftInfo(dateKey);
+  const rec = appData[dateKey] || {};
+
+  let cls = 'cal-cell';
+  if (other) cls += ' other-month';
+  if (isToday) cls += ' today';
+  if (isSel && !isToday) cls += ' selected';
+  if (dow === 0) cls += ' sun';
+  if (dow === 6) cls += ' sat';
+
+  let inner = `<div class="cal-date">${day}</div>`;
+
+  if (ttInfo && !other) {
+    if (ttInfo.type === 'paid' || ttInfo.type === 'off') {
+      inner += `<div class="cal-shift off">${ttInfo.label}</div>`;
+    } else {
+      // CODEの番号のみ表示
+      const shiftRec = loadTTData()[dateKey] || {};
+      if (shiftRec.shift === 'compound') {
+        const kobans = shiftRec.compoundKobans || [];
+        const modes  = shiftRec.compoundKobanModes || {};
+        const tasks  = shiftRec.taskContents || [];
+        tasks.forEach((t, i) => {
+          inner += `<div class="cal-shift ${i%2===0?'task':'task2'}">${t.name}</div>`;
+        });
+        kobans.forEach(n => {
+          const lbl = modes[n] === 'all' ? String(n).padStart(3,'0') : String(n).padStart(3,'0')+'一部';
+          inner += `<div class="cal-shift work">${lbl}</div>`;
+        });
+      } else {
+        // 通常シフト：CODEの番号のみ
+        const tasks = shiftRec.taskContents || [];
+        if (shiftRec.trainingLabel || shiftRec.trainingStart) {
+          inner += `<div class="cal-shift task">${shiftRec.trainingLabel||'業務習得'}</div>`;
+        }
+        tasks.forEach((t, i) => {
+          inner += `<div class="cal-shift ${i%2===0?'task':'task2'}">${t.name}</div>`;
+        });
+        // 交番名から数字3桁のみ抽出
+        const codeNum = ttInfo.label.replace('交番','').trim().padStart(3,'0');
+        inner += `<div class="cal-shift work">${codeNum}</div>`;
+      }
+    }
+  } else if (ttInfo && other) {
+    const sc = ttInfo.type === 'work' ? 'work' : 'off';
+    const codeNum = ttInfo.type === 'work' ? ttInfo.label.replace('交番','').trim().padStart(3,'0') : ttInfo.label;
+    inner += `<div class="cal-shift ${sc}">${codeNum}</div>`;
+  }
+
+  // IRODORIアイコン
+  if (!other) {
+    const events = rec.events || [];
+    if (events.length > 0) {
+      inner += `<div class="cal-irodori-icons">${events.map(e=>`<span class="cal-irodori-icon">${e.icon}</span>`).join('')}</div>`;
+    }
+  }
+
+  return `<div class="${cls}" onclick="selectDate('${dateKey}')">${inner}</div>`;
 }
 
 function selectDate(key) {
@@ -748,7 +789,15 @@ function renderDay() {
   if (ttInfo) {
     const ttData = loadTTData();
     const ttRec  = ttData[key] || {};
+    // CODEの番号のみ表示
     let shiftDisplay = ttInfo.label;
+    if (ttInfo.type === 'work' && ttInfo.label.includes('交番')) {
+      shiftDisplay = ttInfo.label.replace('交番','').trim().padStart(3,'0');
+    } else if (ttInfo.type === 'work' && ttRec.shift === 'compound') {
+      const kobans = ttRec.compoundKobans || [];
+      const modes  = ttRec.compoundKobanModes || {};
+      shiftDisplay = kobans.map(n => modes[n]==='all' ? String(n).padStart(3,'0') : String(n).padStart(3,'0')+'一部').join('＆') || '複合業務';
+    }
     let timeDisplay  = '';
     if (ttInfo.start && ttInfo.end) {
       timeDisplay = `${ttInfo.start} – ${ttInfo.end}`;
