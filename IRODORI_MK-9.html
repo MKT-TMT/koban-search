@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRODORI MK-11</title>
+<title>IRODORI MK-12</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -408,7 +408,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-11</div>
+    <div class="auth-logo">IRODORI MK-12</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -423,7 +423,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-11 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-12 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -623,7 +623,7 @@ function switchView(v) {
     t.classList.toggle('active', ['month','day','diary'][i] === v);
   });
   const fab = document.getElementById('fab');
-  fab.style.display = (v === 'diary') ? 'none' : 'flex';
+  fab.style.display = (v === 'input' || v === 'diary') ? 'none' : 'flex';
   render();
 }
 
@@ -655,6 +655,8 @@ function updateNavTitle() {
   } else if (view === 'day') {
     const d = parseDate(selectedDate);
     el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
+  } else if (view === 'input') {
+    el.textContent = '予定を入力';
   } else {
     el.textContent = '日記';
   }
@@ -662,9 +664,10 @@ function updateNavTitle() {
 
 function render() {
   updateNavTitle();
-  if (view === 'month')    renderMonth();
-  else if (view === 'day') renderDay();
-  else                     renderDiary();
+  if (view === 'month')      renderMonth();
+  else if (view === 'day')   renderDay();
+  else if (view === 'input') renderInput();
+  else                       renderDiary();
 }
 
 // ══════════════════════════════════════════
