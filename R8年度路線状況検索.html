@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RouteTrack MK-8</title>
+<title>RouteTrack MK-9</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:sans-serif;background:#e8f5e9;padding:1rem}
@@ -107,10 +107,9 @@ body{font-family:sans-serif;background:#e8f5e9;padding:1rem}
 .kb-add-row select{padding:6px 8px;border:0.5px solid #a5d6a7;border-radius:8px;font-size:13px}
 .unsaved-dot{display:inline-block;width:7px;height:7px;background:#e53935;border-radius:50%;margin-left:5px;vertical-align:middle}
 </style>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyCIqSyfHwHg5ygdyB5XA6KBsIDqiyLQLgU",
   authDomain: "schedule-app-d1ba4.firebaseapp.com",
@@ -119,34 +118,33 @@ const firebaseConfig = {
   messagingSenderId: "350863090121",
   appId: "1:350863090121:web:b3283d3895cdb0670c4818"
 };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const RECS_DOC  = doc(db, 'routetrack', 'recs');
-const MEMOS_DOC = doc(db, 'routetrack', 'memos');
-const KOBAN_DOC = doc(db, 'routetrack', 'koban');
+const RECS_DOC  = db.collection('routetrack').doc('recs');
+const MEMOS_DOC = db.collection('routetrack').doc('memos');
+const KOBAN_DOC = db.collection('routetrack').doc('koban');
 
 // Firestoreへ保存
-window._fbSaveRecs  = async (data) => { try { await setDoc(RECS_DOC,  { data: JSON.stringify(data) }); } catch(e){ console.error('fbSaveRecs',e); } };
-window._fbSaveMemos = async (data) => { try { await setDoc(MEMOS_DOC, { data: JSON.stringify(data) }); } catch(e){ console.error('fbSaveMemos',e); } };
-window._fbSaveKoban = async (data) => { try { await setDoc(KOBAN_DOC, { data: JSON.stringify(data) }); } catch(e){ console.error('fbSaveKoban',e); } };
+window._fbSaveRecs  = async (data) => { try { await RECS_DOC.set({ data: JSON.stringify(data) }); } catch(e){ console.error('fbSaveRecs',e); } };
+window._fbSaveMemos = async (data) => { try { await MEMOS_DOC.set({ data: JSON.stringify(data) }); } catch(e){ console.error('fbSaveMemos',e); } };
+window._fbSaveKoban = async (data) => { try { await KOBAN_DOC.set({ data: JSON.stringify(data) }); } catch(e){ console.error('fbSaveKoban',e); } };
 
-// Firestoreから読み込み（ログイン後に呼ぶ）
+// Firestoreから読み込み
 window._fbLoad = async () => {
   try {
-    const [rd, md, kd] = await Promise.all([getDoc(RECS_DOC), getDoc(MEMOS_DOC), getDoc(KOBAN_DOC)]);
+    const [rd, md, kd] = await Promise.all([RECS_DOC.get(), MEMOS_DOC.get(), KOBAN_DOC.get()]);
     return {
-      recs:   rd.exists()  ? JSON.parse(rd.data().data)  : null,
-      memos:  md.exists()  ? JSON.parse(md.data().data)  : null,
-      koban:  kd.exists()  ? JSON.parse(kd.data().data)  : null,
+      recs:  rd.exists ? JSON.parse(rd.data().data) : null,
+      memos: md.exists ? JSON.parse(md.data().data) : null,
+      koban: kd.exists ? JSON.parse(kd.data().data) : null,
     };
   } catch(e) { console.error('fbLoad',e); return {}; }
 };
 
 // リアルタイム同期（他デバイスの変更を反映）
-onSnapshot(RECS_DOC, snap => {
-  if (!snap.exists()) return;
+RECS_DOC.onSnapshot(snap => {
+  if (!snap.exists) return;
   try {
     const remote = JSON.parse(snap.data().data);
     if (window._syncRecs) window._syncRecs(remote);
@@ -168,7 +166,7 @@ onSnapshot(RECS_DOC, snap => {
 
 <div id="main" style="display:none">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-    <div style="font-size:15px;font-weight:600;color:#2e7d32">RouteTrack <span style="font-size:12px;color:#7aab80">MK-8 R8年度</span></div>
+    <div style="font-size:15px;font-weight:600;color:#2e7d32">RouteTrack <span style="font-size:12px;color:#7aab80">MK-9 R8年度</span></div>
     <div style="display:flex;gap:6px">
       <button class="btn" style="font-size:12px;padding:4px 10px" onclick="openMaster()">CODE編集</button>
       <button class="btn" style="font-size:12px;padding:4px 10px" onclick="logout()">ログアウト</button>
