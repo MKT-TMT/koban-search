@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RouteTrack MK-9</title>
+<title>RouteTrack MK-10</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:sans-serif;background:#e8f5e9;padding:1rem}
@@ -166,7 +166,7 @@ RECS_DOC.onSnapshot(snap => {
 
 <div id="main" style="display:none">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-    <div style="font-size:15px;font-weight:600;color:#2e7d32">RouteTrack <span style="font-size:12px;color:#7aab80">MK-9 R8年度</span></div>
+    <div style="font-size:15px;font-weight:600;color:#2e7d32">RouteTrack <span style="font-size:12px;color:#7aab80">MK-10 R8年度</span></div>
     <div style="display:flex;gap:6px">
       <button class="btn" style="font-size:12px;padding:4px 10px" onclick="openMaster()">CODE編集</button>
       <button class="btn" style="font-size:12px;padding:4px 10px" onclick="logout()">ログアウト</button>
@@ -533,7 +533,8 @@ function init(){
       if(remote.recs){recs=remote.recs;try{localStorage.setItem(RECS_KEY,JSON.stringify(recs));}catch(e){}renderHist();}
       if(remote.memos){kobanMemos=remote.memos;try{localStorage.setItem(MEMOS_KEY,JSON.stringify(kobanMemos));}catch(e){}}
       if(remote.koban){KOBAN=remote.koban;try{localStorage.setItem(STORAGE_KEY,JSON.stringify(KOBAN));}catch(e){}filterKoban();}
-    });
+      showToast('クラウド同期完了');
+    }).catch(e=>{showToast('クラウド接続失敗: '+e.message,false);});
   }
   // リアルタイム同期コールバック
   window._syncRecs = (remote) => {
@@ -599,7 +600,7 @@ function routeInfo(rid){for(const k of Object.keys(KOBAN)){const r=KOBAN[k].find
 function crowdAvg(vals){const nums=vals.map(v=>parseInt(v)).filter(v=>!isNaN(v));if(!nums.length)return null;return nums.reduce((a,b)=>a+b,0)/nums.length;}
 function crowdText(avg){if(avg===null)return'<span style="color:#aaa">—</span>';const idx=Math.min(5,Math.max(0,Math.round(avg)));return`<span class="crowd-txt" style="color:${CROWD_COLORS[idx]}">${avg.toFixed(1)}（${CROWD_LABELS[idx]}）</span>`;}
 function crowdLabel(v){return v!==''&&v!==undefined?`${v} ${CROWD_LABELS[parseInt(v)]||''}`:'—';}
-function delayBadge(d){if(!d||d==='なし')return'<span style="color:#aaa">—</span>';return`<span class="badge b-delay">${d}</span>`;}
+function delayBadge(d){if(!d||d==='なし')return'<span style="color:#aaa">—</span>';if(d.startsWith('早着'))return`<span style="font-size:11px;color:#555">${d}</span>`;return`<span class="badge b-delay">${d}</span>`;}
 
 function saveRec(){
   const date=document.getElementById('i-date').value,koban=document.getElementById('i-koban').value,route=document.getElementById('i-route').value;
@@ -653,7 +654,7 @@ function doSearch(){
   if(!KOBAN[q]){el.innerHTML=`<div style="text-align:center;padding:2rem;color:#aaa;font-size:14px">CODE ${q} は見つかりません</div>`;return;}
   const routes=KOBAN[q],matches=recs.filter(r=>r.koban===q);
   const wcTotal=matches.reduce((s,r)=>s+parseInt(r.wc||0),0);
-  const delayCnt=matches.filter(r=>r.delay&&r.delay!=='なし').length;
+  const delayCnt=matches.filter(r=>r.delay&&r.delay!=='なし'&&r.delay.startsWith('遅延')).length;
   const memo=kobanMemos[q]||'';
   const allAvg=crowdAvg(matches.map(r=>r.crowd).filter(v=>v!==''&&v!==undefined));
 
