@@ -608,21 +608,6 @@
     color: #0a6e3e; min-width: 56px; text-align: right;
   }
 
-  /* ══════════════ EXPORT / IMPORT ══════════════ */
-  .data-btns {
-    display: flex; gap: 6px; align-items: center;
-  }
-  .data-btn {
-    height: 30px; padding: 0 11px; border-radius: 7px; border: 1.5px solid var(--border2);
-    font-size: 11px; font-weight: 700; font-family: var(--sans);
-    cursor: pointer; display: flex; align-items: center; gap: 4px;
-    transition: all .14s; white-space: nowrap;
-  }
-  .data-btn-export { background: #e0f7fd; color: var(--accent); border-color: var(--accent); }
-  .data-btn-export:hover { background: var(--accent); color: #fff; }
-  .data-btn-import { background: #e6faef; color: #0a6e3e; border-color: #2ecf7a; }
-  .data-btn-import:hover { background: #2ecf7a; color: #fff; }
-
   /* モーダル */
   .modal-overlay {
     display: none; position: fixed; inset: 0; z-index: 900;
@@ -951,14 +936,10 @@
 
 
 <div class="header">
-  <div class="logo">MK-58 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-60 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
-  </div>
-  <div class="data-btns">
-    <button class="data-btn data-btn-export" onclick="openExportModal()">⬇️ 書き出し</button>
-    <button class="data-btn data-btn-import" onclick="openImportModal()">⬆️ 読み込み</button>
   </div>
   <div class="tab-bar">
     <button class="tab active" onclick="switchView('month')">月</button>
@@ -966,40 +947,10 @@
     <button class="tab" onclick="switchView('day')">日</button>
     <button class="tab" onclick="switchView('input')">入力</button>
     <button class="tab" onclick="switchView('stats')">📊</button>
+    <button class="tab" onclick="switchView('spec')">仕様</button>
   </div>
 </div>
 
-<!-- エクスポートモーダル -->
-<div class="modal-overlay" id="exportModal" onclick="if(event.target===this)closeModal('exportModal')">
-  <div class="modal-box">
-    <div class="modal-title">⬇️ データ書き出し</div>
-    <div class="modal-desc">
-      下のテキストを<strong>全選択してコピー</strong>し、メモ帳・メモアプリ等に貼り付けて<strong>.json</strong>という名前で保存してください。<br>
-      iPhoneやiPadへはそのファイルをAirDrop・iCloudで共有してください。
-    </div>
-    <textarea class="modal-textarea" id="exportText" readonly onclick="this.select()"></textarea>
-    <div class="modal-btns">
-      <button class="modal-btn modal-btn-primary" onclick="selectExportText()">📋 全選択</button>
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal('exportModal')">閉じる</button>
-    </div>
-  </div>
-</div>
-
-<!-- インポートモーダル -->
-<div class="modal-overlay" id="importModal" onclick="if(event.target===this)closeModal('importModal')">
-  <div class="modal-box">
-    <div class="modal-title">⬆️ データ読み込み</div>
-    <div class="modal-desc">
-      書き出したJSONテキストを下に<strong>貼り付け</strong>て「読み込む」を押してください。<br>
-      既存データと統合されます（同じ日付はインポート側が優先されます）。
-    </div>
-    <textarea class="modal-textarea" id="importText" placeholder="JSONデータをここに貼り付け…"></textarea>
-    <div class="modal-btns">
-      <button class="modal-btn modal-btn-green" onclick="doImport()">✅ 読み込む</button>
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal('importModal')">キャンセル</button>
-    </div>
-  </div>
-</div>
 
 
 <div class="nav-row">
@@ -1391,7 +1342,7 @@ function getSleepHours(dateKey) {
 function switchView(v) {
   view = v;
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['month','week','day','input','stats','koban'][i] === v);
+    t.classList.toggle('active', ['month','week','day','input','stats','spec'][i] === v);
   });
   if (v === 'week') weekStart = getWeekStart(new Date(selectedDate));
   render();
@@ -1440,9 +1391,9 @@ function updateNavTitle() {
     } else {
       el.textContent = `${statsCursor.getFullYear()}年 — 統計`;
     }
+  } else if (view === 'spec') {
+    el.textContent = '仕様書';
   } else {
-    const d = new Date(selectedDate);
-    el.textContent = `入力 — ${d.getMonth()+1}月${d.getDate()}日`;
   }
 }
 
@@ -1452,6 +1403,7 @@ function render() {
   else if (view === 'week')  renderWeek();
   else if (view === 'day')   renderDay();
   else if (view === 'stats') renderStats();
+  else if (view === 'spec')  renderSpec();
   else                       renderInput();
 }
 
@@ -3014,46 +2966,74 @@ function showToast(msg) {
 }
 
 // ══════════════════════════════════════════
-// EXPORT / IMPORT（Safari対応コピペ方式）
+// SPEC VIEW（仕様書）
 // ══════════════════════════════════════════
-function openExportModal() {
-  document.getElementById('exportText').value = JSON.stringify(appData, null, 2);
-  document.getElementById('exportModal').classList.add('show');
+function renderSpec() {
+  const c = document.getElementById('mainContent');
+  c.innerHTML = `
+  <div style="padding:16px;max-width:680px;margin:0 auto;font-family:var(--sans);">
+
+    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📋 アプリ概要</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.8;">
+        <b>アプリ名：</b>TIME TABLE<br>
+        <b>現バージョン：</b>MK-60<br>
+        <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
+        <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
+        <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
+        <b>固定ファイル名：</b>TIME_TABLE_MK-49.html（上書き更新）<br>
+        <b>バージョン管理：</b>アプリ内表示・納品ファイル名は毎回番号を上げる
+      </div>
+    </div>
+
+    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">🗂️ タブ構成・使い方</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>月（月ビュー）：</b>月間カレンダー。各日にCODE・タスクを表示。タップで日ビューへ遷移<br>
+        <b>週（週ビュー）：</b>週間表示。サマリーとライフ記録セクションあり<br>
+        <b>日（日ビュー）：</b>選択日の詳細。入力へのショートカットあり。TRIPカード表示<br>
+        <b>入力：</b>勤務データ入力画面。CODE直接入力・複合勤務対応<br>
+        <b>📊（統計）：</b>勤務時間・睡眠・勤務間隔の統計グラフ<br>
+        <b>仕様（本画面）：</b>アプリの仕様書・使い方確認
+      </div>
+    </div>
+
+    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📖 用語定義</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>CODE：</b>交番番号（旧：路線識別子）。3桁の数字で入力<br>
+        <b>TRIP：</b>便番号（旧：ルート番号）。複合勤務時に使用<br>
+        <b>複合勤務：</b>1日に複数のCODE/TRIPが発生する勤務形態<br>
+        <b>休日：</b>赤色で統一表示<br>
+        <b>ライフ記録：</b>睡眠・勤務間隔などの生活データ
+      </div>
+    </div>
+
+    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">🔄 データ・同期仕様</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>クラウド：</b>Firebase Firestore（project: schedule-app-d1ba4）<br>
+        <b>ドキュメント：</b>schedules / mkdata<br>
+        <b>ローカル：</b>localStorage にも並行保存<br>
+        <b>リアルタイム：</b>他デバイスの変更を自動反映（onSnapshot）<br>
+        <b>書き出し/読み込み：</b>廃止（Firebase同期で不要）
+      </div>
+    </div>
+
+    <div style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">🛠️ 開発・運用ルール</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>納品ファイル名：</b>TIME_TABLE_MK-{バージョン}.html（例：MK-60）<br>
+        <b>GitHub アップロード時：</b>TIME_TABLE_MK-49.html に改名して上書き<br>
+        <b>アプリ内バージョン：</b>ヘッダーに表示。更新のたびに番号を上げる<br>
+        <b>仕様書：</b>この画面。変更があれば都度Claudeに依頼して更新
+      </div>
+    </div>
+
+  </div>`;
 }
-function selectExportText() {
-  const ta = document.getElementById('exportText');
-  ta.select();
-  ta.setSelectionRange(0, 99999); // モバイル対応
-  try {
-    document.execCommand('copy');
-    showToast('クリップボードにコピーしました ✓');
-  } catch {
-    showToast('手動でコピーしてください');
-  }
-}
-function openImportModal() {
-  document.getElementById('importText').value = '';
-  document.getElementById('importModal').classList.add('show');
-}
-function doImport() {
-  const txt = document.getElementById('importText').value.trim();
-  if (!txt) { showToast('⚠️ テキストを貼り付けてください'); return; }
-  try {
-    const imported = JSON.parse(txt);
-    const count = Object.keys(imported).length;
-    Object.keys(imported).forEach(k => { appData[k] = imported[k]; });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-    if (firestoreSave) firestoreSave(appData);
-    closeModal('importModal');
-    render();
-    showToast(`読み込み完了 ✓ （${count}件）`);
-  } catch {
-    showToast('⚠️ データの形式が正しくありません');
-  }
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
-}
+
+
 
 // ══════════════════════════════════════════
 // 新交番管理
