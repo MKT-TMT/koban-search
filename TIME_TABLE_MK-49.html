@@ -3120,14 +3120,16 @@ function checkAuth() {
 
     // TIMETABLEデータ と IRODORIデータ を並列取得してから render
     try {
-      const [snap, irodoriSnap] = await Promise.all([
-        getDoc(docRef),
-        getDoc(irodoriDocRef)
-      ]);
+      const snap = await getDoc(docRef);
 
-      // IRODORIデータをセット
-      if (irodoriSnap.exists()) {
-        window._irodoriCloudData = irodoriSnap.data().appData || {};
+      // IRODORIデータをオプション取得（失敗してもオフライン扱いにしない）
+      try {
+        const irodoriSnap = await getDoc(irodoriDocRef);
+        if (irodoriSnap.exists()) {
+          window._irodoriCloudData = irodoriSnap.data().appData || {};
+        }
+      } catch(irodoriErr) {
+        console.warn('IRODORIデータ取得スキップ:', irodoriErr);
       }
 
       // TIMETABLEデータをセット
