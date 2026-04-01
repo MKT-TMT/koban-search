@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-60</title>
+<title>TIME TABLE MK-61</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -921,7 +921,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-60</div>
+    <div class="auth-logo">MK-61</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -936,7 +936,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-60 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-61 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -945,7 +945,6 @@
     <button class="tab active" onclick="switchView('month')">月</button>
     <button class="tab" onclick="switchView('week')">週</button>
     <button class="tab" onclick="switchView('day')">日</button>
-    <button class="tab" onclick="switchView('input')">入力</button>
     <button class="tab" onclick="switchView('stats')">📊</button>
     <button class="tab" onclick="switchView('spec')">仕様</button>
   </div>
@@ -1342,7 +1341,7 @@ function getSleepHours(dateKey) {
 function switchView(v) {
   view = v;
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['month','week','day','input','stats','spec'][i] === v);
+    t.classList.toggle('active', ['month','week','day','stats','spec'][i] === v);
   });
   if (v === 'week') weekStart = getWeekStart(new Date(selectedDate));
   render();
@@ -1394,6 +1393,8 @@ function updateNavTitle() {
   } else if (view === 'spec') {
     el.textContent = '仕様書';
   } else {
+    const d = new Date(selectedDate);
+    el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
   }
 }
 
@@ -1404,7 +1405,7 @@ function render() {
   else if (view === 'day')   renderDay();
   else if (view === 'stats') renderStats();
   else if (view === 'spec')  renderSpec();
-  else                       renderInput();
+  else                       renderDay();
 }
 
 // ══════════════════════════════════════════
@@ -1637,48 +1638,281 @@ function renderDay() {
   const sleepMin = getSleepHours(key);
   const workMin = info && info.start && info.end ? diffMin(parseTime(info.start), parseTime(info.end)) : null;
 
-  const prev = new Date(key); prev.setDate(prev.getDate()-1);
-  const prevRec = appData[fmtDate(prev)] || {};
-  const prevLife = prevRec.life || {};
-
   const intervalColor = intervalMin === null ? '' : intervalMin < 600 ? 'bad' : intervalMin < 660 ? 'warn' : 'good';
   const sleepColor = sleepMin === null ? '' : sleepMin < 360 ? 'bad' : sleepMin < 420 ? 'warn' : 'good';
 
-  function infoRow(label, val) {
-    return `<div class="life-row">
-      <span class="life-label">${label}</span>
-      <span style="font-family:var(--mono);font-size:26px;font-weight:700;color:${val ? 'var(--text)' : 'var(--muted)'}">${val || '—'}</span>
+  // ── シフト入力パネル ──
+  const specials = [
+    { id:'501交番', label:'公休日',    selCls:'sel-holiday' },
+    { id:'502交番', label:'振替休日',  selCls:'sel-sub' },
+    { id:'503交番', label:'有給休暇',  selCls:'sel-paid' },
+    { id:null,      label:'休み（未設定）', selCls:'sel-off' },
+    { id:'compound',label:'複合業務',  selCls:'sel-compound' },
+  ];
+
+  const hasHoliday = ['501交番','502交番','503交番',null].includes(rec.shift);
+  const hasWork = info && info.type === 'work';
+
+  let specialHtml = '<div class="special-btns">';
+  specials.forEach(s => {
+    const active = rec.shift === s.id;
+    specialHtml += `<button class="special-btn${active?' '+s.selCls:''}" onclick="setShiftMode('${key}','${s.id}')">${s.label}</button>`;
+  });
+  specialHtml += '</div>';
+
+  // 休日クリアボタン（選択中のみ）
+  const holidayClearHtml = hasHoliday
+    ? `<button onclick="clearHoliday('${key}')" style="font-size:11px;padding:4px 10px;border-radius:7px;border:1.5px solid #f4a0a0;background:#fff5f5;color:#c0392b;cursor:pointer;font-weight:700;margin-left:8px;">✕ クリア</button>`
+    : '';
+
+  // CODE直接入力
+  const currentCode = rec.shift && rec.shift !== '501交番' && rec.shift !== '502交番' && rec.shift !== '503交番' && rec.shift !== 'compound' ? rec.shift : null;
+  const codeNum = currentCode ? parseInt(currentCode) : null;
+  const codeDisplay = codeNum ? String(codeNum).padStart(3,'0') : '';
+  const currentShiftInfo = codeNum ? getShiftInfo(key) : null;
+  const codeTimeStr = currentShiftInfo && currentShiftInfo.start ? `${currentShiftInfo.start} – ${currentShiftInfo.end}` : '';
+
+  const selBarHtml = currentShiftInfo ? `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:5px 16px;font-weight:800;font-size:20px;font-family:var(--mono);letter-spacing:1px;">${codeDisplay}</span>
+      <span style="font-size:13px;color:var(--muted);">${codeTimeStr}</span>
+      <button onclick="clearShift('${key}')" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1.5px solid #f4a0a0;background:#fff5f5;color:#c0392b;cursor:pointer;font-weight:700;margin-left:auto;" id="clearShiftBtn_${key}">業務クリア</button>
+    </div>` : '';
+
+  const shiftListHtml = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <input type="number" min="1" max="999" placeholder="CODE番号" id="codeDirectInput_${key}"
+        value="${codeDisplay}"
+        oninput="onCodeDirectInput('${key}',this.value)"
+        style="font-family:var(--mono);font-size:28px;font-weight:800;width:110px;text-align:center;border:2px solid var(--accent);border-radius:10px;padding:8px 10px;color:#0878a0;background:#E6F1FB;outline:none;letter-spacing:2px;">
+      <div id="codeDirectTime_${key}" style="font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;">${codeTimeStr ? '▶ ' + codeTimeStr : ''}</div>
+    </div>`;
+
+  // 複合業務パネル（既存のrenderInputから流用）
+  let compoundPanelHtml = '';
+  if (rec.shift === 'compound') {
+    const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
+    const dbType = isNew ? 'new' : 'cur';
+    const d2 = new Date(key); const dow2 = d2.getDay();
+    const shu2 = dow2===6?'土曜':dow2===0?'日祝':'平日';
+    const selKobans = rec.compoundKobans || [];
+    const modes = rec.compoundKobanModes || {};
+    const partialData = rec.compoundPartialData || {};
+    const tasks = rec.taskContents || [];
+    const taskFormOpen = window._taskFormOpen && window._taskFormOpen === key;
+    const taskFormState = window._taskFormState || { type: '業務習得', customName: '', start: '', end: '' };
+    const presetTypes = (rec.taskPresets || ['業務習得', '車庫整理']);
+    let taskItemsHtml = tasks.map((t, i) => `
+      <div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:#f0faff;border-radius:6px;margin-bottom:4px;">
+        <span style="font-size:12px;font-weight:700;color:#0878a0;">${t.type||''}</span>
+        <span style="font-size:11px;color:var(--muted);">${t.start||''}${t.end?' – '+t.end:''}</span>
+        <button class="task-content-del" onclick="deleteTaskContent('${key}',${i})">✕</button>
+      </div>`).join('');
+    const isPartialMode = window._compInputMode === 'partial';
+    compoundPanelHtml = `<div class="compound-panel">
+      <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">複合業務 — CODE選択</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <button onclick="setCompInputMode('full')" style="font-size:11px;padding:4px 12px;border-radius:7px;border:none;background:${!isPartialMode?'var(--accent)':'#e8f0fe'};color:${!isPartialMode?'#fff':'var(--accent)'};font-weight:700;cursor:pointer;">全部</button>
+        <button onclick="setCompInputMode('partial')" style="font-size:11px;padding:4px 12px;border-radius:7px;border:none;background:${isPartialMode?'var(--accent)':'#e8f0fe'};color:${isPartialMode?'#fff':'var(--accent)'};font-weight:700;cursor:pointer;">一部</button>
+        <span style="font-size:11px;color:var(--muted);">モード選択してCODE追加</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <input type="number" min="1" max="999" placeholder="CODE" id="compCodeInput_${key}"
+          style="font-family:var(--mono);font-size:20px;font-weight:800;width:90px;text-align:center;border:2px solid var(--accent);border-radius:10px;padding:6px 8px;color:#0878a0;background:#E6F1FB;outline:none;">
+        <button onclick="addCompoundKobanDirect('${key}')" style="font-size:12px;padding:6px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;">＋ 追加</button>
+      </div>
+      ${selKobans.map(n => {
+        const isAll = modes[n] !== 'part';
+        const codeStr = String(n).padStart(3,'0');
+        const pd = partialData[n] || {};
+        const {routes: allRoutes} = getEffectiveRoutes(dbType, shu2, n);
+        const tripNos = pd.tripNos || [];
+        let tripHtml = '';
+        if (!isAll) {
+          tripHtml = `<div style="margin-top:6px;padding-left:8px;">` +
+            allRoutes.map(r => `
+              <label style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:11px;">
+                <input type="checkbox" ${tripNos.includes(r.no)?'checked':''} onchange="previewTrip('${key}',${n},'${r.no}')">
+                <span style="font-family:var(--mono);color:#0878a0;">${r.no}</span>
+                <span>${r.dep_place}→${r.arr_place} ${r.dep_time}</span>
+              </label>`).join('') +
+            `<button onclick="addCompoundTrip('${key}',${n})" style="font-size:11px;margin-top:4px;padding:3px 10px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;">確定</button>` +
+            `</div>`;
+        }
+        return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;background:#f0faff;border-radius:8px;padding:6px 10px;">
+          <span style="background:#c8eef8;color:#0878a0;border-radius:7px;padding:3px 10px;font-weight:800;font-size:15px;font-family:var(--mono);">${codeStr}</span>
+          <span style="font-size:11px;color:var(--muted);">${isAll?'全部':'一部'}</span>
+          <button onclick="removeCompoundKoban('${key}',${n})" style="font-size:11px;padding:2px 8px;border-radius:5px;border:none;background:#ffeaea;color:#c0392b;cursor:pointer;margin-left:auto;">✕</button>
+          ${tripHtml}
+        </div>`;
+      }).join('')}
+      ${taskItemsHtml ? `<div style="margin-top:8px;">${taskItemsHtml}</div>` : ''}
     </div>`;
   }
 
+  // ── 逆算値 ──
+  const calc = rec.calc || {};
+  const DEF_ARRIVE_TO_COMMUTE = calc.arriveToCommute !== undefined ? calc.arriveToCommute : 90;
+  const DEF_COMMUTE_TO_READY  = calc.commuteToReady  !== undefined ? calc.commuteToReady  : 90;
+  const DEF_READY_TO_WAKE     = calc.readyToWake     !== undefined ? calc.readyToWake     : 240;
+  const DEF_SLEEP_H           = calc.sleepH          !== undefined ? calc.sleepH          : 6;
+  const DEF_SLEEP_M           = calc.sleepM          !== undefined ? calc.sleepM          : 30;
+  const DEF_ARRIVE            = calc.arriveTime      !== undefined ? calc.arriveTime      : '';
+
+  let arriveOpts = '<option value="">--</option>';
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 5) {
+      const v = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      arriveOpts += `<option value="${v}"${DEF_ARRIVE===v?' selected':''}>${v}</option>`;
+    }
+  }
+  function minOpts(cur) {
+    let o = '';
+    for (let i = 0; i <= 300; i += 5) o += `<option value="${i}"${cur===i?' selected':''}>${i}</option>`;
+    return o;
+  }
+  let sleepHOpts = '';
+  for (let i = 1; i <= 12; i++) sleepHOpts += `<option value="${i}"${DEF_SLEEP_H===i?' selected':''}>${i}</option>`;
+  let sleepMOpts = '';
+  for (let i = 0; i < 60; i += 5) sleepMOpts += `<option value="${i}"${DEF_SLEEP_M===i?' selected':''}>${i}</option>`;
+
+  const leftRows = [
+    { id:'life_sleep',   field:'sleep',   label:'💤 就寝',    val: life.sleep   || '' },
+    { id:'life_wake',    field:'wake',    label:'☀️ 起床',    val: life.wake    || '' },
+    { id:'life_ready',   field:'ready',   label:'🚿 準備完了', val: life.ready   || '' },
+    { id:'life_commute', field:'commute', label:'🚃 出社',    val: life.commute || '' },
+    { id:'calc_arrive',  field:null,      label:'🏢 会社到着', val: DEF_ARRIVE,  isSelect: true },
+  ];
+  const leftHtml = leftRows.map(r => `
+    <div class="lc-row">
+      <div class="lc-label">${r.label}</div>
+      ${r.isSelect
+        ? `<select class="lc-inp" id="${r.id}" onchange="onCalcChange('${key}')">
+             ${arriveOpts}
+           </select>`
+        : `<input type="time" value="${r.val}" class="lc-inp" id="${r.id}"
+             onchange="onLifeChange('${key}','${r.field}',this.value)"
+             onfocus="this.style.borderColor='#7ab830'"
+             onblur="this.style.borderColor='#b8e08a'">`
+      }
+    </div>`).join('');
+
+  const rightHtml = `
+    <div class="lc-calc-row">
+      <div class="lc-calc-label">睡眠時間</div>
+      <div class="lc-calc-inner">
+        <select class="lc-calc-sel lc-calc-sel-s" id="calc_sh" onchange="onCalcChange('${key}')">${sleepHOpts}</select>
+        <span class="lc-calc-unit">時間</span>
+        <select class="lc-calc-sel lc-calc-sel-s" id="calc_sm" onchange="onCalcChange('${key}')">${sleepMOpts}</select>
+        <span class="lc-calc-unit">分</span>
+      </div>
+    </div>
+    <div class="lc-calc-row">
+      <div class="lc-calc-label">起床 → 準備完了</div>
+      <div class="lc-calc-inner">
+        <select class="lc-calc-sel lc-calc-sel-wide" id="calc_r2w" onchange="onCalcChange('${key}')">${minOpts(DEF_READY_TO_WAKE)}</select>
+        <span class="lc-calc-unit">分</span>
+      </div>
+    </div>
+    <div class="lc-calc-row">
+      <div class="lc-calc-label">準備完了 → 出社</div>
+      <div class="lc-calc-inner">
+        <select class="lc-calc-sel lc-calc-sel-wide" id="calc_c2r" onchange="onCalcChange('${key}')">${minOpts(DEF_COMMUTE_TO_READY)}</select>
+        <span class="lc-calc-unit">分</span>
+      </div>
+    </div>
+    <div class="lc-calc-row">
+      <div class="lc-calc-label">出社 → 会社到着</div>
+      <div class="lc-calc-inner">
+        <select class="lc-calc-sel lc-calc-sel-wide" id="calc_a2c" onchange="onCalcChange('${key}')">${minOpts(DEF_ARRIVE_TO_COMMUTE)}</select>
+        <span class="lc-calc-unit">分</span>
+      </div>
+    </div>`;
+
+  const lifeCalcHtml = `
+  <div class="life-calc-card">
+    <div class="life-calc-header">
+      <div class="life-calc-col-hd left">🕐 時刻入力</div>
+      <div class="life-calc-col-hd right">🔁 逆算設定</div>
+    </div>
+    <div class="life-calc-grid">
+      <div class="life-calc-left">${leftHtml}</div>
+      <div class="life-calc-right">${rightHtml}</div>
+    </div>
+  </div>`;
+
+  // シフト情報ヘッダー表示
+  const shiftLabel = info ? info.label : (rec.shift === '501交番' ? '公休日' : rec.shift === '502交番' ? '振替休日' : rec.shift === '503交番' ? '有給休暇' : '未設定');
+  const isOpen = window._dayInputOpen === key;
+
+  // TRIP表示
+  const tripHtml = (() => {
+    if (!info || info.type !== 'work') return '';
+    const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
+    const dbType = isNew ? 'new' : 'cur';
+    const d3 = new Date(key); const dow3 = d3.getDay();
+    const shu3 = dow3===6?'土曜':dow3===0?'日祝':'平日';
+    if (rec.shift === 'compound') {
+      const kobans = rec.compoundKobans || [];
+      const modes2 = rec.compoundKobanModes || {};
+      const pd2 = rec.compoundPartialData || {};
+      if (!kobans.length) return '';
+      let blocksHtml = '';
+      kobans.forEach(n => {
+        const isAll = modes2[n] !== 'part';
+        const {routes: allRoutes} = getEffectiveRoutes(dbType, shu3, n);
+        let displayRoutes = isAll ? allRoutes : ((pd2[n]&&pd2[n].tripNos)||[]).map(no=>allRoutes.find(r=>r.no===no)).filter(Boolean);
+        if (!displayRoutes.length) return;
+        const codeStr = String(n).padStart(3,'0');
+        const rowsHtml = displayRoutes.map(r => `
+          <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+            <span style="font-size:12px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
+          </div>`).join('');
+        blocksHtml += `<div style="margin-bottom:10px;"><div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">CODE ${codeStr}（${isAll?'全部':'一部'}）</div>${rowsHtml}</div>`;
+      });
+      return blocksHtml ? `<div class="section-label">TRIP</div><div class="day-card"><div class="day-card-body" style="padding:10px 16px;">${blocksHtml}</div></div>` : '';
+    }
+    if (!rec.shift || rec.shift.startsWith('5')) return '';
+    const kobanNum = parseInt(rec.shift);
+    if (isNaN(kobanNum)) return '';
+    const {routes} = getEffectiveRoutes(dbType, shu3, kobanNum);
+    if (!routes || !routes.length) return '';
+    const rowsHtml = routes.map(r => `
+      <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+        <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+        <span style="font-size:12px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
+      </div>`).join('');
+    return `<div class="section-label">TRIP</div><div class="day-card"><div class="day-card-body" style="padding:10px 16px;">${rowsHtml}</div></div>`;
+  })();
+
   c.innerHTML = `
   <div class="day-view">
+
     <div class="section-label">シフト情報</div>
-    <div class="day-card">
+    <div class="day-card" style="cursor:pointer;" onclick="toggleDayInput('${key}')">
       <div class="day-card-header">
         <span class="day-card-icon">📋</span>
-        <span class="day-card-title">${info ? info.label : '未設定'}</span>
+        <span class="day-card-title">${shiftLabel}</span>
         ${info && info.start ? `<span class="day-card-sub">${info.start} – ${info.end}</span>` : ''}
+        <span style="margin-left:auto;font-size:18px;color:var(--accent);transition:transform 0.2s;${isOpen?'transform:rotate(180deg)':''}">∨</span>
       </div>
-      <div class="day-card-body">
-        <div class="life-row">
-          <span class="life-label">CODE</span>
-          ${info ? `<span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:5px 16px;font-weight:800;font-size:20px;font-family:var(--mono);letter-spacing:1px;display:inline-block;">${info.label}</span>` : '<span style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--muted)">—</span>'}
+    </div>
+    ${isOpen ? `
+    <div class="inp-card" style="margin-top:4px;">
+      <div class="inp-card-body">
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+          ${specialHtml.replace('</div>','') + holidayClearHtml + '</div>'}
         </div>
-        ${infoRow('勤務開始', info && info.start ? info.start : '')}
-        ${infoRow('勤務終了', info && info.end ? info.end : '')}
+        ${compoundPanelHtml}
+        ${rec.shift !== 'compound' ? selBarHtml + shiftListHtml : ''}
       </div>
-    </div>
+    </div>` : ''}
 
-    <div class="section-label">生活記録</div>
-    <div class="day-card">
-      <div class="day-card-body">
-        ${infoRow('💤 就寝', life.sleep || '')}
-        ${infoRow('☀️ 起床', life.wake || '')}
-        ${infoRow('🚿 準備完了', life.ready || '')}
-        ${infoRow('🚃 出社', life.commute || '')}
-      </div>
-    </div>
+    <div class="section-label">生活時刻の記録 ＆ 逆算設定</div>
+    ${lifeCalcHtml}
 
     <div class="section-label">サマリー</div>
     <div class="day-card">
@@ -1697,156 +1931,13 @@ function renderDay() {
             <div class="stat-val ${sleepColor}">${fmtMin(sleepMin)}</div>
           </div>
         </div>
-        ${intervalMin !== null && intervalMin < 600 ? `<div class="alert-warn bad"><span class="alert-icon">⚠️</span><div><div class="alert-main">勤務間隔が10時間未満</div><div class="alert-sub">勤務間時間：${fmtMin(intervalMin)}（残り ${fmtMin(600 - intervalMin)}）</div></div></div>` : ''}
-        ${sleepMin !== null && sleepMin < 360 ? `<div class="alert-warn warn"><span class="alert-icon">😴</span><div><div class="alert-main">睡眠が6時間未満</div><div class="alert-sub">睡眠時間：${fmtMin(sleepMin)}</div></div></div>` : ''}
+        ${intervalMin !== null && intervalMin < 600 ? `<div class="alert-warn bad"><span class="alert-icon">⚠️</span><div><div class="alert-main">勤務間隔が10時間未満</div><div class="alert-sub">${fmtMin(intervalMin)}（残り ${fmtMin(600 - intervalMin)}）</div></div></div>` : ''}
+        ${sleepMin !== null && sleepMin < 360 ? `<div class="alert-warn warn"><span class="alert-icon">😴</span><div><div class="alert-main">睡眠が6時間未満</div><div class="alert-sub">${fmtMin(sleepMin)}</div></div></div>` : ''}
       </div>
     </div>
 
-    ${(()=>{
-      const tStart = rec.trainingStart || '';
-      const tEnd   = rec.trainingEnd   || '';
-      const tLabel = rec.trainingLabel || '';
-      if (!tStart && !tEnd && !tLabel) return '';
-      if (rec.shift === 'training') return ''; // 単独時は上で表示済み
-      if (rec.shift === 'compound') return ''; // 複合業務時はtaskContentsで管理
-      const tMin = (tStart && tEnd) ? diffMin(parseTime(tStart), parseTime(tEnd)) : null;
-      return `
-    <div class="section-label">業務習得</div>
-    <div class="day-card">
-      <div class="day-card-body">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-          <span style="background:#c8f5e2;color:#0a5e2a;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;">📚 ${tLabel||'業務習得'}</span>
-        </div>
-        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
-          <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:22px;">${tStart||'—'}</div></div>
-          <div class="stat-box"><div class="stat-label">終了</div><div class="stat-val" style="font-size:22px;">${tEnd||'—'}</div></div>
-          <div class="stat-box"><div class="stat-label">時間</div><div class="stat-val" style="font-size:22px;">${tMin!==null?fmtMin(tMin):'—'}</div></div>
-        </div>
-      </div>
-    </div>`;
-    })()}
+    ${tripHtml}
 
-    <div style="text-align:center;margin-top:16px">
-      <button onclick="selectedDate='${key}';switchView('input')"
-        style="padding:10px 28px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(58,123,255,.3);font-family:var(--sans)">
-        ✏️ この日を入力・編集する
-      </button>
-    </div>
-
-    ${(()=>{
-      if (!info || info.type !== 'work') return '';
-      const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
-      const dbType = isNew ? 'new' : 'cur';
-      const d = new Date(key); const dow = d.getDay();
-      const shu = dow===6?'土曜':dow===0?'日祝':'平日';
-
-      // ── 複合業務 ──
-      if (rec.shift === 'compound') {
-        const kobans = rec.compoundKobans || [];
-        const modes  = rec.compoundKobanModes || {};
-        const pd     = rec.compoundPartialData || {};
-        if (!kobans.length) return '';
-        let blocksHtml = '';
-        kobans.forEach(n => {
-          const isAll = modes[n] !== 'part';
-          const {routes: allRoutes} = getEffectiveRoutes(dbType, shu, n);
-          let displayRoutes = [];
-          if (isAll) {
-            displayRoutes = allRoutes;
-          } else {
-            const tripNos = (pd[n] && pd[n].tripNos) || [];
-            displayRoutes = tripNos.map(no => allRoutes.find(r => r.no === no)).filter(Boolean);
-          }
-          if (!displayRoutes.length) return;
-          const modeLabel = isAll ? '全部' : '一部';
-          const codeStr = String(n).padStart(3,'0');
-          const rowsHtml = displayRoutes.map(r => `
-            <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-              <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border:1px solid var(--border);border-radius:4px;padding:2px 7px;white-space:nowrap;">${r.no}</span>
-              <span style="font-size:12px;color:var(--text);flex:1;min-width:100px;">${r.dep_place} → ${r.arr_place}</span>
-              <span style="font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;">${r.dep_time} dep › ${r.arr_time} arr</span>
-            </div>`).join('');
-          blocksHtml += `
-            <div style="margin-bottom:10px;">
-              <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">CODE ${codeStr}（${modeLabel}）</div>
-              ${rowsHtml}
-            </div>`;
-        });
-        if (!blocksHtml) return '';
-        return `
-    <div class="section-label">TRIP</div>
-    <div class="day-card">
-      <div class="day-card-body" style="padding:10px 16px;">
-        ${blocksHtml}
-      </div>
-    </div>`;
-      }
-
-      // ── 通常シフト ──
-      if (rec.shift === 'training' || rec.shift === 'custom') return '';
-      const tbl = getEffectiveShiftTable(key);
-      const entry = tbl[rec.shift];
-      if (!entry) return '';
-      const kobanNum = parseInt(rec.shift.replace('交番','').trim(), 10);
-      const {routes} = getEffectiveRoutes(dbType, shu, kobanNum);
-      if (!routes || !routes.length) return '';
-      const rowsHtml = routes.map(r => `
-        <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-          <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border:1px solid var(--border);border-radius:4px;padding:2px 7px;white-space:nowrap;">${r.no}</span>
-          <span style="font-size:12px;color:var(--text);flex:1;min-width:120px;">${r.dep_place} → ${r.arr_place}</span>
-          <span style="font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;">${r.dep_time} dep › ${r.arr_time} arr</span>
-        </div>`).join('');
-      return `
-    <div class="section-label">TRIP</div>
-    <div class="day-card">
-      <div class="day-card-body" style="padding:10px 16px;">
-        ${rowsHtml}
-      </div>
-    </div>`;
-    })()}
-
-    ${(()=>{
-      const irodoriIcons = getIrodoriIcons(key);
-      if (!irodoriIcons.length) return '';
-      return `
-    <div class="section-label">🌿 IRODORIの予定</div>
-    <div class="day-card">
-      <div class="day-card-body" style="padding:14px 16px;">
-        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-          ${irodoriIcons.map(ic => `<span style="font-size:32px;line-height:1;">${ic}</span>`).join('')}
-        </div>
-      </div>
-    </div>`;
-    })()}
-
-    ${(()=>{
-      if (!info || info.type !== 'work') return '';
-
-
-      // ── 業務習得の考察（単独シフト時）──
-      if (rec.shift === 'training') {
-        const tStart = rec.trainingStart || '';
-        const tEnd   = rec.trainingEnd   || '';
-        const tLabel = rec.trainingLabel || '業務習得';
-        const tMin   = (tStart && tEnd) ? diffMin(parseTime(tStart), parseTime(tEnd)) : null;
-        return `
-      <div class="section-label">業務習得</div>
-      <div class="day-card">
-        <div class="day-card-body">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-            <span style="background:#c8f5e2;color:#0a5e2a;border-radius:9px;padding:4px 14px;font-weight:800;font-size:15px;">📚 ${tLabel}</span>
-          </div>
-          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
-            <div class="stat-box"><div class="stat-label">開始</div><div class="stat-val" style="font-size:22px;">${tStart||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">終了</div><div class="stat-val" style="font-size:22px;">${tEnd||'—'}</div></div>
-            <div class="stat-box"><div class="stat-label">時間</div><div class="stat-val" style="font-size:22px;">${tMin!==null?fmtMin(tMin):'—'}</div></div>
-          </div>
-        </div>
-      </div>`;
-      }
-
-      return '';
-    })()}
   </div>`;
 }
 
@@ -2965,6 +3056,36 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+// ── 日ビュー入力パネル開閉 ──
+function toggleDayInput(dateKey) {
+  window._dayInputOpen = (window._dayInputOpen === dateKey) ? null : dateKey;
+  render();
+}
+
+// ── 休日クリア ──
+function clearHoliday(dateKey) {
+  if (!appData[dateKey]) appData[dateKey] = {};
+  appData[dateKey].shift = undefined;
+  delete appData[dateKey].shift;
+  saveData(appData);
+  render();
+}
+
+// ── 業務クリア ──
+function clearShift(dateKey) {
+  if (!confirm('業務内容（CODE・複合勤務）を削除しますか？')) return;
+  if (!appData[dateKey]) return;
+  delete appData[dateKey].shift;
+  delete appData[dateKey].compoundKobans;
+  delete appData[dateKey].compoundKobanModes;
+  delete appData[dateKey].compoundPartialData;
+  delete appData[dateKey].compoundManualStart;
+  delete appData[dateKey].compoundManualEnd;
+  delete appData[dateKey].taskContents;
+  saveData(appData);
+  render();
+}
+
 // ══════════════════════════════════════════
 // SPEC VIEW（仕様書）
 // ══════════════════════════════════════════
@@ -2977,7 +3098,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📋 アプリ概要</div>
       <div style="font-size:12px;color:var(--text);line-height:1.8;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-60<br>
+        <b>現バージョン：</b>MK-61<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -3023,7 +3144,7 @@ function renderSpec() {
     <div style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">🛠️ 開発・運用ルール</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
-        <b>納品ファイル名：</b>TIME_TABLE_MK-{バージョン}.html（例：MK-60）<br>
+        <b>納品ファイル名：</b>TIME_TABLE_MK-{バージョン}.html（例：MK-61）<br>
         <b>GitHub アップロード時：</b>TIME_TABLE_MK-49.html に改名して上書き<br>
         <b>アプリ内バージョン：</b>ヘッダーに表示。更新のたびに番号を上げる<br>
         <b>仕様書：</b>この画面。変更があれば都度Claudeに依頼して更新
