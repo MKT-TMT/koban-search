@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-61</title>
+<title>TIME TABLE MK-62</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -134,6 +134,7 @@
   .cal-shift.holiday { background: #ffd9d9; color: #c01010; }
   .cal-shift.off     { background: #ffd9d9; color: #c01010; }
   .cal-shift.paid    { background: #ffd9d9; color: #c01010; }
+  .cal-shift.plan    { background: #ffe5b0; color: #a06000; border: 1px dashed #e0a030; }
   .cal-shift.task    { background: #d4f5e5; color: #0a5e2a; }
   .cal-shift.task2   { background: #fff3cc; color: #8a5c00; }
   .cal-time { font-family: var(--mono); font-size: 11px; color: var(--muted); }
@@ -218,6 +219,7 @@
   .wt-shift-badge.holiday { background: #ffd9d9; color: #c01010; }
   .wt-shift-badge.off     { background: #ffd9d9; color: #c01010; }
   .wt-shift-badge.paid    { background: #ffd9d9; color: #c01010; }
+  .wt-shift-badge.plan    { background: #ffe5b0; color: #a06000; border: 1px dashed #e0a030; }
 
   .wt-summary-badge {
     display: inline-block; padding: 4px 10px; border-radius: 6px;
@@ -242,8 +244,8 @@
     display: flex; align-items: center; gap: 10px;
   }
   .day-card-icon { font-size: 19px; }
-  .day-card-title { font-size: 16px; font-weight: 700; color: var(--text); }
-  .day-card-sub { font-size: 16px; color: var(--muted); margin-left: auto; font-family: var(--mono); font-weight: 600; }
+  .day-card-title { font-size: 28px; font-weight: 700; color: var(--text); }
+  .day-card-sub { font-size: 24px; color: var(--muted); margin-left: auto; font-family: var(--mono); font-weight: 600; }
   .day-card-body { padding: 14px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   .life-row {
@@ -258,8 +260,8 @@
     background: var(--surface2); border-radius: 10px; padding: 10px 12px;
     border: 1px solid var(--border); text-align: center;
   }
-  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
-  .stat-val { font-family: var(--mono); font-size: 26px; font-weight: 700; color: var(--text); }
+  .stat-label { font-size: 18px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+  .stat-val { font-family: var(--mono); font-size: 32px; font-weight: 700; color: var(--text); }
   .stat-val.good { color: var(--green); }
   .stat-val.warn { color: var(--amber); }
   .stat-val.bad  { color: var(--red); }
@@ -308,6 +310,7 @@
   .special-btn.sel-holiday  { background: #d4f5e5; color: #0a7a3e; border-color: #18b86a; }
   .special-btn.sel-sub      { background: #ffefd4; color: #965800; border-color: #e08a10; }
   .special-btn.sel-paid     { background: #ffd9d9; color: #a01010; border-color: #e03535; }
+  .special-btn.sel-plan     { background: #ffe5b0; color: #a06000; border: 1.5px dashed #e0a030; font-weight: 700; }
   .special-btn.sel-off      { background: #ebebeb; color: #555; border-color: #aaa; }
   .special-btn.sel-compound { background: #ede0ff; color: #6200cc; border-color: #9b4dff; }
   .special-btn.sel-training { background: #fff0d4; color: #8a4a00; border-color: #e07a00; }
@@ -650,7 +653,7 @@
 
   /* ══════════════ SECTION LABEL ══════════════ */
   .section-label {
-    font-size: 12px; font-weight: 800; letter-spacing: 1.5px;
+    font-size: 18px; font-weight: 800; letter-spacing: 1.5px;
     color: var(--muted); text-transform: uppercase;
     padding: 0 2px; margin-bottom: 8px; margin-top: 18px;
   }
@@ -713,8 +716,8 @@
     display: flex; gap: 0;
   }
   .life-calc-col-hd {
-    flex: 1; font-size: 10px; font-weight: 800; letter-spacing: 1px;
-    text-align: center; padding: 6px 0;
+    flex: 1; font-size: 16px; font-weight: 800; letter-spacing: 1px;
+    text-align: center; padding: 8px 0;
   }
   .life-calc-col-hd.left  { color: var(--muted); border-right: 1px solid #b8e08a; }
   .life-calc-col-hd.right { color: #3a6e10; }
@@ -725,34 +728,34 @@
   .life-calc-right { background: #fff; }
   .lc-row {
     display: flex; flex-direction: column; justify-content: center;
-    padding: 10px 12px; border-bottom: 1px solid #d8efc0; min-height: 66px;
+    padding: 12px 14px; border-bottom: 1px solid #d8efc0; min-height: 80px;
   }
   .lc-row:last-child { border-bottom: none; }
-  .lc-label { font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+  .lc-label { font-size: 20px; color: var(--muted); margin-bottom: 6px; }
   .lc-inp {
-    font-family: var(--mono); font-size: 15px; font-weight: 700;
+    font-family: var(--mono); font-size: 26px; font-weight: 700;
     border: 1.5px solid #b8e08a; border-radius: 8px;
-    padding: 6px 8px; color: var(--text); background: var(--surface);
+    padding: 6px 10px; color: var(--text); background: var(--surface);
     outline: none; width: 100%;
   }
   .lc-inp:focus { border-color: #7ab830; }
   .lc-calc-row {
-    display: flex; flex-direction: column; justify-content: center; gap: 5px;
-    padding: 10px 12px; border-bottom: 1px solid #d8efc0; min-height: 66px;
+    display: flex; flex-direction: column; justify-content: center; gap: 6px;
+    padding: 12px 14px; border-bottom: 1px solid #d8efc0; min-height: 80px;
     background: #fff;
   }
   .lc-calc-row:last-child { border-bottom: none; }
-  .lc-calc-label { font-size: 11px; font-weight: 800; color: #5a9e1a; letter-spacing: 0.5px; }
-  .lc-calc-inner { display: flex; align-items: center; gap: 5px; }
+  .lc-calc-label { font-size: 18px; font-weight: 800; color: #5a9e1a; letter-spacing: 0.5px; }
+  .lc-calc-inner { display: flex; align-items: center; gap: 6px; }
   .lc-calc-sel {
-    font-family: var(--mono); font-size: 14px; font-weight: 700;
+    font-family: var(--mono); font-size: 22px; font-weight: 700;
     border: 1.5px solid #b8e08a; border-radius: 7px;
-    padding: 5px 6px; background: #edfad0; color: #3a6e10; outline: none;
+    padding: 5px 8px; background: #edfad0; color: #3a6e10; outline: none;
   }
   .lc-calc-sel:focus { border-color: #7ab830; }
-  .lc-calc-sel-wide { width: 80px; }
-  .lc-calc-sel-s    { width: 50px; }
-  .lc-calc-unit { font-size: 12px; color: #5a9e1a; font-weight: 700; }
+  .lc-calc-sel-wide { width: 90px; }
+  .lc-calc-sel-s    { width: 60px; }
+  .lc-calc-unit { font-size: 18px; color: #5a9e1a; font-weight: 700; }
 
   /* ══════════════ TOAST ══════════════ */
   .toast {
@@ -921,7 +924,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-61</div>
+    <div class="auth-logo">MK-62</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -936,7 +939,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-61 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-62 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1142,7 +1145,7 @@ function getEffectiveDate() {
   const cfg = loadNewKobanConfig();
   return cfg ? cfg.effectiveDate : null;
 }
-const HOLIDAY_SHIFTS = { "501交番":"公休日", "502交番":"振替休日", "503交番":"有給休暇" };
+const HOLIDAY_SHIFTS = { "501交番":"公休日", "502交番":"振替休日", "503交番":"有給休暇", "504交番":"休日予定" };
 const DOW = ["日","月","火","水","木","金","土"];
 
 // ══════════════════════════════════════════
@@ -1313,7 +1316,7 @@ function getShiftInfo(dateKey) {
     const label = parts.length ? parts.map(p => p.label).join('＆') : (rec.compoundLabel || '複合業務');
     return { label, start, end, type: 'work' };
   }
-  if (HOLIDAY_SHIFTS[rec.shift]) return { label: HOLIDAY_SHIFTS[rec.shift], start: null, end: null, type: rec.shift === '503交番' ? 'paid' : rec.shift === '501交番' ? 'holiday' : 'off' };
+  if (HOLIDAY_SHIFTS[rec.shift]) return { label: HOLIDAY_SHIFTS[rec.shift], start: null, end: null, type: rec.shift === '503交番' ? 'paid' : rec.shift === '501交番' ? 'holiday' : rec.shift === '504交番' ? 'plan' : 'off' };
   const tbl = getEffectiveShiftTable(dateKey);
   const s = tbl[rec.shift];
   if (s) return { label: rec.shift.replace('交番',''), start: s.start, end: s.end, type: 'work' };
@@ -1377,7 +1380,14 @@ function goToday() {
 function updateNavTitle() {
   const el = document.getElementById('navTitle');
   if (view === 'month') {
-    el.textContent = `${cursor.getFullYear()}年${cursor.getMonth()+1}月`;
+    const year = cursor.getFullYear(), month = cursor.getMonth();
+    const phKey = `publicHolidays_${year}-${String(month+1).padStart(2,'0')}`;
+    const phSelected = appData[phKey] || [];
+    const DOW_NAMES_SHORT = ['日','月','火','水','木','金','土'];
+    const badgeText = phSelected.length > 0
+      ? ` <span style="background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.4);border-radius:8px;padding:2px 9px;font-size:13px;font-weight:600;vertical-align:middle;">📅 公休日：${phSelected.map(i=>DOW_NAMES_SHORT[i]+'曜').join('・')}</span>`
+      : '';
+    el.innerHTML = `${year}年${month+1}月${badgeText}`;
   } else if (view === 'week') {
     const end = new Date(weekStart); end.setDate(end.getDate()+6);
     el.textContent = `${weekStart.getMonth()+1}/${weekStart.getDate()} — ${end.getMonth()+1}/${end.getDate()}`;
@@ -1437,7 +1447,47 @@ function renderMonth() {
     html += renderCalCell(year, month+1, d, fmtDate(new Date(year, month+1, d)), true, todayKey);
   }
   html += '</div></div>';
+
+  // 公休日設定パネル
+  const phKey = `publicHolidays_${year}-${String(month+1).padStart(2,'0')}`;
+  const phSelected = (appData[phKey] || []);
+  const DOW_LABELS = ['日','月','火','水','木','金','土'];
+  const DOW_NAMES = ['日曜日','月曜日','火曜日','水曜日','木曜日','金曜日','土曜日'];
+  const resultText = phSelected.length > 0
+    ? `📅 ${year}年${month+1}月の公休日：${phSelected.map(i=>DOW_NAMES[i]).join('・')}`
+    : '（未設定）';
+  html += `<div style="background:#fff8ee;border-top:2px solid #f5c060;padding:14px 16px;">
+    <div style="font-size:15px;font-weight:700;color:#a06000;margin-bottom:10px;">📅 当月の公休日設定 <span style="font-size:12px;color:#888;font-weight:400;">— 曜日をタップして選択</span></div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">
+      ${DOW_LABELS.map((lbl,i)=>{
+        const active = phSelected.includes(i);
+        const col = i===0?'#e03535':i===6?'#1a8faa':'#555';
+        return `<button onclick="togglePublicHoliday(${year},${month},${i})"
+          style="text-align:center;font-size:14px;padding:9px 4px;border-radius:8px;
+          border:${active?'1.5px solid #f5a623':'1.5px solid #e0d0b0'};
+          background:${active?'#f5a623':'#fff'};
+          color:${active?'#fff':col};font-weight:${active?'700':'400'};cursor:pointer;">${lbl}</button>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:10px;font-size:13px;color:#a06000;background:#fff3d0;border-radius:8px;padding:8px 12px;border:1px solid #f5c060;">${resultText}</div>
+  </div>`;
+
   c.innerHTML = html;
+}
+
+function togglePublicHoliday(year, month, dowIndex) {
+  const phKey = `publicHolidays_${year}-${String(month+1).padStart(2,'0')}`;
+  let arr = appData[phKey] ? [...appData[phKey]] : [];
+  if (arr.includes(dowIndex)) {
+    arr = arr.filter(i => i !== dowIndex);
+  } else {
+    arr.push(dowIndex);
+    arr.sort();
+  }
+  appData[phKey] = arr;
+  saveAppData();
+  renderMonth();
+  updateNavTitle();
 }
 
 function renderCalCell(year, month, day, dateKey, other, todayKey) {
@@ -1458,7 +1508,8 @@ function renderCalCell(year, month, day, dateKey, other, todayKey) {
   if (info && !other) {
     if (info.type !== 'work') {
       // 休日系：1行だけ
-      inner += `<div class="cal-shift off">${info.label}</div>`;
+      const hCls = info.type === 'holiday' ? 'holiday' : info.type === 'paid' ? 'paid' : info.type === 'plan' ? 'plan' : 'off';
+      inner += `<div class="cal-shift ${hCls}">${info.label}</div>`;
     } else if (rec.shift === 'compound') {
       // 複合業務：taskContents → compound kobans の順に縦積み
       const tasks = rec.taskContents || [];
@@ -1565,7 +1616,7 @@ function renderWeek() {
       ${row('CODE', (d,key) => {
         const info = getShiftInfo(key);
         if (!info) return emptyCell(key);
-        const bc = info.type === 'work' ? 'work' : info.type === 'holiday' ? 'holiday' : info.type === 'paid' ? 'paid' : 'off';
+        const bc = info.type === 'work' ? 'work' : info.type === 'holiday' ? 'holiday' : info.type === 'paid' ? 'paid' : info.type === 'plan' ? 'plan' : 'off';
         return cell(key, `<span class="wt-shift-badge ${bc}">${info.label}</span>`);
       })}
       ${row('開始', (d,key) => {
@@ -1646,11 +1697,12 @@ function renderDay() {
     { id:'501交番', label:'公休日',    selCls:'sel-holiday' },
     { id:'502交番', label:'振替休日',  selCls:'sel-sub' },
     { id:'503交番', label:'有給休暇',  selCls:'sel-paid' },
+    { id:'504交番', label:'📅 休日予定', selCls:'sel-plan' },
     { id:null,      label:'休み（未設定）', selCls:'sel-off' },
     { id:'compound',label:'複合業務',  selCls:'sel-compound' },
   ];
 
-  const hasHoliday = ['501交番','502交番','503交番',null].includes(rec.shift);
+  const hasHoliday = ['501交番','502交番','503交番','504交番',null].includes(rec.shift);
   const hasWork = info && info.type === 'work';
 
   let specialHtml = '<div class="special-btns">';
@@ -1666,7 +1718,7 @@ function renderDay() {
     : '';
 
   // CODE直接入力
-  const currentCode = rec.shift && rec.shift !== '501交番' && rec.shift !== '502交番' && rec.shift !== '503交番' && rec.shift !== 'compound' ? rec.shift : null;
+  const currentCode = rec.shift && rec.shift !== '501交番' && rec.shift !== '502交番' && rec.shift !== '503交番' && rec.shift !== '504交番' && rec.shift !== 'compound' ? rec.shift : null;
   const codeNum = currentCode ? parseInt(currentCode) : null;
   const codeDisplay = codeNum ? String(codeNum).padStart(3,'0') : '';
   const currentShiftInfo = codeNum ? getShiftInfo(key) : null;
@@ -1842,7 +1894,7 @@ function renderDay() {
   </div>`;
 
   // シフト情報ヘッダー表示
-  const shiftLabel = info ? info.label : (rec.shift === '501交番' ? '公休日' : rec.shift === '502交番' ? '振替休日' : rec.shift === '503交番' ? '有給休暇' : '未設定');
+  const shiftLabel = info ? info.label : (rec.shift === '501交番' ? '公休日' : rec.shift === '502交番' ? '振替休日' : rec.shift === '503交番' ? '有給休暇' : rec.shift === '504交番' ? '休日予定' : '未設定');
   const isOpen = window._dayInputOpen === key;
 
   // TRIP表示
@@ -1866,11 +1918,11 @@ function renderDay() {
         const codeStr = String(n).padStart(3,'0');
         const rowsHtml = displayRoutes.map(r => `
           <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-            <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
-            <span style="font-size:12px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
-            <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
+            <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+            <span style="font-size:18px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
+            <span style="font-family:var(--mono);font-size:16px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
           </div>`).join('');
-        blocksHtml += `<div style="margin-bottom:10px;"><div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">CODE ${codeStr}（${isAll?'全部':'一部'}）</div>${rowsHtml}</div>`;
+        blocksHtml += `<div style="margin-bottom:10px;"><div style="font-size:16px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">CODE ${codeStr}（${isAll?'全部':'一部'}）</div>${rowsHtml}</div>`;
       });
       return blocksHtml ? `<div class="section-label">TRIP</div><div class="day-card"><div class="day-card-body" style="padding:10px 16px;">${blocksHtml}</div></div>` : '';
     }
@@ -1881,9 +1933,9 @@ function renderDay() {
     if (!routes || !routes.length) return '';
     const rowsHtml = routes.map(r => `
       <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-        <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
-        <span style="font-size:12px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
+        <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+        <span style="font-size:18px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
+        <span style="font-family:var(--mono);font-size:16px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
       </div>`).join('');
     return `<div class="section-label">TRIP</div><div class="day-card"><div class="day-card-body" style="padding:10px 16px;">${rowsHtml}</div></div>`;
   })();
