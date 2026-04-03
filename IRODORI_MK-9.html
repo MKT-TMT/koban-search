@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRODORI MK-12</title>
+<title>IRODORI MK-13</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -92,7 +92,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
 .cal-cell {
   background:var(--surface); border-radius:9px; padding:5px 4px 6px;
-  min-height:70px; cursor:pointer;
+  min-height:80px; cursor:pointer;
   border:1.5px solid var(--border);
   transition:border-color .13s, box-shadow .13s;
   box-shadow:var(--shadow);
@@ -104,14 +104,14 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .cal-cell.sun .cal-date { color:var(--red); }
 .cal-cell.sat .cal-date { color:var(--work); }
 .cal-date {
-  font-family:var(--mono); font-size:12px; font-weight:600;
+  font-family:var(--mono); font-size:13px; font-weight:600;
   margin-bottom:3px; color:var(--text);
 }
 .cal-cell.today .cal-date {
   background:var(--green); color:#fff;
-  width:20px; height:20px; border-radius:50%;
+  width:22px; height:22px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
-  margin-bottom:3px; font-size:11px;
+  margin-bottom:3px; font-size:12px;
 }
 .cal-cell.today.sat .cal-date,
 .cal-cell.today.sun .cal-date { color:#fff; }
@@ -123,10 +123,11 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .cal-shift.work    { background:#c8eef8; color:#007c91; }
 .cal-shift.off     { background:#ffd9d9; color:#a01010; }
 .cal-shift.paid    { background:#ffd9d9; color:#a01010; }
+.cal-shift.plan    { background:#ffe8cc; color:#b45309; }
 .cal-shift.task    { background:#d4f5e5; color:#0a5e2a; }
 .cal-shift.task2   { background:#fff3cc; color:#8a5c00; }
 .cal-irodori-icons { display:flex; flex-wrap:wrap; gap:1px; margin-top:2px; }
-.cal-irodori-icon  { font-size:11px; line-height:1; }
+.cal-irodori-icon  { font-size:14px; line-height:1; }
 
 /* ══ 日表示 ══ */
 .day-view { padding:0 14px 80px; max-width:620px; margin:0 auto; }
@@ -150,20 +151,35 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 }
 .work-day-head {
   padding:11px 16px; background:#d4f2fa; border-bottom:1px solid var(--workbd);
-  font-size:14px; font-weight:700; color:#007c91;
+  font-size:15px; font-weight:700; color:#007c91;
 }
 .work-day-body { padding:13px 16px; }
 .work-main { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
 .work-badge-lg {
   background:var(--work); color:#fff; border-radius:8px;
-  font-family:var(--mono); font-size:17px; font-weight:700; padding:3px 14px;
+  font-family:var(--mono); font-size:24px; font-weight:700; padding:4px 16px;
 }
-.work-time-lg { font-family:var(--mono); font-size:15px; color:#007c91; font-weight:700; }
+.work-time-lg { font-family:var(--mono); font-size:16px; color:#007c91; font-weight:700; }
 .life-chips { display:flex; gap:7px; flex-wrap:wrap; }
 .life-chip {
   background:var(--surface); border:1px solid var(--workbd);
-  border-radius:7px; padding:4px 10px;
-  font-family:var(--mono); font-size:12px; color:#007c91; font-weight:600;
+  border-radius:7px; padding:5px 11px;
+  font-family:var(--mono); font-size:13px; color:#007c91; font-weight:600;
+}
+
+/* 休日予定カード（オレンジ） */
+.plan-day-card {
+  background:#fff8f0; border:1.5px solid #fdba74;
+  border-radius:14px; margin-bottom:10px; overflow:hidden; box-shadow:var(--shadow);
+}
+.plan-day-head {
+  padding:11px 16px; background:#fff3e0; border-bottom:1px solid #fdba74;
+  font-size:15px; font-weight:700; color:#b45309;
+}
+.plan-day-body { padding:13px 16px; display:flex; align-items:center; }
+.plan-badge-lg {
+  background:#f97316; color:#fff; border-radius:8px;
+  font-size:20px; font-weight:700; padding:5px 18px;
 }
 
 /* プライベート予定行 */
@@ -172,14 +188,14 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   padding:10px 0; border-bottom:1px solid var(--border);
 }
 .priv-item:last-child { border-bottom:none; }
-.priv-item-icon { font-size:26px; flex-shrink:0; }
+.priv-item-icon { font-size:28px; flex-shrink:0; }
 .priv-item-info { flex:1; }
-.priv-item-name { font-size:15px; font-weight:700; color:var(--text); }
-.priv-item-memo { font-size:12px; color:var(--muted); margin-top:2px; }
-.priv-item-time { font-family:var(--mono); font-size:13px; color:var(--green2); white-space:nowrap; font-weight:600; }
-.priv-item-edit { font-size:14px; cursor:pointer; background:none; border:none; flex-shrink:0; padding:0 4px; opacity:0.6; }
+.priv-item-name { font-size:16px; font-weight:700; color:var(--text); }
+.priv-item-memo { font-size:13px; color:var(--muted); margin-top:2px; }
+.priv-item-time { font-family:var(--mono); font-size:14px; color:var(--green2); white-space:nowrap; font-weight:600; }
+.priv-item-edit { font-size:16px; cursor:pointer; background:none; border:none; flex-shrink:0; padding:0 4px; opacity:0.6; }
 .priv-item-edit:hover { opacity:1; }
-.priv-item-del  { font-size:16px; color:var(--border); cursor:pointer; background:none; border:none; flex-shrink:0; padding:0 4px; }
+.priv-item-del  { font-size:18px; color:var(--border); cursor:pointer; background:none; border:none; flex-shrink:0; padding:0 4px; }
 .priv-item-del:hover { color:var(--red); }
 
 /* 日記カード */
@@ -190,7 +206,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .diary-day-head {
   padding:11px 16px; background:var(--amberbg); border-bottom:1px solid var(--amberbd);
   display:flex; align-items:center; justify-content:space-between;
-  font-size:14px; font-weight:700; color:#92400e;
+  font-size:15px; font-weight:700; color:#92400e;
 }
 .diary-day-body { padding:13px 16px; }
 .diary-chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
@@ -199,18 +215,18 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   background:var(--surface2); border:1.5px solid var(--border);
   border-radius:10px; padding:7px 10px; cursor:pointer;
 }
-.diary-chip .dc-icon  { font-size:22px; }
-.diary-chip .dc-label { font-size:9px; color:var(--green3); font-weight:800; }
+.diary-chip .dc-icon  { font-size:26px; }
+.diary-chip .dc-label { font-size:11px; color:var(--green3); font-weight:800; }
 .diary-memo {
   background:var(--amberbg); border:1px solid var(--amberbd);
-  border-radius:8px; padding:9px 11px; font-size:13px; color:#78350f; line-height:1.7;
+  border-radius:8px; padding:9px 11px; font-size:14px; color:#78350f; line-height:1.7;
 }
-.diary-empty { text-align:center; padding:20px; font-size:13px; color:var(--muted); }
+.diary-empty { text-align:center; padding:20px; font-size:14px; color:var(--muted); }
 
 .small-btn {
-  font-size:11px; font-weight:700; color:var(--green2);
+  font-size:13px; font-weight:700; color:var(--green2);
   background:var(--surface); border:1.5px solid var(--green);
-  border-radius:6px; padding:3px 10px; cursor:pointer; font-family:var(--sans);
+  border-radius:6px; padding:4px 12px; cursor:pointer; font-family:var(--sans);
   transition:all .14s;
 }
 .small-btn:hover { background:var(--green); color:#fff; }
@@ -408,7 +424,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-12</div>
+    <div class="auth-logo">IRODORI MK-13</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -423,7 +439,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-12 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-13 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -570,9 +586,10 @@ function getTTShiftInfo(dateKey) {
   const rec = ttData[dateKey];
   if (!rec || !rec.shift) return null;
 
-  const HOLIDAY_SHIFTS = {'501交番':'公休日','502交番':'振替休日','503交番':'有給休暇'};
+  const HOLIDAY_SHIFTS = {'501交番':'公休日','502交番':'振替休日','503交番':'有給休暇','504交番':'休日予定'};
   if (HOLIDAY_SHIFTS[rec.shift]) {
-    return { label: HOLIDAY_SHIFTS[rec.shift], start:null, end:null, type: 'paid' };
+    const isPlan = rec.shift === '504交番';
+    return { label: HOLIDAY_SHIFTS[rec.shift], start:null, end:null, type: isPlan ? 'plan' : 'paid' };
   }
   if (rec.shift === 'custom') {
     return { label: rec.customLabel||'カスタム', start:rec.customStart, end:rec.customEnd, type:'work' };
@@ -723,6 +740,8 @@ function renderCalCell(year, month, day, dateKey, other, todayKey) {
   if (ttInfo && !other) {
     if (ttInfo.type === 'paid' || ttInfo.type === 'off') {
       inner += `<div class="cal-shift off">${ttInfo.label}</div>`;
+    } else if (ttInfo.type === 'plan') {
+      inner += `<div class="cal-shift plan">${ttInfo.label}</div>`;
     } else {
       // CODEの番号のみ表示
       const shiftRec = loadTTData()[dateKey] || {};
@@ -801,7 +820,17 @@ function renderDay() {
       const modes  = ttRec.compoundKobanModes || {};
       shiftDisplay = kobans.map(n => modes[n]==='all' ? String(n).padStart(3,'0') : String(n).padStart(3,'0')+'一部').join('＆') || '複合業務';
     }
-    let timeDisplay  = '';
+    // 休日予定（504）はオレンジカードで表示
+    if (ttInfo.type === 'plan') {
+      workCardHtml = `
+    <div class="plan-day-card">
+      <div class="plan-day-head">📅 仕事 — TIMETABLE連携</div>
+      <div class="plan-day-body">
+        <span class="plan-badge-lg">${ttInfo.label}</span>
+      </div>
+    </div>`;
+    } else {
+    let timeDisplay = '';
     if (ttInfo.start && ttInfo.end) {
       timeDisplay = `${ttInfo.start} – ${ttInfo.end}`;
     }
@@ -833,6 +862,7 @@ function renderDay() {
         ${lifeHtml ? `<div class="life-chips">${lifeHtml}</div>` : ''}
       </div>
     </div>`;
+    } // end else
   }
 
   // プライベート予定カード
