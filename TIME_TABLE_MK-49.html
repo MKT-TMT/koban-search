@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-63</title>
+<title>TIME TABLE MK-64</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -924,7 +924,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-63</div>
+    <div class="auth-logo">MK-64</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -939,7 +939,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-63 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-64 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -3203,13 +3203,77 @@ function renderSpec() {
       </div>
     </div>
 
+    <div style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;letter-spacing:0.5px;">⚙️ 新CODE切替設定</div>
+      <div id="newCodeStatus" style="margin-bottom:12px;"></div>
+      <hr style="border:none;border-top:0.5px solid var(--border);margin:12px 0;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">有効日を変更・設定する場合：</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <input type="date" id="newCodeDateInput"
+          style="font-size:16px;padding:8px 12px;border-radius:9px;border:1.5px solid var(--accent);background:var(--surface);color:var(--text);font-family:var(--mono);">
+        <button onclick="setNewCodeDate()"
+          style="font-size:14px;font-weight:700;padding:9px 20px;border-radius:9px;border:none;background:#4ab8d8;color:#fff;cursor:pointer;">設定</button>
+        <button onclick="clearNewCodeDate()"
+          style="font-size:14px;font-weight:700;padding:9px 20px;border-radius:9px;background:#fff5f5;color:#c0392b;border:1.5px solid #f4a0a0;cursor:pointer;">解除</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.7;">
+        ※ 有効日を設定すると、その日以降のシフトが新CODEに切り替わります。<br>
+        ※ この設定は各デバイスで個別に行う必要があります。
+      </div>
+    </div>
+
   </div>`;
+  updateNewCodeStatus();
 }
 
 
 
 // ══════════════════════════════════════════
 // 新交番管理
+
+function updateNewCodeStatus() {
+  const el = document.getElementById('newCodeStatus');
+  const inp = document.getElementById('newCodeDateInput');
+  if (!el) return;
+  const cfg = loadNewKobanConfig();
+  if (cfg && cfg.effectiveDate) {
+    const today = new Date().toISOString().slice(0,10);
+    const isActive = today >= cfg.effectiveDate;
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+        <span style="font-size:12px;color:var(--muted);">現在の状態</span>
+        <span style="font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;background:${isActive?'#c8eef8':'#ffd9d9'};color:${isActive?'#0878a0':'#c01010'};">
+          ${isActive ? '新CODE適用中' : '新CODE未開始'}
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--muted);">切替有効日</span>
+        <span style="font-size:16px;font-weight:700;color:var(--text);font-family:var(--mono);">${cfg.effectiveDate}</span>
+      </div>`;
+    if (inp) inp.value = cfg.effectiveDate;
+  } else {
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:12px;color:var(--muted);">現在の状態</span>
+        <span style="font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;background:#d4f5e5;color:#0a7a3e;">旧CODE使用中（未設定）</span>
+      </div>`;
+  }
+}
+
+function setNewCodeDate() {
+  const inp = document.getElementById('newCodeDateInput');
+  if (!inp || !inp.value) { alert('有効日を選択してください'); return; }
+  saveNewKobanConfig({ effectiveDate: inp.value });
+  updateNewCodeStatus();
+  alert('新CODEの有効日を設定しました：' + inp.value);
+}
+
+function clearNewCodeDate() {
+  if (!confirm('新CODE設定を解除して旧CODEに戻しますか？')) return;
+  localStorage.removeItem(NEW_KOBAN_KEY);
+  updateNewCodeStatus();
+  alert('新CODE設定を解除しました。旧CODEを使用します。');
+}
 // ══════════════════════════════════════════
 // ── 交番データ編集ヘルパー ──
 // ── Init ──
