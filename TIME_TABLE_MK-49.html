@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-64</title>
+<title>TIME TABLE MK-65</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -312,7 +312,37 @@
   .special-btn.sel-paid     { background: #ffd9d9; color: #a01010; border-color: #e03535; }
   .special-btn.sel-plan     { background: #ffe5b0; color: #a06000; border: 1.5px dashed #e0a030; font-weight: 700; }
   .special-btn.sel-off      { background: #ebebeb; color: #555; border-color: #aaa; }
-  .special-btn.sel-compound { background: #ede0ff; color: #6200cc; border-color: #9b4dff; }
+  .special-btn.sel-compound { background: #fff0e0; color: #e07a00; border-color: #f5a623; }
+  /* 複合業務オレンジ系 */
+  .compound-panel { border: 2px solid #f5a623; border-radius: 14px; padding: 14px; margin-top: 10px; background: #fff; }
+  .compound-header { font-size: 12px; font-weight: 800; color: #e07a00; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .compound-badge-tag { font-size: 11px; background: #f5a623; color: #fff; border-radius: 20px; padding: 2px 10px; font-weight: 800; }
+  .compound-code-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .compound-code-inp { font-family: var(--mono); font-size: 26px; font-weight: 900; color: #0878a0; background: #c8eef8; border: 2px solid #4ab8d8; border-radius: 10px; padding: 7px 10px; text-align: center; width: 88px; flex-shrink: 0; outline: none; }
+  .compound-mode-btns { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .compound-mode-btn { font-size: 14px; font-weight: 700; padding: 10px 0; border-radius: 9px; border: none; cursor: pointer; text-align: center; transition: background 0.15s; }
+  .compound-mode-btn.all-btn  { background: #4ab8d8; color: #fff; }
+  .compound-mode-btn.part-btn { background: #fff; color: #4ab8d8; border: 2px solid #4ab8d8; }
+  .compound-mode-btn.part-btn.active { background: #f5a623; color: #fff; border-color: #f5a623; }
+  .compound-trip-panel { border: 1.5px solid #c5eaf5; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+  .compound-trip-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 0.5px solid #e8f4fb; cursor: pointer; }
+  .compound-trip-item:last-child { border-bottom: none; }
+  .compound-trip-item.selected { background: #fff8f0; }
+  .compound-trip-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #4ab8d8; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; color: transparent; }
+  .compound-trip-check.on { background: #4ab8d8; color: #fff; border-color: #4ab8d8; }
+  .compound-trip-no { font-family: var(--mono); font-size: 13px; font-weight: 700; color: #0878a0; min-width: 58px; }
+  .compound-trip-detail { font-size: 11px; color: #555; line-height: 1.5; flex: 1; }
+  .compound-trip-time { font-size: 11px; color: #4ab8d8; font-weight: 700; }
+  .compound-decide-btn { width: 100%; font-size: 15px; font-weight: 700; padding: 12px; border-radius: 10px; border: none; background: #f5a623; color: #fff; cursor: pointer; margin-top: 8px; }
+  .compound-added-card { background: #fff; border: 1.5px solid #ffd4a0; border-radius: 10px; overflow: hidden; margin-bottom: 8px; }
+  .compound-added-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #fff8f0; border-bottom: 0.5px solid #ffd4a0; }
+  .compound-added-code { font-family: var(--mono); font-size: 16px; font-weight: 900; color: #0878a0; background: #c8eef8; border-radius: 6px; padding: 3px 10px; }
+  .compound-added-mode { font-size: 11px; font-weight: 700; }
+  .compound-added-mode.all { color: #4ab8d8; }
+  .compound-added-mode.part { color: #f5a623; }
+  .compound-added-time { font-size: 12px; font-weight: 700; color: #555; margin-left: auto; }
+  .compound-added-del { color: var(--red); background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 700; margin-left: 6px; }
+  .compound-added-body { padding: 6px 12px; font-family: var(--mono); font-size: 11px; color: #555; line-height: 1.8; }
   .special-btn.sel-training { background: #fff0d4; color: #8a4a00; border-color: #e07a00; }
 
   /* 複合業務パネル */
@@ -924,7 +954,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-64</div>
+    <div class="auth-logo">MK-65</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -939,7 +969,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-64 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-65 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1760,45 +1790,101 @@ function renderDay() {
         <span style="font-size:11px;color:var(--muted);">${t.start||''}${t.end?' – '+t.end:''}</span>
         <button class="task-content-del" onclick="deleteTaskContent('${key}',${i})">✕</button>
       </div>`).join('');
-    const isPartialMode = window._compInputMode === 'partial';
-    compoundPanelHtml = `<div class="compound-panel">
-      <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">複合業務 — CODE選択</div>
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-        <button onclick="setCompInputMode('full')" style="font-size:11px;padding:4px 12px;border-radius:7px;border:none;background:${!isPartialMode?'var(--accent)':'#e8f0fe'};color:${!isPartialMode?'#fff':'var(--accent)'};font-weight:700;cursor:pointer;">全部</button>
-        <button onclick="setCompInputMode('partial')" style="font-size:11px;padding:4px 12px;border-radius:7px;border:none;background:${isPartialMode?'var(--accent)':'#e8f0fe'};color:${isPartialMode?'#fff':'var(--accent)'};font-weight:700;cursor:pointer;">一部</button>
-        <span style="font-size:11px;color:var(--muted);">モード選択してCODE追加</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-        <input type="number" min="1" max="999" placeholder="CODE" id="compCodeInput_${key}"
-          style="font-family:var(--mono);font-size:20px;font-weight:800;width:90px;text-align:center;border:2px solid var(--accent);border-radius:10px;padding:6px 8px;color:#0878a0;background:#E6F1FB;outline:none;">
-        <button onclick="addCompoundKobanDirect('${key}')" style="font-size:12px;padding:6px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;">＋ 追加</button>
-      </div>
-      ${selKobans.map(n => {
-        const isAll = modes[n] !== 'part';
-        const codeStr = String(n).padStart(3,'0');
+    // 追加済みCODEを時刻順にソート
+    const sortedKobans = [...selKobans].sort((a, b) => {
+      const getStart = (n) => {
+        const m = modes[n];
         const pd = partialData[n] || {};
-        const {routes: allRoutes} = getEffectiveRoutes(dbType, shu2, n);
-        const tripNos = pd.tripNos || [];
-        let tripHtml = '';
-        if (!isAll) {
-          tripHtml = `<div style="margin-top:6px;padding-left:8px;">` +
-            allRoutes.map(r => `
-              <label style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:11px;">
-                <input type="checkbox" ${tripNos.includes(r.no)?'checked':''} onchange="previewTrip('${key}',${n},'${r.no}')">
-                <span style="font-family:var(--mono);color:#0878a0;">${r.no}</span>
-                <span>${r.dep_place}→${r.arr_place} ${r.dep_time}</span>
-              </label>`).join('') +
-            `<button onclick="addCompoundTrip('${key}',${n})" style="font-size:11px;margin-top:4px;padding:3px 10px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;">確定</button>` +
-            `</div>`;
+        if (m === 'part') {
+          return pd.start || '99:99';
+        } else {
+          const tbl = getEffectiveShiftTable(key);
+          const s = tbl[String(n).padStart(3,'0') + '交番'];
+          return s ? s.start : '99:99';
         }
-        return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;background:#f0faff;border-radius:8px;padding:6px 10px;">
-          <span style="background:#c8eef8;color:#0878a0;border-radius:7px;padding:3px 10px;font-weight:800;font-size:15px;font-family:var(--mono);">${codeStr}</span>
-          <span style="font-size:11px;color:var(--muted);">${isAll?'全部':'一部'}</span>
-          <button onclick="removeCompoundKoban('${key}',${n})" style="font-size:11px;padding:2px 8px;border-radius:5px;border:none;background:#ffeaea;color:#c0392b;cursor:pointer;margin-left:auto;">✕</button>
-          ${tripHtml}
+      };
+      return getStart(a).localeCompare(getStart(b));
+    });
+
+    // 追加済みCODEカードHTML
+    const addedCardsHtml = sortedKobans.map(n => {
+      const isAll = modes[n] !== 'part';
+      const codeStr = String(n).padStart(3,'0');
+      const pd = partialData[n] || {};
+      const tbl = getEffectiveShiftTable(key);
+      const s = tbl[codeStr + '交番'];
+      let timeStr = '';
+      if (isAll) {
+        timeStr = s ? s.start + ' 〜 ' + s.end : '';
+      } else {
+        timeStr = pd.start && pd.end ? pd.start + ' 〜 ' + pd.end : pd.start || '';
+      }
+      let tripBodyHtml = '';
+      if (!isAll) {
+        const tripNos = pd.tripNos || [];
+        const {routes: effR} = getEffectiveRoutes(dbType, shu2, n);
+        tripBodyHtml = tripNos.map(no => {
+          const r = effR.find(r => r.no === no);
+          return r ? `${no}　${r.dep_place}→${r.arr_place}　${r.dep_time}` : no;
+        }).join('<br>');
+      } else {
+        tripBodyHtml = s ? '全便' : '';
+      }
+      return `<div class="compound-added-card">
+        <div class="compound-added-header">
+          <span class="compound-added-code">${codeStr}</span>
+          <span class="compound-added-mode ${isAll?'all':'part'}">${isAll?'交番通り':'交番一部'}</span>
+          <span class="compound-added-time">${timeStr}</span>
+          <button class="compound-added-del" onclick="removeCompoundKoban('${key}',${n})">✕</button>
+        </div>
+        ${tripBodyHtml ? `<div class="compound-added-body">${tripBodyHtml}</div>` : ''}
+      </div>`;
+    }).join('');
+
+    // 入力中のTRIP一覧（一部モード選択時）
+    const editingKoban = window._compEditingKoban;
+    const editingMode  = window._compEditingMode;
+    let tripPanelHtml = '';
+    if (editingKoban && editingMode === 'part') {
+      const {routes: editRoutes} = getEffectiveRoutes(dbType, shu2, editingKoban);
+      const editPd = (partialData[editingKoban] || {});
+      const editTrips = editPd.tripNos || [];
+      tripPanelHtml = `
+        <div style="margin-top:10px;">
+          <div style="font-size:11px;font-weight:800;color:#4ab8d8;letter-spacing:1px;margin-bottom:8px;">
+            CODE ${String(editingKoban).padStart(3,'0')} — TRIP選択
+          </div>
+          <div class="compound-trip-panel">
+            ${editRoutes.map(r => {
+              const sel = editTrips.includes(r.no);
+              return `<div class="compound-trip-item${sel?' selected':''}" onclick="toggleCompoundTrip('${key}',${editingKoban},'${r.no}')">
+                <div class="compound-trip-check${sel?' on':''}">✓</div>
+                <span class="compound-trip-no">${r.no}</span>
+                <div class="compound-trip-detail">
+                  <div>${r.dep_place} → ${r.arr_place}</div>
+                  <div class="compound-trip-time">${r.dep_time} → ${r.arr_time}</div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+          <button class="compound-decide-btn" onclick="decideTripSelection('${key}',${editingKoban})">✅ 決定</button>
         </div>`;
-      }).join('')}
-      ${taskItemsHtml ? `<div style="margin-top:8px;">${taskItemsHtml}</div>` : ''}
+    }
+
+    compoundPanelHtml = `<div class="compound-panel">
+      <div class="compound-header">🔢 CODE入力 <span class="compound-badge-tag">複合業務</span></div>
+      <div class="compound-code-row">
+        <input type="number" min="1" max="999" placeholder="000" id="compCodeInput_${key}"
+          class="compound-code-inp" oninput="previewCompCode('${key}',this.value)">
+        <div class="compound-mode-btns">
+          <button class="compound-mode-btn all-btn" onclick="addCompoundKobanNew('${key}','all')">交番通り</button>
+          <button class="compound-mode-btn part-btn${editingMode==='part'?' active':''}" onclick="addCompoundKobanNew('${key}','part')">交番一部</button>
+        </div>
+      </div>
+      <div id="compCodePreview2_${key}" style="font-size:11px;color:var(--accent);font-family:var(--mono);margin-bottom:8px;"></div>
+      ${tripPanelHtml}
+      ${addedCardsHtml ? `<div style="margin-top:10px;">${addedCardsHtml}</div>` : ''}
+      ${taskItemsHtml ? `<div style="margin-top:10px;border-top:1px solid #ffe8cc;padding-top:10px;">${taskItemsHtml}</div>` : ''}
     </div>`;
   }
 
@@ -2296,47 +2382,51 @@ function renderInput() {
       </div>`;
     }
 
-    // 追加済みCODEリスト
-    let addedCodesHtml = selKobans.map((n, ci) => {
+    // 追加済みCODEを時刻順にソート
+    const sortedKobansDV = [...selKobans].sort((a, b) => {
+      const getStartDV = (n) => {
+        const pd = partialData[n] || {};
+        if (modes[n] === 'part') return pd.start || '99:99';
+        const tbl2 = getEffectiveShiftTable(key);
+        const s2 = tbl2[String(n).padStart(3,'0') + '交番'];
+        return s2 ? s2.start : '99:99';
+      };
+      return getStartDV(a).localeCompare(getStartDV(b));
+    });
+
+    // 追加済みCODEリスト（日ビュー・✏️編集付き）
+    let addedCodesHtml = sortedKobansDV.map((n, ci) => {
       const isAll = modes[n] !== 'part';
-      const modeLabel = isAll ? '全部' : '一部';
+      const modeLabel = isAll ? '交番通り' : '交番一部';
       const pd = partialData[n] || {};
-      // 一部モード時のTRIPリスト
+      const tbl3 = getEffectiveShiftTable(key);
+      const s3 = tbl3[String(n).padStart(3,'0') + '交番'];
+      let timeStr = '';
+      if (isAll) {
+        timeStr = s3 ? s3.start + ' 〜 ' + s3.end : '';
+      } else {
+        timeStr = pd.start && pd.end ? pd.start + ' 〜 ' + pd.end : pd.start || '';
+      }
       const tripNos = pd.tripNos || [];
-      let tripListHtml = '';
+      let tripBodyHtml = '';
       if (!isAll && tripNos.length > 0) {
         const {routes: effR} = getEffectiveRoutes(dbType, shu, n);
-        tripListHtml = tripNos.map((no, ti) => {
-          const r = effR.find(r=>r.no===no);
-          return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border);">
-            <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#0878a0;background:#e0f7fd;border:1px solid var(--border);border-radius:4px;padding:2px 6px;">${no}</span>
-            <span style="font-size:11px;color:var(--text);flex:1;">${r ? r.dep_place+'→'+r.arr_place : '?'}</span>
-            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">${r ? r.dep_time+' dep' : ''}</span>
-            <button onclick="removeCompoundTrip('${key}',${n},${ti})" style="color:var(--red);background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;">✕</button>
-          </div>`;
-        }).join('');
+        tripBodyHtml = tripNos.map(no => {
+          const r = effR.find(r => r.no === no);
+          return r ? `<span style="font-family:var(--mono);font-size:11px;color:#0878a0;">${no}</span>　${r.dep_place}→${r.arr_place}　<span style="color:#4ab8d8;font-weight:700;">${r.dep_time}→${r.arr_time}</span>` : no;
+        }).join('<br>');
+      } else if (isAll && s3) {
+        tripBodyHtml = `<span style="color:var(--muted);font-size:11px;">全便</span>`;
       }
-      // 一部モード時のTRIP入力
-      const tripInputHtml = !isAll ? `
-        <div style="background:var(--surface2);border-top:1px solid var(--border);padding:8px 10px;">
-          <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">TRIP 番号を追加</div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input type="text" id="tripInp_${n}" maxlength="6" placeholder="例: 02201"
-              style="font-family:var(--mono);font-size:15px;font-weight:700;width:110px;border:1.5px solid var(--border2);border-radius:7px;padding:6px 8px;color:var(--text);background:var(--surface);outline:none;"
-              oninput="previewTrip('${key}',${n},this.value)" id="tripInp_${n}">
-            <button onclick="addCompoundTrip('${key}',${n})"
-              style="font-family:var(--sans);font-size:12px;font-weight:700;padding:7px 14px;border:1.5px solid var(--accent);border-radius:7px;background:var(--surface);color:var(--accent);cursor:pointer;">＋ 追加</button>
-          </div>
-          <div id="tripPreview_${n}" style="font-size:11px;color:var(--accent);margin-top:4px;font-family:var(--mono);"></div>
-          ${tripListHtml ? `<div style="margin-top:6px;">${tripListHtml}</div>` : ''}
-        </div>` : '';
-      return `<div style="background:var(--surface);border:1.5px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:8px;">
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);">
-          <span style="font-family:var(--mono);font-size:16px;font-weight:800;color:#0878a0;background:#c8eef8;border-radius:6px;padding:3px 10px;">${String(n).padStart(3,'0')}</span>
-          <span style="font-size:12px;color:var(--muted);">${modeLabel}</span>
-          <button onclick="removeCompoundKoban('${key}',${n})" style="margin-left:auto;color:var(--red);background:none;border:none;cursor:pointer;font-size:13px;font-weight:700;">✕</button>
+      return `<div class="compound-added-card" style="margin-bottom:8px;">
+        <div class="compound-added-header">
+          <span class="compound-added-code">${String(n).padStart(3,'0')}</span>
+          <span class="compound-added-mode ${isAll?'all':'part'}">${modeLabel}</span>
+          <span class="compound-added-time">${timeStr}</span>
+          <button style="font-size:18px;background:none;border:none;cursor:pointer;padding:2px 4px;margin-left:4px;" onclick="editCompoundKoban('${key}',${n})" title="編集">✏️</button>
+          <button class="compound-added-del" onclick="removeCompoundKoban('${key}',${n})">✕</button>
         </div>
-        ${tripInputHtml}
+        ${tripBodyHtml ? `<div class="compound-added-body">${tripBodyHtml}</div>` : ''}
       </div>`;
     }).join('');
 
@@ -2386,8 +2476,8 @@ function renderInput() {
       </div>
       <!-- 決定ボタン -->
       <button onclick="decideCompound('${key}')"
-        style="margin-top:12px;width:100%;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--sans);box-shadow:0 3px 12px rgba(14,168,216,.3);">
-        ✅ このスケジュールで決定
+        style="margin-top:12px;width:100%;padding:12px;background:#f5a623;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--sans);box-shadow:0 3px 12px rgba(245,166,35,.3);">
+        🟠 スケジュールを確定
       </button>
     </div>`;
   }
@@ -2950,35 +3040,23 @@ function onCodeDirectInput(dateKey, val) {
 
 // 複合業務パネル: 全部/一部モード切替ボタン
 window._compInputMode = 'all';
-function setCompInputMode(mode) {
-  window._compInputMode = mode;
-  const btnAll  = document.getElementById('compModeAll');
-  const btnPart = document.getElementById('compModePart');
-  if (btnAll && btnPart) {
-    if (mode === 'all') {
-      btnAll.style.background = '#9b4dff'; btnAll.style.color = '#fff';
-      btnPart.style.background = 'var(--surface)'; btnPart.style.color = '#9b4dff';
-    } else {
-      btnPart.style.background = '#9b4dff'; btnPart.style.color = '#fff';
-      btnAll.style.background = 'var(--surface)'; btnAll.style.color = '#9b4dff';
-    }
-  }
-  const el = document.getElementById('compCodeInp');
-  if (el) {
-    const preview = document.getElementById('compCodePreview');
-    const v = el.value.trim();
-    if (preview && v.length === 3) {
-      const tbl = getEffectiveShiftTable(selectedDate);
-      const s = tbl[v.padStart(3,'0') + '交番'];
-      preview.textContent = s ? (mode === 'all' ? '▶ ' + s.start + ' – ' + s.end : '▶ 一部担当') : '⚠ 該当なし';
-    }
-  }
+// CODE入力プレビュー（新フロー）
+function previewCompCode(dateKey, val) {
+  const v = String(val).trim().padStart(3,'0');
+  const el = document.getElementById('compCodePreview2_' + dateKey);
+  if (!el) return;
+  if (!v || v === '000') { el.textContent = ''; return; }
+  const tbl = getEffectiveShiftTable(dateKey);
+  const s = tbl[v + '交番'];
+  el.textContent = s ? '▶ ' + s.start + ' 〜 ' + s.end : '⚠ CODE ' + v + ' は存在しません';
+  el.style.color = s ? 'var(--accent)' : 'var(--red)';
 }
 
-function addCompoundKobanDirect(dateKey) {
-  const el = document.getElementById('compCodeInp');
-  if (!el) return;
-  const v = el.value.trim().padStart(3,'0');
+// 交番通り / 交番一部 ボタンで直接追加（新フロー）
+function addCompoundKobanNew(dateKey, mode) {
+  const el = document.getElementById('compCodeInput_' + dateKey);
+  if (!el || !el.value) { alert('CODEを入力してください'); return; }
+  const v = String(el.value).trim().padStart(3,'0');
   const tbl = getEffectiveShiftTable(dateKey);
   if (!tbl[v + '交番']) { alert('CODE ' + v + ' は存在しません'); return; }
   const n = parseInt(v, 10);
@@ -2987,12 +3065,82 @@ function addCompoundKobanDirect(dateKey) {
   if (!kobans.includes(n)) kobans.push(n);
   appData[dateKey].compoundKobans = kobans;
   if (!appData[dateKey].compoundKobanModes) appData[dateKey].compoundKobanModes = {};
-  appData[dateKey].compoundKobanModes[n] = window._compInputMode || 'all';
+  appData[dateKey].compoundKobanModes[n] = mode;
   saveData(appData);
   el.value = '';
-  const preview = document.getElementById('compCodePreview');
+  const preview = document.getElementById('compCodePreview2_' + dateKey);
   if (preview) preview.textContent = '';
+  if (mode === 'part') {
+    window._compEditingKoban = n;
+    window._compEditingMode = 'part';
+  } else {
+    window._compEditingKoban = null;
+    window._compEditingMode = null;
+  }
   renderInput();
+}
+
+// TRIP選択トグル（チェックボックス代わり）
+function toggleCompoundTrip(dateKey, kobanNum, tripNo) {
+  if (!appData[dateKey]) appData[dateKey] = { life: {} };
+  if (!appData[dateKey].compoundPartialData) appData[dateKey].compoundPartialData = {};
+  if (!appData[dateKey].compoundPartialData[kobanNum]) appData[dateKey].compoundPartialData[kobanNum] = {};
+  const pd = appData[dateKey].compoundPartialData[kobanNum];
+  if (!pd.tripNos) pd.tripNos = [];
+  if (pd.tripNos.includes(tripNo)) {
+    pd.tripNos = pd.tripNos.filter(t => t !== tripNo);
+  } else {
+    pd.tripNos.push(tripNo);
+  }
+  // 時刻自動計算
+  const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&dateKey>=cfg.effectiveDate; })();
+  const dbType = isNew ? 'new' : 'cur';
+  const d = new Date(dateKey); const dow = d.getDay();
+  const shu = dow===6?'土曜':dow===0?'日祝':'平日';
+  const {routes} = getEffectiveRoutes(dbType, shu, kobanNum);
+  const tripRoutes = pd.tripNos.map(n => routes.find(r => r.no === n)).filter(Boolean);
+  const times = tripRoutes.map(r => r.dep_time).filter(Boolean).sort();
+  const endTimes = tripRoutes.map(r => r.arr_time).filter(Boolean).sort();
+  if (times.length) pd.start = times[0];
+  if (endTimes.length) pd.end = endTimes[endTimes.length-1];
+  saveData(appData);
+  renderInput();
+}
+
+// 「決定」ボタン（TRIP選択確定）
+function decideTripSelection(dateKey, kobanNum) {
+  const pd = (appData[dateKey]?.compoundPartialData?.[kobanNum]) || {};
+  if (!pd.tripNos || pd.tripNos.length === 0) {
+    alert('TRIPを1つ以上選択してください');
+    return;
+  }
+  window._compEditingKoban = null;
+  window._compEditingMode = null;
+  saveData(appData);
+  renderInput();
+}
+
+// 編集ボタン（✏️）から編集モードへ
+function editCompoundKoban(dateKey, kobanNum) {
+  const mode = (appData[dateKey]?.compoundKobanModes?.[kobanNum]) || 'all';
+  if (mode === 'part') {
+    window._compEditingKoban = kobanNum;
+    window._compEditingMode = 'part';
+    switchView('input');
+  } else {
+    // 交番通りは削除して再入力
+    if (confirm('CODE ' + String(kobanNum).padStart(3,'0') + ' を編集（削除して再入力）しますか？')) {
+      removeCompoundKoban(dateKey, kobanNum);
+    }
+  }
+}
+
+// 旧関数（互換用）
+function setCompInputMode(mode) { window._compInputMode = mode; }
+function addCompoundKobanDirect(dateKey) {
+  const el = document.getElementById('compCodeInput_' + dateKey);
+  if (!el) return;
+  addCompoundKobanNew(dateKey, window._compInputMode || 'all');
 }
 
 function removeCompoundKoban(dateKey, kobanNum) {
