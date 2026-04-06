@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-72</title>
+<title>TIME TABLE MK-73</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -954,7 +954,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-72</div>
+    <div class="auth-logo">MK-73</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -969,7 +969,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-72 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-73 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1329,13 +1329,28 @@ function getShiftInfo(dateKey) {
         const pd = partialData[n] || {};
         startTime = pd.start || null;
       }
-      const label = modes[n] === 'all' ? `${String(n).padStart(3,'0')}` : `${String(n).padStart(3,'0')}一部`;
+      const label = modes[n] === 'all' ? `${String(n).padStart(3,'0')}` : `${String(n).padStart(3,'0')}交番一部`;
       parts.push({ label, startTime });
     });
     // 作業内容を開始時刻付きで追加
     tasks.forEach(t => {
-      parts.push({ label: t.name, startTime: t.start || null });
+      parts.push({ label: t.name || t.type || '', startTime: t.start || null });
     });
+    // workItems（新データ構造）にも対応
+    const workItems = rec.workItems || [];
+    if (workItems.length > 0) {
+      // workItemsがある場合はそちらを優先
+      const wiParts = [...workItems].sort((a,b) => (a.startTime||'99:99').localeCompare(b.startTime||'99:99'));
+      const wiLabel = wiParts.map(item => {
+        if (item.type === 'all') return item.code || '';
+        if (item.type === 'part') return (item.code || '') + '交番一部';
+        return item.label || '';
+      }).join('＆');
+      const wiTimes = workItems.map(i => [i.startTime, i.endTime]).flat().filter(Boolean);
+      const wiStart = rec.multiWorkStart || (wiTimes.length ? wiTimes.reduce((a,b)=>a<b?a:b) : null);
+      const wiEnd   = rec.multiWorkEnd   || (wiTimes.length ? wiTimes.reduce((a,b)=>a>b?a:b) : null);
+      return { label: wiLabel || '複合業務', start: wiStart, end: wiEnd, type: 'work' };
+    }
     // 開始時刻でソート（nullは後ろ）
     parts.sort((a, b) => {
       if (!a.startTime && !b.startTime) return 0;
@@ -2085,25 +2100,67 @@ function renderDay() {
     const d3 = new Date(key); const dow3 = d3.getDay();
     const shu3 = dow3===6?'土曜':dow3===0?'日祝':'平日';
     if (rec.shift === 'compound') {
+      const workItems = rec.workItems || [];
       const kobans = rec.compoundKobans || [];
-      const modes2 = rec.compoundKobanModes || {};
-      const pd2 = rec.compoundPartialData || {};
-      if (!kobans.length) return '';
       let blocksHtml = '';
-      kobans.forEach(n => {
-        const isAll = modes2[n] !== 'part';
-        const {routes: allRoutes} = getEffectiveRoutes(dbType, shu3, n);
-        let displayRoutes = isAll ? allRoutes : ((pd2[n]&&pd2[n].tripNos)||[]).map(no=>allRoutes.find(r=>r.no===no)).filter(Boolean);
-        if (!displayRoutes.length) return;
-        const codeStr = String(n).padStart(3,'0');
-        const rowsHtml = displayRoutes.map(r => `
-          <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-            <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
-            <span style="font-size:18px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
-            <span style="font-family:var(--mono);font-size:16px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
-          </div>`).join('');
-        blocksHtml += `<div style="margin-bottom:10px;"><div style="font-size:16px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">CODE ${codeStr}（${isAll?'全部':'一部'}）</div>${rowsHtml}</div>`;
-      });
+
+      // 新データ構造（workItems）対応
+      if (workItems.length > 0) {
+        const sorted = [...workItems].sort((a,b) => (a.startTime||'99:99').localeCompare(b.startTime||'99:99'));
+        sorted.forEach(item => {
+          if (item.type === 'all') {
+            // 交番通り：全便表示
+            const kobanNum = parseInt(item.code, 10);
+            const {routes: allRoutes} = getEffectiveRoutes(dbType, shu3, kobanNum);
+            if (!allRoutes.length) return;
+            const rowsHtml = allRoutes.map(r => `
+              <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+                <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+                <span style="font-size:16px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
+                <span style="font-family:var(--mono);font-size:14px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
+              </div>`).join('');
+            blocksHtml += `<div style="margin-bottom:10px;"><div style="font-size:14px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">CODE ${item.code}（交番通り）</div>${rowsHtml}</div>`;
+          } else if (item.type === 'part') {
+            // 交番一部：選択TRIPのみ表示
+            const kobanNum = parseInt(item.code, 10);
+            const {routes: allRoutes} = getEffectiveRoutes(dbType, shu3, kobanNum);
+            const tripNos = item.trips || [];
+            const displayRoutes = tripNos.map(no => allRoutes.find(r => r.no === no)).filter(Boolean);
+            if (!displayRoutes.length) return;
+            const rowsHtml = displayRoutes.map(r => `
+              <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+                <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+                <span style="font-size:16px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
+                <span style="font-family:var(--mono);font-size:14px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
+              </div>`).join('');
+            blocksHtml += `<div style="margin-bottom:10px;"><div style="font-size:14px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">CODE ${item.code}（交番一部）</div>${rowsHtml}</div>`;
+          } else {
+            // 業務習得・車庫整理・その他
+            blocksHtml += `<div style="margin-bottom:10px;padding:8px 12px;background:#fff8f0;border-radius:8px;border:1px solid #f5a623;">
+              <div style="font-size:14px;font-weight:800;color:#e07a00;">${item.label || item.type}</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:2px;">${item.startTime||''} 〜 ${item.endTime||''}</div>
+            </div>`;
+          }
+        });
+      } else if (kobans.length > 0) {
+        // 旧データ構造（compoundKobans）対応
+        const modes2 = rec.compoundKobanModes || {};
+        const pd2 = rec.compoundPartialData || {};
+        kobans.forEach(n => {
+          const isAll = modes2[n] !== 'part';
+          const {routes: allRoutes} = getEffectiveRoutes(dbType, shu3, n);
+          let displayRoutes = isAll ? allRoutes : ((pd2[n]&&pd2[n].tripNos)||[]).map(no=>allRoutes.find(r=>r.no===no)).filter(Boolean);
+          if (!displayRoutes.length) return;
+          const codeStr = String(n).padStart(3,'0');
+          const rowsHtml = displayRoutes.map(r => `
+            <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+              <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+              <span style="font-size:16px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
+              <span style="font-family:var(--mono);font-size:14px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
+            </div>`).join('');
+          blocksHtml += `<div style="margin-bottom:10px;"><div style="font-size:14px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">CODE ${codeStr}（${isAll?'交番通り':'交番一部'}）</div>${rowsHtml}</div>`;
+        });
+      }
       return blocksHtml ? `<div class="section-label">TRIP</div><div class="day-card"><div class="day-card-body" style="padding:10px 16px;">${blocksHtml}</div></div>` : '';
     }
     if (!rec.shift || rec.shift.startsWith('5')) return '';
