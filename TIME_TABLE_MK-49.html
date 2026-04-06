@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-70</title>
+<title>TIME TABLE MK-71</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -954,7 +954,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-70</div>
+    <div class="auth-logo">MK-71</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -969,7 +969,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-70 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-71 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1729,7 +1729,7 @@ function renderDay() {
     { id:'502交番', label:'振替休日',  selCls:'sel-sub' },
     { id:'503交番', label:'有給休暇',  selCls:'sel-paid' },
     { id:'504交番', label:'📅 休日予定', selCls:'sel-plan' },
-    { id:null,      label:'休み（未設定）', selCls:'sel-off' },
+    { id:null,      label:'予定未定',       selCls:'sel-off' },
   ];
 
   const hasHoliday = ['501交番','502交番','503交番','504交番',null].includes(rec.shift);
@@ -1777,14 +1777,7 @@ function renderDay() {
       <button onclick="clearShift('${key}')" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1.5px solid #f4a0a0;background:#fff5f5;color:#c0392b;cursor:pointer;font-weight:700;margin-left:auto;" id="clearShiftBtn_${key}">業務クリア</button>
     </div>` : '';
 
-  const shiftListHtml = `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-      <input type="number" min="1" max="999" placeholder="CODE番号" id="codeDirectInput_${key}"
-        value="${codeDisplay}"
-        oninput="onCodeDirectInput('${key}',this.value)"
-        style="font-family:var(--mono);font-size:28px;font-weight:800;width:110px;text-align:center;border:2px solid var(--accent);border-radius:10px;padding:8px 10px;color:#0878a0;background:#E6F1FB;outline:none;letter-spacing:2px;">
-      <div id="codeDirectTime_${key}" style="font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;">${codeTimeStr ? '▶ ' + codeTimeStr : ''}</div>
-    </div>`;
+  const shiftListHtml = '';
 
   // 複合業務パネル（既存のrenderInputから流用）
   let compoundPanelHtml = '';
@@ -2433,7 +2426,7 @@ function renderInput() {
     { id:'502交番', label:'振替休日',  selCls:'sel-sub' },
     { id:'503交番', label:'有給休暇',  selCls:'sel-paid' },
     { id:'504交番', label:'📅 休日予定', selCls:'sel-plan' },
-    { id:null,      label:'休み（未設定）', selCls:'sel-off' },
+    { id:null,      label:'予定未定',       selCls:'sel-off' },
   ];
   let holidayHtml = '<div style="font-size:10px;font-weight:800;color:#aaa;letter-spacing:1px;margin-bottom:6px;">休日</div><div class="special-btns">';
   holidaySpecials.forEach(s => {
@@ -2656,17 +2649,7 @@ function renderInput() {
     const s = tbl[codeVal.padStart(3,'0') + '交番'];
     return s ? `${s.start} – ${s.end}` : '';
   })();
-  const shiftListHtml = `
-  <div style="margin-top:4px;">
-    <div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">CODE 直接入力</div>
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <input type="text" id="codeDirectInput" maxlength="3" placeholder="000"
-        value="${codeVal}"
-        oninput="onCodeDirectInput('${key}',this.value)"
-        style="font-family:var(--mono);font-size:28px;font-weight:800;width:90px;text-align:center;border:2px solid var(--accent);border-radius:10px;padding:8px 10px;color:#0878a0;background:#E6F1FB;outline:none;letter-spacing:2px;">
-      <div id="codeDirectTime" style="font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;">${codeTimeStr ? '▶ ' + codeTimeStr : ''}</div>
-    </div>
-  </div>`;
+  const shiftListHtml = '';
 
   const isCustom = rec.shift === 'custom';
   const customHtml = `
@@ -2821,6 +2804,21 @@ function setShift(dateKey, shiftId) {
   delete appData[dateKey].customLabel;
   delete appData[dateKey].customStart;
   delete appData[dateKey].customEnd;
+  // 予定未定選択時はシフト・業務データを全消去
+  if (shiftId === null) {
+    delete appData[dateKey].compoundKobans;
+    delete appData[dateKey].compoundKobanModes;
+    delete appData[dateKey].compoundPartialData;
+    delete appData[dateKey].compoundManualStart;
+    delete appData[dateKey].compoundManualEnd;
+    delete appData[dateKey].taskContents;
+    delete appData[dateKey].workItems;
+    delete appData[dateKey].multiWorkStart;
+    delete appData[dateKey].multiWorkEnd;
+    delete appData[dateKey].trainingLabel;
+    delete appData[dateKey].trainingStart;
+    delete appData[dateKey].trainingEnd;
+  }
   saveData(appData);
   renderInput();
 }
