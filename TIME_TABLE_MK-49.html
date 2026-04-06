@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-71</title>
+<title>TIME TABLE MK-72</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -954,7 +954,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-71</div>
+    <div class="auth-logo">MK-72</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -969,7 +969,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-71 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-72 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1752,7 +1752,7 @@ function renderDay() {
   ];
   let dayWorkBtnsHtml = '<div style="font-size:10px;font-weight:800;color:#aaa;letter-spacing:1px;margin:8px 0 6px;">業務</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
   dayWorkBtns.forEach(b => {
-    dayWorkBtnsHtml += `<button style="font-size:13px;font-weight:700;padding:10px 13px;border-radius:10px;cursor:pointer;touch-action:manipulation;${b.style}" onclick="openWorkMode('${key}','${b.id}')">${b.label}</button>`;
+    dayWorkBtnsHtml += `<button style="font-size:16px;font-weight:700;padding:12px 18px;border-radius:10px;cursor:pointer;touch-action:manipulation;${b.style}" onclick="openWorkMode('${key}','${b.id}')">${b.label}</button>`;
   });
   dayWorkBtnsHtml += '</div>';
 
@@ -1918,7 +1918,7 @@ function renderDay() {
             <input type="text" maxlength="3" placeholder="000" id="workModeCodeInp"
               value="${codeVal2}"
               style="font-family:var(--mono);font-size:26px;font-weight:900;color:#0878a0;background:#c8eef8;border:2px solid #4ab8d8;border-radius:10px;padding:7px 10px;text-align:center;width:88px;outline:none;"
-              oninput="onWorkModeCodeInput('${key}',this.value)">
+              onchange="onWorkModeCodeInput('${key}',this.value)">
             <div>
               <div style="font-size:11px;color:#888;margin-bottom:3px;">交番時刻</div>
               <div id="workModeTimeDisp" style="font-size:16px;font-weight:800;color:#0878a0;font-family:var(--mono);">${timeStr4}</div>
@@ -1950,7 +1950,7 @@ function renderDay() {
             <input type="text" maxlength="3" placeholder="000" id="workModeCodeInp"
               value="${codeVal2}"
               style="font-family:var(--mono);font-size:26px;font-weight:900;color:#0878a0;background:#c8eef8;border:2px solid #4ab8d8;border-radius:10px;padding:7px 10px;text-align:center;width:88px;outline:none;"
-              oninput="onWorkModeCodeInput('${key}',this.value)">
+              onchange="onWorkModeCodeInput('${key}',this.value)">
           </div>
           ${tripListHtml4 ? `<div style="border:1.5px solid #c5eaf5;border-radius:10px;overflow:hidden;margin-bottom:10px;">${tripListHtml4}</div>` : ''}
           <button onclick="confirmWorkModePart('${key}')" style="width:100%;font-size:16px;font-weight:700;padding:11px;border-radius:10px;border:none;background:#f5a623;color:#fff;cursor:pointer;touch-action:manipulation;">✅ 確定</button>
@@ -2447,7 +2447,7 @@ function renderInput() {
   ];
   let workBtnsHtml = '<div style="font-size:10px;font-weight:800;color:#aaa;letter-spacing:1px;margin:8px 0 6px;">業務</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
   businessBtns.forEach(b => {
-    workBtnsHtml += `<button style="font-size:13px;font-weight:700;padding:10px 13px;border-radius:10px;cursor:pointer;${b.style}" onclick="openWorkMode('${key}','${b.id}')">${b.label}</button>`;
+    workBtnsHtml += `<button style="font-size:16px;font-weight:700;padding:12px 18px;border-radius:10px;cursor:pointer;${b.style}" onclick="openWorkMode('${key}','${b.id}')">${b.label}</button>`;
   });
   workBtnsHtml += '</div>';
 
@@ -2477,7 +2477,7 @@ function renderInput() {
             <input type="text" maxlength="3" placeholder="000" id="workModeCodeInp"
               value="${codeVal2}"
               style="font-family:var(--mono);font-size:26px;font-weight:900;color:#0878a0;background:#c8eef8;border:2px solid #4ab8d8;border-radius:10px;padding:7px 10px;text-align:center;width:88px;outline:none;"
-              oninput="onWorkModeCodeInput('${key}',this.value)">
+              onchange="onWorkModeCodeInput('${key}',this.value)">
             <div>
               <div style="font-size:11px;color:#888;margin-bottom:3px;">交番時刻</div>
               <div id="workModeTimeDisp" style="font-size:16px;font-weight:800;color:#0878a0;font-family:var(--mono);">${timeStr4}</div>
@@ -2517,7 +2517,7 @@ function renderInput() {
             <input type="text" maxlength="3" placeholder="000" id="workModeCodeInp"
               value="${codeVal2}"
               style="font-family:var(--mono);font-size:26px;font-weight:900;color:#0878a0;background:#c8eef8;border:2px solid #4ab8d8;border-radius:10px;padding:7px 10px;text-align:center;width:88px;outline:none;"
-              oninput="onWorkModeCodeInput('${key}',this.value)">
+              onchange="onWorkModeCodeInput('${key}',this.value)">
           </div>
           ${tripListHtml4 ? `<div style="border:1.5px solid #c5eaf5;border-radius:10px;overflow:hidden;margin-bottom:10px;">${tripListHtml4}</div>` : ''}
           <button onclick="confirmWorkModePart('${key}')"
@@ -3568,7 +3568,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📋 アプリ概要</div>
       <div style="font-size:12px;color:var(--text);line-height:1.8;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-61<br>
+        <b>現バージョン：</b>MK-72<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -3583,7 +3583,7 @@ function renderSpec() {
         <b>月（月ビュー）：</b>月間カレンダー。各日にCODE・タスクを表示。タップで日ビューへ遷移<br>
         <b>週（週ビュー）：</b>週間表示。サマリーとライフ記録セクションあり<br>
         <b>日（日ビュー）：</b>選択日の詳細。入力へのショートカットあり。TRIPカード表示<br>
-        <b>入力：</b>勤務データ入力画面。CODE直接入力・複合勤務対応<br>
+        <b>入力：</b>勤務データ入力画面。業務種別ボタン選択→CODE入力またはTRIP選択<br>
         <b>📊（統計）：</b>勤務時間・睡眠・勤務間隔の統計グラフ<br>
         <b>仕様（本画面）：</b>アプリの仕様書・使い方確認
       </div>
@@ -3592,10 +3592,12 @@ function renderSpec() {
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📖 用語定義</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
-        <b>CODE：</b>交番番号（旧：路線識別子）。3桁の数字で入力<br>
-        <b>TRIP：</b>便番号（旧：ルート番号）。複合勤務時に使用<br>
-        <b>複合勤務：</b>1日に複数のCODE/TRIPが発生する勤務形態<br>
-        <b>休日：</b>赤色で統一表示<br>
+        <b>CODE：</b>交番番号。3桁の数字（例：007、022）<br>
+        <b>TRIP：</b>便番号。交番一部選択時にTRIP一覧から選択<br>
+        <b>交番通り：</b>交番の全便を乗務する通常勤務<br>
+        <b>交番一部：</b>交番の一部TRIPのみ乗務する勤務形態<br>
+        <b>複数業務：</b>1日に複数の業務（CODE・TRIP・業務習得等）が発生する勤務形態<br>
+        <b>予定未定：</b>勤務予定が未確定の日。選択時にシフト・業務データを白紙化<br>
         <b>ライフ記録：</b>睡眠・勤務間隔などの生活データ
       </div>
     </div>
@@ -3618,6 +3620,21 @@ function renderSpec() {
         <b>GitHub アップロード時：</b>TIME_TABLE_MK-49.html に改名して上書き<br>
         <b>アプリ内バージョン：</b>ヘッダーに表示。更新のたびに番号を上げる<br>
         <b>仕様書：</b>この画面。変更があれば都度Claudeに依頼して更新
+      </div>
+    </div>
+
+    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📝 主な変更履歴</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>MK-72：</b>業務入力ボタンサイズ統一・交番一部CODE入力のiOS対応修正<br>
+        <b>MK-71：</b>ボタン構成変更（複合業務削除・交番通り/一部追加・休日予定復活・予定未定追加）<br>
+        <b>MK-70：</b>日ビューに新業務入力フロー実装（交番通り/一部/業務習得等）<br>
+        <b>MK-69：</b>iOS対応（touch-action・onchange統一・フォントサイズ16px統一）<br>
+        <b>MK-68：</b>JS構文エラー修正（ログイン不可バグ解消）<br>
+        <b>MK-67：</b>入力フロー刷新（業務種別ボタン・複数業務自動判定・登録済み一覧）<br>
+        <b>MK-66：</b>睡眠時間「分」セレクトボックス幅拡大<br>
+        <b>MK-65：</b>複合業務UIをCODE並列ボタン方式に刷新<br>
+        <b>MK-64：</b>仕様タブに新CODE切替設定パネル追加
       </div>
     </div>
 
