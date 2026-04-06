@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>TIME TABLE MK-75</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
@@ -137,6 +140,8 @@
   .cal-shift.plan    { background: #ffe5b0; color: #a06000; border: 1px dashed #e0a030; }
   .cal-shift.task    { background: #d4f5e5; color: #0a5e2a; }
   .cal-shift.task2   { background: #fff3cc; color: #8a5c00; }
+  .cal-shift.garage  { background: #ffebc8; color: #7a4a00; border: 1px solid #e0a030; }
+  .cal-shift.other   { background: #ede0ff; color: #5a00b0; border: 1px solid #b080e0; }
   .cal-time { font-family: var(--mono); font-size: 11px; color: var(--muted); }
   .cal-koban-info { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 2px; }
   .cal-koban-badge {
@@ -1560,6 +1565,10 @@ function renderCalCell(year, month, day, dateKey, other, todayKey) {
         sorted.forEach(item => {
           if (item.type === 'training' || item.type === 'task') {
             inner += `<div class="cal-shift task">${item.label || '業務習得'}</div>`;
+          } else if (item.type === 'garage') {
+            inner += `<div class="cal-shift garage">${item.label || '車庫整理'}</div>`;
+          } else if (item.type === 'other') {
+            inner += `<div class="cal-shift other">${item.label || 'その他'}</div>`;
           } else if (item.type === 'all') {
             inner += `<div class="cal-shift work">${item.code || ''}</div>`;
           } else if (item.type === 'part') {
@@ -2604,26 +2613,26 @@ function renderInput() {
       </div>`;
   }
 
-  // 複数業務判定時の出退社入力
+  // 複合業務の始業・終業入力（1件以上あれば常に表示）
   let multiTimePanelHtml = '';
-  if (isMultiWork) {
+  if (workItems.length >= 1) {
     multiTimePanelHtml = `
-      <div style="background:#fff8f0;border:2px solid #f5a623;border-radius:12px;padding:12px 14px;margin-top:10px;">
-        <div style="font-size:12px;font-weight:800;color:#e07a00;margin-bottom:10px;">🟠 複数業務 — 出退社時刻を入力して保存</div>
+      <div style="background:#f0fafb;border:2px solid #0ea8d8;border-radius:12px;padding:12px 14px;margin-top:10px;">
+        <div style="font-size:12px;font-weight:800;color:#0878a0;margin-bottom:10px;">🕐 始業・終業時刻</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <span style="font-size:13px;font-weight:700;color:#555;min-width:36px;">出社</span>
+          <span style="font-size:13px;font-weight:700;color:#555;min-width:36px;">始業</span>
           <input type="time" value="${manualStartNew}" id="multiStartInp"
-            style="font-size:17px;font-weight:700;padding:7px 10px;border-radius:8px;border:1.5px solid #f5a623;width:130px;font-family:var(--mono);"
+            style="font-size:17px;font-weight:700;padding:7px 10px;border-radius:8px;border:1.5px solid #0ea8d8;width:130px;font-family:var(--mono);touch-action:manipulation;"
             onchange="window._multiStart=this.value">
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <span style="font-size:13px;font-weight:700;color:#555;min-width:36px;">退社</span>
+          <span style="font-size:13px;font-weight:700;color:#555;min-width:36px;">終業</span>
           <input type="time" value="${manualEndNew}" id="multiEndInp"
-            style="font-size:17px;font-weight:700;padding:7px 10px;border-radius:8px;border:1.5px solid #f5a623;width:130px;font-family:var(--mono);"
+            style="font-size:17px;font-weight:700;padding:7px 10px;border-radius:8px;border:1.5px solid #0ea8d8;width:130px;font-family:var(--mono);touch-action:manipulation;"
             onchange="window._multiEnd=this.value">
         </div>
         <button onclick="saveMultiWorkTime('${key}')"
-          style="width:100%;font-size:14px;font-weight:700;padding:10px;border-radius:9px;border:none;background:#f5a623;color:#fff;cursor:pointer;">💾 保存</button>
+          style="width:100%;font-size:14px;font-weight:700;padding:10px;border-radius:9px;border:none;background:#0ea8d8;color:#fff;cursor:pointer;touch-action:manipulation;">💾 保存</button>
       </div>`;
   }
 
