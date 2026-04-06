@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-69</title>
+<title>TIME TABLE MK-70</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -954,7 +954,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-69</div>
+    <div class="auth-logo">MK-70</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -969,7 +969,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-69 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-70 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1723,24 +1723,40 @@ function renderDay() {
   const sleepColor = sleepMin === null ? '' : sleepMin < 360 ? 'bad' : sleepMin < 420 ? 'warn' : 'good';
 
   // ── シフト入力パネル ──
-  const specials = [
+  // 休日系ボタン
+  const holidaySpecialsDay = [
     { id:'501交番', label:'公休日',    selCls:'sel-holiday' },
     { id:'502交番', label:'振替休日',  selCls:'sel-sub' },
     { id:'503交番', label:'有給休暇',  selCls:'sel-paid' },
     { id:'504交番', label:'📅 休日予定', selCls:'sel-plan' },
     { id:null,      label:'休み（未設定）', selCls:'sel-off' },
-    { id:'compound',label:'複合業務',  selCls:'sel-compound' },
   ];
 
   const hasHoliday = ['501交番','502交番','503交番','504交番',null].includes(rec.shift);
   const hasWork = info && info.type === 'work';
 
-  let specialHtml = '<div class="special-btns">';
-  specials.forEach(s => {
+  let specialHtml = '<div style="font-size:10px;font-weight:800;color:#aaa;letter-spacing:1px;margin-bottom:6px;">休日</div><div class="special-btns">';
+  holidaySpecialsDay.forEach(s => {
     const active = rec.shift === s.id;
-    specialHtml += `<button class="special-btn${active?' '+s.selCls:''}" onclick="setShiftMode('${key}','${s.id}')">${s.label}</button>`;
+    specialHtml += `<button class="special-btn${active?' '+s.selCls:''}" onclick="setShiftMode('${key}','${s.id}')" style="touch-action:manipulation;">${s.label}</button>`;
   });
   specialHtml += '</div>';
+
+  // 業務系ボタン
+  const dayWorkBtns = [
+    { id:'training', label:'業務習得', style:'border:1.5px solid #e07a00;color:#8a4a00;background:#fff0d4;' },
+    { id:'garage',   label:'車庫整理', style:'border:1.5px solid #9b6200;color:#7a4a00;background:#ffebc8;' },
+    { id:'other',    label:'その他',   style:'border:1.5px solid #aaa;color:#555;background:#f5f5f5;' },
+    { id:'all',      label:'交番通り', style:'border:1.5px solid #4ab8d8;color:#0878a0;background:#c8eef8;font-weight:800;' },
+    { id:'part',     label:'交番一部', style:'border:1.5px solid #f5a623;color:#b85000;background:#fff0e0;font-weight:800;' },
+  ];
+  let dayWorkBtnsHtml = '<div style="font-size:10px;font-weight:800;color:#aaa;letter-spacing:1px;margin:8px 0 6px;">業務</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
+  dayWorkBtns.forEach(b => {
+    dayWorkBtnsHtml += `<button style="font-size:13px;font-weight:700;padding:10px 13px;border-radius:10px;cursor:pointer;touch-action:manipulation;${b.style}" onclick="openWorkMode('${key}','${b.id}')">${b.label}</button>`;
+  });
+  dayWorkBtnsHtml += '</div>';
+
+  specialHtml = specialHtml + dayWorkBtnsHtml;
 
   // 休日クリアボタン（選択中のみ）
   const holidayClearHtml = hasHoliday
@@ -1886,6 +1902,91 @@ function renderDay() {
       ${addedCardsHtml ? `<div style="margin-top:10px;">${addedCardsHtml}</div>` : ''}
       ${taskItemsHtml ? `<div style="margin-top:10px;border-top:1px solid #ffe8cc;padding-top:10px;">${taskItemsHtml}</div>` : ''}
     </div>`;
+  }
+
+  // ── 新業務フロー入力パネル（日ビュー）──
+  const workModeOpenNow = window._workModeOpen === key;
+  const workModeTypeNow = window._workModeType || null;
+  if (workModeOpenNow && workModeTypeNow) {
+    const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
+    const dbType = isNew ? 'new' : 'cur';
+    const d = new Date(key); const dow = d.getDay();
+    const shu = dow===6?'土曜':dow===0?'日祝':'平日';
+    const wmt = workModeTypeNow;
+    if (wmt === 'all') {
+      const codeVal2 = window._workModeCode || '';
+      const tbl4 = getEffectiveShiftTable(key);
+      const s4 = codeVal2.length===3 ? tbl4[codeVal2+'交番'] : null;
+      const timeStr4 = s4 ? s4.start + ' 〜 ' + s4.end : '';
+      compoundPanelHtml = `
+        <div style="background:#fff;border:1.5px solid #c5eaf5;border-radius:14px;padding:14px 16px;margin-top:10px;">
+          <div style="font-size:12px;font-weight:800;color:#0878a0;margin-bottom:12px;">📋 CODE番号を入力</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <input type="text" maxlength="3" placeholder="000" id="workModeCodeInp"
+              value="${codeVal2}"
+              style="font-family:var(--mono);font-size:26px;font-weight:900;color:#0878a0;background:#c8eef8;border:2px solid #4ab8d8;border-radius:10px;padding:7px 10px;text-align:center;width:88px;outline:none;"
+              oninput="onWorkModeCodeInput('${key}',this.value)">
+            <div>
+              <div style="font-size:11px;color:#888;margin-bottom:3px;">交番時刻</div>
+              <div id="workModeTimeDisp" style="font-size:16px;font-weight:800;color:#0878a0;font-family:var(--mono);">${timeStr4}</div>
+            </div>
+          </div>
+          <button onclick="confirmWorkModeAll('${key}')" style="width:100%;font-size:16px;font-weight:700;padding:11px;border-radius:10px;border:none;background:#4ab8d8;color:#fff;cursor:pointer;touch-action:manipulation;">✅ 確定</button>
+        </div>`;
+    } else if (wmt === 'part') {
+      const codeVal2 = window._workModeCode || '';
+      const editingTrips = window._workModeTrips || [];
+      const kobanNum4 = codeVal2.length===3 ? parseInt(codeVal2,10) : null;
+      let tripListHtml4 = '';
+      if (kobanNum4) {
+        const {routes: r4} = getEffectiveRoutes(dbType, shu, kobanNum4);
+        tripListHtml4 = r4.map(r => {
+          const sel = editingTrips.includes(r.no);
+          return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:0.5px solid #e8f4fb;cursor:pointer;background:${sel?'#fff8f0':'#fff'};"
+            onclick="toggleWorkModeTrip('${r.no}')">
+            <div style="width:22px;height:22px;border-radius:50%;border:2px solid #4ab8d8;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;background:${sel?'#f5a623':'transparent'};color:${sel?'#fff':'transparent'};border-color:${sel?'#f5a623':'#4ab8d8'};">✓</div>
+            <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#0878a0;min-width:58px;">${r.no}</span>
+            <div style="font-size:11px;color:#555;flex:1;"><div>${r.dep_place} → ${r.arr_place}</div><div style="color:#4ab8d8;font-weight:700;">${r.dep_time} → ${r.arr_time}</div></div>
+          </div>`;
+        }).join('');
+      }
+      compoundPanelHtml = `
+        <div style="background:#fff;border:1.5px solid #f5a623;border-radius:14px;padding:14px 16px;margin-top:10px;">
+          <div style="font-size:12px;font-weight:800;color:#e07a00;margin-bottom:12px;">📋 CODE番号を入力してTRIPを選択</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <input type="text" maxlength="3" placeholder="000" id="workModeCodeInp"
+              value="${codeVal2}"
+              style="font-family:var(--mono);font-size:26px;font-weight:900;color:#0878a0;background:#c8eef8;border:2px solid #4ab8d8;border-radius:10px;padding:7px 10px;text-align:center;width:88px;outline:none;"
+              oninput="onWorkModeCodeInput('${key}',this.value)">
+          </div>
+          ${tripListHtml4 ? `<div style="border:1.5px solid #c5eaf5;border-radius:10px;overflow:hidden;margin-bottom:10px;">${tripListHtml4}</div>` : ''}
+          <button onclick="confirmWorkModePart('${key}')" style="width:100%;font-size:16px;font-weight:700;padding:11px;border-radius:10px;border:none;background:#f5a623;color:#fff;cursor:pointer;touch-action:manipulation;">✅ 確定</button>
+        </div>`;
+    } else if (['training','garage','other'].includes(wmt)) {
+      const labelMap = { training:'業務習得', garage:'車庫整理', other:'その他' };
+      const colorMap = { training:'#e07a00', garage:'#9b6200', other:'#777' };
+      const wLabel = labelMap[wmt];
+      const wColor = colorMap[wmt];
+      const wStart = window._workModeStart || '';
+      const wEnd   = window._workModeEnd   || '';
+      compoundPanelHtml = `
+        <div style="background:#fff;border:1.5px solid ${wColor};border-radius:14px;padding:14px 16px;margin-top:10px;">
+          <div style="font-size:12px;font-weight:800;color:${wColor};margin-bottom:12px;">📚 ${wLabel} — 時刻を入力</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <span style="font-size:13px;font-weight:700;color:#555;min-width:34px;">開始</span>
+            <input type="time" value="${wStart}" id="workModeStartInp"
+              style="font-size:16px;font-weight:700;padding:7px 10px;border-radius:8px;border:1.5px solid ${wColor};width:140px;font-family:var(--mono);"
+              onchange="window._workModeStart=this.value">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span style="font-size:13px;font-weight:700;color:#555;min-width:34px;">終了</span>
+            <input type="time" value="${wEnd}" id="workModeEndInp"
+              style="font-size:16px;font-weight:700;padding:7px 10px;border-radius:8px;border:1.5px solid ${wColor};width:140px;font-family:var(--mono);"
+              onchange="window._workModeEnd=this.value">
+          </div>
+          <button onclick="confirmWorkModeTask('${key}','${wmt}')" style="width:100%;font-size:16px;font-weight:700;padding:11px;border-radius:10px;border:none;background:${wColor};color:#fff;cursor:pointer;touch-action:manipulation;">✅ 確定</button>
+        </div>`;
+    }
   }
 
   // ── 逆算値 ──
@@ -2041,8 +2142,9 @@ function renderDay() {
     ${isOpen ? `
     <div class="inp-card" style="margin-top:4px;">
       <div class="inp-card-body">
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
-          ${specialHtml.replace('</div>','') + holidayClearHtml + '</div>'}
+        <div style="margin-bottom:8px;">
+          ${specialHtml}
+          ${holidayClearHtml}
         </div>
         ${compoundPanelHtml}
         ${rec.shift !== 'compound' ? selBarHtml + shiftListHtml : ''}
