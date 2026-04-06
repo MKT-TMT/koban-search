@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIME TABLE MK-73</title>
+<title>TIME TABLE MK-74</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -954,7 +954,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-73</div>
+    <div class="auth-logo">MK-74</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -969,7 +969,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-73 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-74 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1796,123 +1796,7 @@ function renderDay() {
 
   // 複合業務パネル（既存のrenderInputから流用）
   let compoundPanelHtml = '';
-  if (rec.shift === 'compound') {
-    const isNew = (() => { const cfg=loadNewKobanConfig(); return cfg&&cfg.effectiveDate&&key>=cfg.effectiveDate; })();
-    const dbType = isNew ? 'new' : 'cur';
-    const d2 = new Date(key); const dow2 = d2.getDay();
-    const shu2 = dow2===6?'土曜':dow2===0?'日祝':'平日';
-    const selKobans = rec.compoundKobans || [];
-    const modes = rec.compoundKobanModes || {};
-    const partialData = rec.compoundPartialData || {};
-    const tasks = rec.taskContents || [];
-    const taskFormOpen = window._taskFormOpen && window._taskFormOpen === key;
-    const taskFormState = window._taskFormState || { type: '業務習得', customName: '', start: '', end: '' };
-    const presetTypes = (rec.taskPresets || ['業務習得', '車庫整理']);
-    let taskItemsHtml = tasks.map((t, i) => `
-      <div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:#f0faff;border-radius:6px;margin-bottom:4px;">
-        <span style="font-size:12px;font-weight:700;color:#0878a0;">${t.type||''}</span>
-        <span style="font-size:11px;color:var(--muted);">${t.start||''}${t.end?' – '+t.end:''}</span>
-        <button class="task-content-del" onclick="deleteTaskContent('${key}',${i})">✕</button>
-      </div>`).join('');
-    // 追加済みCODEを時刻順にソート
-    const sortedKobans = [...selKobans].sort((a, b) => {
-      const getStart = (n) => {
-        const m = modes[n];
-        const pd = partialData[n] || {};
-        if (m === 'part') {
-          return pd.start || '99:99';
-        } else {
-          const tbl = getEffectiveShiftTable(key);
-          const s = tbl[String(n).padStart(3,'0') + '交番'];
-          return s ? s.start : '99:99';
-        }
-      };
-      return getStart(a).localeCompare(getStart(b));
-    });
-
-    // 追加済みCODEカードHTML
-    const addedCardsHtml = sortedKobans.map(n => {
-      const isAll = modes[n] !== 'part';
-      const codeStr = String(n).padStart(3,'0');
-      const pd = partialData[n] || {};
-      const tbl = getEffectiveShiftTable(key);
-      const s = tbl[codeStr + '交番'];
-      let timeStr = '';
-      if (isAll) {
-        timeStr = s ? s.start + ' 〜 ' + s.end : '';
-      } else {
-        timeStr = pd.start && pd.end ? pd.start + ' 〜 ' + pd.end : pd.start || '';
-      }
-      let tripBodyHtml = '';
-      if (!isAll) {
-        const tripNos = pd.tripNos || [];
-        const {routes: effR} = getEffectiveRoutes(dbType, shu2, n);
-        tripBodyHtml = tripNos.map(no => {
-          const r = effR.find(r => r.no === no);
-          return r ? `${no}　${r.dep_place}→${r.arr_place}　${r.dep_time}` : no;
-        }).join('<br>');
-      } else {
-        tripBodyHtml = s ? '全便' : '';
-      }
-      return `<div class="compound-added-card">
-        <div class="compound-added-header">
-          <span class="compound-added-code">${codeStr}</span>
-          <span class="compound-added-mode ${isAll?'all':'part'}">${isAll?'交番通り':'交番一部'}</span>
-          <span class="compound-added-time">${timeStr}</span>
-          <button class="compound-added-del" onclick="removeCompoundKoban('${key}',${n})">✕</button>
-        </div>
-        ${tripBodyHtml ? `<div class="compound-added-body">${tripBodyHtml}</div>` : ''}
-      </div>`;
-    }).join('');
-
-    // 入力中のTRIP一覧（一部モード選択時）
-    const editingKoban = window._compEditingKoban;
-    const editingMode  = window._compEditingMode;
-    let tripPanelHtml = '';
-    if (editingKoban && editingMode === 'part') {
-      const {routes: editRoutes} = getEffectiveRoutes(dbType, shu2, editingKoban);
-      const editPd = (partialData[editingKoban] || {});
-      const editTrips = editPd.tripNos || [];
-      tripPanelHtml = `
-        <div style="margin-top:10px;">
-          <div style="font-size:11px;font-weight:800;color:#4ab8d8;letter-spacing:1px;margin-bottom:8px;">
-            CODE ${String(editingKoban).padStart(3,'0')} — TRIP選択
-          </div>
-          <div class="compound-trip-panel">
-            ${editRoutes.map(r => {
-              const sel = editTrips.includes(r.no);
-              return `<div class="compound-trip-item${sel?' selected':''}" onclick="toggleCompoundTrip('${key}',${editingKoban},'${r.no}')">
-                <div class="compound-trip-check${sel?' on':''}">✓</div>
-                <span class="compound-trip-no">${r.no}</span>
-                <div class="compound-trip-detail">
-                  <div>${r.dep_place} → ${r.arr_place}</div>
-                  <div class="compound-trip-time">${r.dep_time} → ${r.arr_time}</div>
-                </div>
-              </div>`;
-            }).join('')}
-          </div>
-          <button class="compound-decide-btn" onclick="decideTripSelection('${key}',${editingKoban})">✅ 決定</button>
-        </div>`;
-    }
-
-    compoundPanelHtml = `<div class="compound-panel">
-      <div class="compound-header">🔢 CODE入力 <span class="compound-badge-tag">複合業務</span></div>
-      <div class="compound-code-row">
-        <input type="number" min="1" max="999" placeholder="000" id="compCodeInput_${key}"
-          class="compound-code-inp" oninput="previewCompCode('${key}',this.value)">
-        <div class="compound-mode-btns">
-          <button class="compound-mode-btn all-btn" onclick="addCompoundKobanNew('${key}','all')">交番通り</button>
-          <button class="compound-mode-btn part-btn${editingMode==='part'?' active':''}" onclick="addCompoundKobanNew('${key}','part')">交番一部</button>
-        </div>
-      </div>
-      <div id="compCodePreview2_${key}" style="font-size:11px;color:var(--accent);font-family:var(--mono);margin-bottom:8px;"></div>
-      ${tripPanelHtml}
-      ${addedCardsHtml ? `<div style="margin-top:10px;">${addedCardsHtml}</div>` : ''}
-      ${taskItemsHtml ? `<div style="margin-top:10px;border-top:1px solid #ffe8cc;padding-top:10px;">${taskItemsHtml}</div>` : ''}
-    </div>`;
-  }
-
-  // ── 新業務フロー入力パネル（日ビュー）──
+    // ── 新業務フロー入力パネル（日ビュー）──
   const workModeOpenNow = window._workModeOpen === key;
   const workModeTypeNow = window._workModeType || null;
   if (workModeOpenNow && workModeTypeNow) {
@@ -2197,7 +2081,57 @@ function renderDay() {
           ${holidayClearHtml}
         </div>
         ${compoundPanelHtml}
-        ${rec.shift !== 'compound' ? selBarHtml + shiftListHtml : ''}
+        ${(() => {
+          const wi = rec.workItems || [];
+          if (wi.length > 0) {
+            const sorted = [...wi].sort((a,b)=>(a.startTime||'99:99').localeCompare(b.startTime||'99:99'));
+            const itemsHtml = sorted.map((item,i) => {
+              const isWork = item.type==='all'||item.type==='part';
+              const badge = isWork
+                ? `<span style="font-family:var(--mono);font-size:15px;font-weight:900;color:#0878a0;background:#c8eef8;border-radius:6px;padding:3px 10px;">${item.code}</span>`
+                : `<span style="font-size:12px;font-weight:800;color:#8a4a00;background:#fff0d4;border-radius:6px;padding:4px 8px;">${item.label||''}</span>`;
+              const modeLabel = item.type==='all'?'交番通り':item.type==='part'?'交番一部':item.label||'';
+              const modeColor = item.type==='part'?'#f5a623':item.type==='all'?'#4ab8d8':'#e07a00';
+              const timeStr = item.startTime&&item.endTime?item.startTime+' 〜 '+item.endTime:item.startTime||'';
+              return `<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:0.5px solid #e8f4fb;gap:10px;">
+                ${badge}
+                <div style="flex:1;">
+                  <div style="font-size:11px;font-weight:700;color:${modeColor};margin-bottom:2px;">${modeLabel}</div>
+                  <div style="font-size:13px;font-weight:700;color:#333;">${timeStr}</div>
+                </div>
+                <button style="font-size:17px;background:none;border:none;cursor:pointer;touch-action:manipulation;" onclick="editWorkItem('${key}',${i})">✏️</button>
+                <button style="font-size:13px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:700;touch-action:manipulation;" onclick="deleteWorkItem('${key}',${i})">✕</button>
+              </div>`;
+            }).join('');
+            const isMulti = wi.length >= 2;
+            const mStart = rec.multiWorkStart||'';
+            const mEnd   = rec.multiWorkEnd||'';
+            const multiPanel = isMulti ? `
+              <div style="background:#fff8f0;border:2px solid #f5a623;border-radius:12px;padding:12px 14px;margin-top:8px;">
+                <div style="font-size:12px;font-weight:800;color:#e07a00;margin-bottom:10px;">🟠 出退社時刻</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                  <span style="font-size:13px;font-weight:700;color:#555;min-width:36px;">出社</span>
+                  <input type="time" value="${mStart}" id="multiStartInp"
+                    style="font-size:17px;font-weight:700;padding:7px 10px;border-radius:8px;border:1.5px solid #f5a623;width:130px;font-family:var(--mono);"
+                    onchange="window._multiStart=this.value">
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                  <span style="font-size:13px;font-weight:700;color:#555;min-width:36px;">退社</span>
+                  <input type="time" value="${mEnd}" id="multiEndInp"
+                    style="font-size:17px;font-weight:700;padding:7px 10px;border-radius:8px;border:1.5px solid #f5a623;width:130px;font-family:var(--mono);"
+                    onchange="window._multiEnd=this.value">
+                </div>
+                <button onclick="saveMultiWorkTime('${key}')" style="width:100%;font-size:14px;font-weight:700;padding:10px;border-radius:9px;border:none;background:#f5a623;color:#fff;cursor:pointer;touch-action:manipulation;">💾 保存</button>
+              </div>` : '';
+            return `<div style="background:#fff;border:1.5px solid #c5eaf5;border-radius:14px;overflow:hidden;margin-top:8px;">
+              <div style="background:#4ab8d8;color:#fff;padding:9px 14px;font-size:13px;font-weight:800;">
+                登録済み業務${isMulti?'<span style="font-size:11px;background:#f5a623;color:#fff;border-radius:20px;padding:2px 10px;margin-left:8px;font-weight:800;">🟠 複数業務</span>':''}
+              </div>
+              ${itemsHtml}
+            </div>${multiPanel}`;
+          }
+          return rec.shift !== 'compound' ? selBarHtml + shiftListHtml : '';
+        })()}
       </div>
     </div>` : ''}
 
