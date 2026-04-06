@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>TIME TABLE MK-75</title>
+<title>TIME TABLE MK-77</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -139,9 +139,9 @@
   .cal-shift.paid    { background: #ffd9d9; color: #c01010; }
   .cal-shift.plan    { background: #ffe5b0; color: #a06000; border: 1px dashed #e0a030; }
   .cal-shift.task    { background: #d4f5e5; color: #0a5e2a; }
-  .cal-shift.task2   { background: #fff3cc; color: #8a5c00; }
-  .cal-shift.garage  { background: #ffebc8; color: #7a4a00; border: 1px solid #e0a030; }
-  .cal-shift.other   { background: #ede0ff; color: #5a00b0; border: 1px solid #b080e0; }
+  .cal-shift.task2   { background: #d4f5e5; color: #0a5e2a; }
+  .cal-shift.garage  { background: #d4f5e5; color: #0a5e2a; }
+  .cal-shift.other   { background: #d4f5e5; color: #0a5e2a; }
   .cal-time { font-family: var(--mono); font-size: 11px; color: var(--muted); }
   .cal-koban-info { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 2px; }
   .cal-koban-badge {
@@ -959,7 +959,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-75</div>
+    <div class="auth-logo">MK-77</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -974,7 +974,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-75 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-77 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -2108,9 +2108,9 @@ function renderDay() {
               const isWork = item.type==='all'||item.type==='part';
               const badge = isWork
                 ? `<span style="font-family:var(--mono);font-size:15px;font-weight:900;color:#0878a0;background:#c8eef8;border-radius:6px;padding:3px 10px;">${item.code}</span>`
-                : `<span style="font-size:12px;font-weight:800;color:#8a4a00;background:#fff0d4;border-radius:6px;padding:4px 8px;">${item.label||''}</span>`;
+                : `<span style="font-size:12px;font-weight:800;color:#0a5e2a;background:#d4f5e5;border-radius:6px;padding:4px 8px;">${item.label||''}</span>`;
               const modeLabel = item.type==='all'?'交番通り':item.type==='part'?'交番一部':item.label||'';
-              const modeColor = item.type==='part'?'#f5a623':item.type==='all'?'#4ab8d8':'#e07a00';
+              const modeColor = item.type==='part'?'#f5a623':item.type==='all'?'#4ab8d8':'#0a5e2a';
               const timeStr = item.startTime&&item.endTime?item.startTime+' 〜 '+item.endTime:item.startTime||'';
               return `<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:0.5px solid #e8f4fb;gap:10px;">
                 ${badge}
@@ -2586,9 +2586,9 @@ function renderInput() {
       const isWork = item.type === 'all' || item.type === 'part';
       const codeBadge = isWork
         ? `<span style="font-family:var(--mono);font-size:16px;font-weight:900;color:#0878a0;background:#c8eef8;border-radius:6px;padding:3px 10px;">${item.code||''}</span>`
-        : `<span style="font-size:12px;font-weight:800;color:#8a4a00;background:#fff0d4;border-radius:6px;padding:4px 8px;">${item.label||''}</span>`;
+        : `<span style="font-size:12px;font-weight:800;color:#0a5e2a;background:#d4f5e5;border-radius:6px;padding:4px 8px;">${item.label||''}</span>`;
       const modeLabel = item.type==='all'?'交番通り':item.type==='part'?'交番一部':item.label||'';
-      const modeColor = item.type==='part'?'#f5a623':item.type==='all'?'#4ab8d8':'#e07a00';
+      const modeColor = item.type==='part'?'#f5a623':item.type==='all'?'#4ab8d8':'#0a5e2a';
       const timeStr = item.startTime && item.endTime ? item.startTime+' 〜 '+item.endTime : item.startTime||'';
       const tripStr = item.trips ? item.trips.join(' / ') : '';
       return `<div style="display:flex;align-items:center;padding:11px 14px;border-bottom:0.5px solid #e8f4fb;gap:10px;">
@@ -3578,7 +3578,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📋 アプリ概要</div>
       <div style="font-size:12px;color:var(--text);line-height:1.8;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-75<br>
+        <b>現バージョン：</b>MK-77<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
