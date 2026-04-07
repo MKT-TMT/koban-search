@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>TIME TABLE MK-77</title>
+<title>TIME TABLE MK-78</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -959,7 +959,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-77</div>
+    <div class="auth-logo">MK-78</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -974,7 +974,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-77 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-78 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1118,7 +1118,7 @@ function buildRouteTable(routes) {
     }
     const hlStyle = highlighted.has(i) ? 'background:#FBEAF0;' : '';
     return `<tr style="${hlStyle}border-bottom:1px solid var(--border)">
-      <td style="font-family:var(--mono);font-size:13px;color:var(--muted);padding:8px 6px 8px 0;white-space:nowrap">${r.no}</td>
+      <td style="font-family:var(--mono);font-size:13px;color:var(--muted);padding:8px 6px 8px 0;white-space:nowrap">${String(r.no).padStart(5,"0")}</td>
       <td style="font-size:13px;padding:8px 4px;white-space:nowrap">${r.dep_place}</td>
       <td style="font-family:var(--mono);font-size:13px;color:${depColor};padding:8px 4px;white-space:nowrap">${r.dep_time}${depBadge}</td>
       <td style="font-size:13px;padding:8px 4px;white-space:nowrap">${r.arr_place}</td>
@@ -1856,7 +1856,7 @@ function renderDay() {
           return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:0.5px solid #e8f4fb;cursor:pointer;background:${sel?'#fff8f0':'#fff'};"
             onclick="toggleWorkModeTrip('${r.no}')">
             <div style="width:22px;height:22px;border-radius:50%;border:2px solid #4ab8d8;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;background:${sel?'#f5a623':'transparent'};color:${sel?'#fff':'transparent'};border-color:${sel?'#f5a623':'#4ab8d8'};">✓</div>
-            <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#0878a0;min-width:58px;">${r.no}</span>
+            <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#0878a0;min-width:58px;">${String(r.no).padStart(5,"0")}</span>
             <div style="font-size:11px;color:#555;flex:1;"><div>${r.dep_place} → ${r.arr_place}</div><div style="color:#4ab8d8;font-weight:700;">${r.dep_time} → ${r.arr_time}</div></div>
           </div>`;
         }).join('');
@@ -2018,7 +2018,7 @@ function renderDay() {
             if (!allRoutes.length) return;
             const rowsHtml = allRoutes.map(r => `
               <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-                <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+                <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${String(r.no).padStart(5,"0")}</span>
                 <span style="font-size:16px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
                 <span style="font-family:var(--mono);font-size:14px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
               </div>`).join('');
@@ -2027,12 +2027,12 @@ function renderDay() {
             // 交番一部：選択TRIPのみ表示
             const kobanNum = parseInt(item.code, 10);
             const {routes: allRoutes} = getEffectiveRoutes(dbType, shu3, kobanNum);
-            const tripNos = item.trips || [];
-            const displayRoutes = tripNos.map(no => allRoutes.find(r => r.no === no)).filter(Boolean);
+            const tripNos = (item.trips || []).map(n => String(n));
+            const displayRoutes = tripNos.map(no => allRoutes.find(r => String(r.no) === no)).filter(Boolean);
             if (!displayRoutes.length) return;
             const rowsHtml = displayRoutes.map(r => `
               <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-                <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+                <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${String(r.no).padStart(5,"0")}</span>
                 <span style="font-size:16px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
                 <span style="font-family:var(--mono);font-size:14px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
               </div>`).join('');
@@ -2057,7 +2057,7 @@ function renderDay() {
           const codeStr = String(n).padStart(3,'0');
           const rowsHtml = displayRoutes.map(r => `
             <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-              <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+              <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${String(r.no).padStart(5,"0")}</span>
               <span style="font-size:16px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
               <span style="font-family:var(--mono);font-size:14px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
             </div>`).join('');
@@ -2073,7 +2073,7 @@ function renderDay() {
     if (!routes || !routes.length) return '';
     const rowsHtml = routes.map(r => `
       <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-        <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${r.no}</span>
+        <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#0878a0;background:#e0f7fd;border-radius:4px;padding:2px 7px;">${String(r.no).padStart(5,"0")}</span>
         <span style="font-size:18px;color:var(--text);flex:1;">${r.dep_place} → ${r.arr_place}</span>
         <span style="font-family:var(--mono);font-size:16px;color:var(--muted);">${r.dep_time} › ${r.arr_time}</span>
       </div>`).join('');
@@ -2512,7 +2512,7 @@ function renderInput() {
           return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:0.5px solid #e8f4fb;cursor:pointer;background:${sel?'#fff8f0':'#fff'};"
             onclick="toggleWorkModeTrip('${r.no}')">
             <div style="width:22px;height:22px;border-radius:50%;border:2px solid #4ab8d8;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;background:${sel?'#f5a623':'transparent'};color:${sel?'#fff':'transparent'};border-color:${sel?'#f5a623':'#4ab8d8'};">✓</div>
-            <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#0878a0;min-width:58px;">${r.no}</span>
+            <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#0878a0;min-width:58px;">${String(r.no).padStart(5,"0")}</span>
             <div style="font-size:11px;color:#555;flex:1;">
               <div>${r.dep_place} → ${r.arr_place}</div>
               <div style="color:#4ab8d8;font-weight:700;">${r.dep_time} → ${r.arr_time}</div>
@@ -2590,7 +2590,7 @@ function renderInput() {
       const modeLabel = item.type==='all'?'交番通り':item.type==='part'?'交番一部':item.label||'';
       const modeColor = item.type==='part'?'#f5a623':item.type==='all'?'#4ab8d8':'#0a5e2a';
       const timeStr = item.startTime && item.endTime ? item.startTime+' 〜 '+item.endTime : item.startTime||'';
-      const tripStr = item.trips ? item.trips.join(' / ') : '';
+      const tripStr = item.trips ? item.trips.map(n => String(n).padStart(5,'0')).join(' / ') : '';
       return `<div style="display:flex;align-items:center;padding:11px 14px;border-bottom:0.5px solid #e8f4fb;gap:10px;">
         ${codeBadge}
         <div style="flex:1;">
@@ -3578,7 +3578,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📋 アプリ概要</div>
       <div style="font-size:12px;color:var(--text);line-height:1.8;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-77<br>
+        <b>現バージョン：</b>MK-78<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
