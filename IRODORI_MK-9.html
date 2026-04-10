@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRODORI MK-16</title>
+<title>IRODORI MK-18</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -25,6 +25,9 @@
   --amberbg: #fffbeb;
   --amberbd: #fcd34d;
   --red:     #e03535;
+  --orange:  #f07d00;
+  --orangebg:#fff0d9;
+  --orangebd:#f5be6a;
   --shadow:  0 2px 10px rgba(46,207,122,.10);
   --mono: 'DM Mono', monospace;
   --sans: 'Noto Sans JP', sans-serif;
@@ -123,6 +126,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .cal-shift.work    { background:#c8eef8; color:#007c91; }
 .cal-shift.off     { background:#ffd9d9; color:#a01010; }
 .cal-shift.paid    { background:#ffd9d9; color:#a01010; }
+.cal-shift.plan    { background:var(--orangebg); color:#a05000; }
 .cal-shift.task    { background:#d4f5e5; color:#0a5e2a; }
 .cal-shift.task2   { background:#fff3cc; color:#8a5c00; }
 .cal-irodori-icons { display:flex; flex-wrap:wrap; gap:1px; margin-top:2px; }
@@ -473,7 +477,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-16</div>
+    <div class="auth-logo">IRODORI MK-18</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -488,7 +492,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-16 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-18 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -649,9 +653,10 @@ function getTTShiftInfo(dateKey) {
   const rec = ttData[dateKey];
   if (!rec || !rec.shift) return null;
 
-  const HOLIDAY_SHIFTS = {'501交番':'公休日','502交番':'振替休日','503交番':'有給休暇'};
+  const HOLIDAY_SHIFTS = {'501交番':'公休日','502交番':'振替休日','503交番':'有給休暇','504交番':'📅 休日予定'};
   if (HOLIDAY_SHIFTS[rec.shift]) {
-    return { label: HOLIDAY_SHIFTS[rec.shift], start:null, end:null, type: 'paid' };
+    const t = rec.shift === '503交番' ? 'paid' : rec.shift === '504交番' ? 'plan' : 'off';
+    return { label: HOLIDAY_SHIFTS[rec.shift], start:null, end:null, type: t };
   }
   if (rec.shift === 'custom') {
     return { label: rec.customLabel||'カスタム', start:rec.customStart, end:rec.customEnd, type:'work' };
@@ -788,7 +793,9 @@ function renderMonth() {
     // シフト列
     let shiftHtml = '<div class="ml-shift-empty"></div>';
     if (ttInfo) {
-      if (ttInfo.type === 'paid' || ttInfo.type === 'off') {
+      if (ttInfo.type === 'plan') {
+        shiftHtml = `<div class="ml-shift-badge" style="background:var(--orangebg);color:#a05000;border:1px solid var(--orangebd);">${ttInfo.label}</div>`;
+      } else if (ttInfo.type === 'paid' || ttInfo.type === 'off') {
         shiftHtml = `<div class="ml-shift-badge off">${ttInfo.label}</div>`;
       } else {
         const ttRec = loadTTData()[dateKey] || {};
@@ -887,12 +894,16 @@ function renderDay() {
       }
       lifeHtml = chips.map(c => `<span class="life-chip">${c}</span>`).join('');
     }
+    const isPlan = ttInfo.type === 'plan';
+    const cardStyle  = isPlan ? `background:var(--orangebg);border:1.5px solid var(--orangebd);` : '';
+    const headStyle  = isPlan ? `background:#ffe8b0;border-bottom-color:var(--orangebd);color:#a05000;` : '';
+    const badgeStyle = isPlan ? `background:var(--orangebg);color:var(--orange);border:1px solid var(--orangebd);` : '';
     workCardHtml = `
-    <div class="work-day-card">
-      <div class="work-day-head">💼 仕事 — TIMETABLE連携</div>
+    <div class="work-day-card" style="${cardStyle}">
+      <div class="work-day-head" style="${headStyle}">💼 仕事 — TIMETABLE連携</div>
       <div class="work-day-body">
         <div class="work-main">
-          <span class="work-badge-lg">${shiftDisplay}</span>
+          <span class="work-badge-lg" style="${badgeStyle}">${shiftDisplay}</span>
           ${timeDisplay ? `<span class="work-time-lg">${timeDisplay}</span>` : ''}
         </div>
         ${lifeHtml ? `<div class="life-chips">${lifeHtml}</div>` : ''}
@@ -903,7 +914,6 @@ function renderDay() {
   // プライベート予定カード
   let privHtml = '';
   if (events.length > 0) {
-    // 表示用に時刻順ソート（元配列は変更しない・元インデックスを保持）
     const sortedEvents = events
       .map((e, i) => ({ e, i }))
       .sort((a, b) => {
