@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>TIME TABLE MK-79</title>
+<title>TIME TABLE MK-80</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -959,7 +959,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-79</div>
+    <div class="auth-logo">MK-80</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -974,7 +974,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-79 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-80 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -3569,7 +3569,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📋 アプリ概要</div>
       <div style="font-size:12px;color:var(--text);line-height:1.8;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-79<br>
+        <b>現バージョン：</b>MK-80<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -3628,6 +3628,13 @@ function renderSpec() {
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📝 主な変更履歴</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>MK-80：</b>TRIP番号を5桁ゼロ埋めに統一（KV_NEW_DATA全件）・旧SHIFT_TABLE削除・getEffectiveShiftTable常にNEW_SHIFT_TABLE固定・仕様書にCODE刷新記載<br>
+        <b>MK-78：</b>複合業務表示色統一（交番系→水色・業務習得/車庫整理/その他→黄緑）・TRIP番号表示5桁対応（表示側）<br>
+        <b>MK-77：</b>月ビュー車庫整理・その他表示対応・複合業務始業終業時刻入力欄追加（1件以上で常に表示）・キャッシュ対策metaタグ追加<br>
+        <b>MK-76：</b>月ビュー複合業務表示を新旧データ構造両対応に修正<br>
+        <b>MK-75：</b>旧交番データ（KV_CUR_DATA）削除（約80KB軽量化）・KV_CUR_DATA参照をKV_NEW_DATAに統一<br>
+        <b>MK-74：</b>フォントサイズ拡大・休日予定ボタンスタイリング・月ビュー公休日設定パネル実装<br>
+        <b>MK-73：</b>週ビュー未入力日の表示を空白セルに変更<br>
         <b>MK-72：</b>業務入力ボタンサイズ統一・交番一部CODE入力のiOS対応修正<br>
         <b>MK-71：</b>ボタン構成変更（複合業務削除・交番通り/一部追加・休日予定復活・予定未定追加）<br>
         <b>MK-70：</b>日ビューに新業務入力フロー実装（交番通り/一部/業務習得等）<br>
