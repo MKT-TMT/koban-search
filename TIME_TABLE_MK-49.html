@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>TIME TABLE MK-81</title>
+<title>TIME TABLE MK-82</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -959,7 +959,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-81</div>
+    <div class="auth-logo">MK-82</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -974,7 +974,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-81 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-82 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -984,7 +984,7 @@
     <button class="tab" onclick="switchView('week')">週</button>
     <button class="tab" onclick="switchView('day')">日</button>
     <button class="tab" onclick="switchView('stats')">📊</button>
-    <button class="tab" onclick="switchView('spec')">仕様</button>
+    <button class="tab" onclick="switchView('spec')">EDITH</button>
   </div>
 </div>
 
@@ -1444,7 +1444,7 @@ function updateNavTitle() {
       el.textContent = `${statsCursor.getFullYear()}年 — 統計`;
     }
   } else if (view === 'spec') {
-    el.textContent = '仕様書';
+    el.textContent = 'EDITH';
   } else {
     const d = new Date(selectedDate);
     el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
@@ -3571,19 +3571,54 @@ function renderSpec() {
   c.innerHTML = `
   <div style="padding:16px;max-width:680px;margin:0 auto;font-family:var(--sans);">
 
+    <!-- EDITHヘッダー -->
+    <div style="background:linear-gradient(135deg,#0d2137,#1a3a5c);border-radius:12px;padding:18px;margin-bottom:14px;text-align:center;border:1px solid #30363d;">
+      <div style="font-size:24px;font-weight:900;color:#58a6ff;letter-spacing:5px;margin-bottom:4px;">E D I T H</div>
+      <div style="font-size:10px;color:#8b949e;letter-spacing:1px;">Even Dead I'm The Hero — TIME TABLE AI Assistant</div>
+    </div>
+
+    <!-- アプリ基本情報 -->
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📋 アプリ概要</div>
-      <div style="font-size:12px;color:var(--text);line-height:1.8;">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-81<br>
+        <b>現バージョン：</b>MK-82<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
+        <b>GitHub：</b>mkt-tmt/koban-search<br>
         <b>固定ファイル名：</b>TIME_TABLE_MK-49.html（上書き更新）<br>
-        <b>バージョン管理：</b>アプリ内表示・納品ファイル名は毎回番号を上げる
+        <b>Firebase：</b>schedule-app-d1ba4 / schedules/mkdata<br>
+        <b>バージョン管理：</b>アップデートのたびにMK番号を必ず+1する
       </div>
     </div>
 
+    <!-- EDITHルール -->
+    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid #30363d;">
+      <div style="font-size:13px;font-weight:700;color:#58a6ff;margin-bottom:10px;letter-spacing:0.5px;">🤖 EDITHルール（AI向け）</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;">
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🔢</span><span>アップデートのたびにMK番号を必ず+1する。同じ番号を再利用しない</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">⏸️</span><span>実装はまことさんの指示があるまで行わない</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🖼️</span><span>修正・新機能はイメージ図を先に見せてから実装する</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：TIME_TABLE_MK-82.html）。アップロード時はTIME_TABLE_MK-49.htmlに改名して上書き</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;">
+          <span style="flex-shrink:0;">👤</span><span>ユーザー名はまことさん。AIの名前はEDITH（イディス）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- タブ構成 -->
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">🗂️ タブ構成・使い方</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
@@ -3592,24 +3627,70 @@ function renderSpec() {
         <b>日（日ビュー）：</b>選択日の詳細。入力へのショートカットあり。TRIPカード表示<br>
         <b>入力：</b>勤務データ入力画面。業務種別ボタン選択→CODE入力またはTRIP選択<br>
         <b>📊（統計）：</b>勤務時間・睡眠・勤務間隔の統計グラフ<br>
-        <b>仕様（本画面）：</b>アプリの仕様書・使い方確認
+        <b>EDITH（本画面）：</b>アプリ仕様書・EDITHルール確認
       </div>
     </div>
 
+    <!-- 表示色ルール -->
+    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">🎨 表示色ルール（全ビュー共通）</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;">
+        <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:0.5px solid var(--border);">
+          <span style="background:#c8eef8;color:#0878a0;border-radius:4px;padding:2px 8px;font-weight:700;font-size:11px;">交番通り・交番一部</span>
+          <span>水色（#c8eef8 / #0878a0）</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:0.5px solid var(--border);">
+          <span style="background:#d4f5e5;color:#0a5e2a;border-radius:4px;padding:2px 8px;font-weight:700;font-size:11px;">業務習得・車庫整理・その他</span>
+          <span>黄緑（#d4f5e5 / #0a5e2a）</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:0.5px solid var(--border);">
+          <span style="background:#ffd9d9;color:#c01010;border-radius:4px;padding:2px 8px;font-weight:700;font-size:11px;">休日・有給・振替休日</span>
+          <span>赤（#ffd9d9 / #c01010）</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:5px 0;">
+          <span style="background:#ffe5b0;color:#a06000;border-radius:4px;padding:2px 8px;font-weight:700;font-size:11px;">休日予定</span>
+          <span>オレンジ（#ffe5b0 / #a06000）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- データ構造 -->
+    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">🗃️ データ構造</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>appData：</b>Firestore（schedules/mkdata）とlocalStorageに同期保存<br>
+        <b>newKobanConfig：</b>appData.newKobanConfig = { effectiveDate: 'YYYY-MM-DD' }<br>
+        <b>workItems型定義：</b>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:11px;color:#79c0ff;margin-top:6px;line-height:2;border:1px solid #30363d;">
+        { type: 'all',      code: '021', startTime, endTime, trips }<br>
+        { type: 'part',     code: '035', startTime, endTime, trips }<br>
+        { type: 'training', label: '業務習得', startTime, endTime }<br>
+        { type: 'garage',   label: '車庫整理', startTime, endTime }<br>
+        { type: 'other',    label: '〇〇',    startTime, endTime }
+      </div>
+      <div style="font-size:12px;color:var(--text);line-height:2;margin-top:8px;">
+        <b>TRIP番号：</b>5桁ゼロ埋め（例：00101、40201）<br>
+        <b>CODE：</b>3桁ゼロ埋め（例：001、035）<br>
+        <b>⚠️ CODE刷新（3月末）：</b>切替後はCODE詳細（TRIP）表示は無くなり就業時刻のみ表示
+      </div>
+    </div>
+
+    <!-- 用語定義 -->
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📖 用語定義</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>CODE：</b>交番番号。3桁の数字（例：007、022）<br>
-        <b>TRIP：</b>便番号。交番一部選択時にTRIP一覧から選択<br>
+        <b>TRIP：</b>便番号。5桁ゼロ埋め（例：00101）<br>
         <b>交番通り：</b>交番の全便を乗務する通常勤務<br>
         <b>交番一部：</b>交番の一部TRIPのみ乗務する勤務形態<br>
-        <b>複数業務：</b>1日に複数の業務（CODE・TRIP・業務習得等）が発生する勤務形態<br>
+        <b>複数業務：</b>1日に複数の業務が発生する勤務形態<br>
         <b>予定未定：</b>勤務予定が未確定の日。選択時にシフト・業務データを白紙化<br>
-        <b>ライフ記録：</b>睡眠・勤務間隔などの生活データ<br>
-        <b>⚠️ CODE刷新（3月末）：</b>3月末にCODEの刷新が行われ新CODEに切り替わる。切替後はCODE詳細（TRIP）の表示は無くなり、就業時刻のみ表示する仕様に変更済み
+        <b>ライフ記録：</b>睡眠・勤務間隔などの生活データ
       </div>
     </div>
 
+    <!-- データ・同期仕様 -->
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">🔄 データ・同期仕様</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
@@ -3621,30 +3702,22 @@ function renderSpec() {
       </div>
     </div>
 
-    <div style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">🛠️ 開発・運用ルール</div>
-      <div style="font-size:12px;color:var(--text);line-height:2;">
-        <b>納品ファイル名：</b>TIME_TABLE_MK-{バージョン}.html（例：MK-61）<br>
-        <b>GitHub アップロード時：</b>TIME_TABLE_MK-49.html に改名して上書き<br>
-        <b>アプリ内バージョン：</b>ヘッダーに表示。更新のたびに番号を上げる<br>
-        <b>仕様書：</b>この画面。変更があれば都度Claudeに依頼して更新
-      </div>
-    </div>
-
+    <!-- 変更履歴 -->
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📝 主な変更履歴</div>
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📝 変更履歴</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>MK-82：</b>仕様書タブをEDITHタブに刷新・EDITHルール・表示色・データ構造を追加<br>
         <b>MK-81：</b>新交番切替設定（newKobanConfig）をFirestore同期対応に変更・全デバイス自動反映<br>
-        <b>MK-79：</b>TRIP番号を5桁ゼロ埋めに統一（KV_NEW_DATA全件）・旧SHIFT_TABLE削除・getEffectiveShiftTable常にNEW_SHIFT_TABLE固定・仕様書にCODE刷新記載<br>
-        <b>MK-78：</b>複合業務表示色統一（交番系→水色・業務習得/車庫整理/その他→黄緑）・TRIP番号表示5桁対応（表示側）<br>
-        <b>MK-77：</b>月ビュー車庫整理・その他表示対応・複合業務始業終業時刻入力欄追加（1件以上で常に表示）・キャッシュ対策metaタグ追加<br>
+        <b>MK-79：</b>TRIP番号を5桁ゼロ埋めに統一（KV_NEW_DATA全件）・旧SHIFT_TABLE削除<br>
+        <b>MK-78：</b>複合業務表示色統一（交番系→水色・業務習得/車庫整理/その他→黄緑）<br>
+        <b>MK-77：</b>月ビュー車庫整理・その他表示対応・複合業務始業終業時刻入力欄追加<br>
         <b>MK-76：</b>月ビュー複合業務表示を新旧データ構造両対応に修正<br>
-        <b>MK-75：</b>旧交番データ（KV_CUR_DATA）削除（約80KB軽量化）・KV_CUR_DATA参照をKV_NEW_DATAに統一<br>
-        <b>MK-74：</b>フォントサイズ拡大・休日予定ボタンスタイリング・月ビュー公休日設定パネル実装<br>
+        <b>MK-75：</b>旧交番データ（KV_CUR_DATA）削除（約80KB軽量化）<br>
+        <b>MK-74：</b>フォントサイズ拡大・休日予定ボタンスタイリング・月ビュー公休日設定パネル<br>
         <b>MK-73：</b>週ビュー未入力日の表示を空白セルに変更<br>
         <b>MK-72：</b>業務入力ボタンサイズ統一・交番一部CODE入力のiOS対応修正<br>
-        <b>MK-71：</b>ボタン構成変更（複合業務削除・交番通り/一部追加・休日予定復活・予定未定追加）<br>
-        <b>MK-70：</b>日ビューに新業務入力フロー実装（交番通り/一部/業務習得等）<br>
+        <b>MK-71：</b>ボタン構成変更（交番通り/一部追加・休日予定復活・予定未定追加）<br>
+        <b>MK-70：</b>日ビューに新業務入力フロー実装<br>
         <b>MK-69：</b>iOS対応（touch-action・onchange統一・フォントサイズ16px統一）<br>
         <b>MK-68：</b>JS構文エラー修正（ログイン不可バグ解消）<br>
         <b>MK-67：</b>入力フロー刷新（業務種別ボタン・複数業務自動判定・登録済み一覧）<br>
@@ -3654,6 +3727,7 @@ function renderSpec() {
       </div>
     </div>
 
+    <!-- 新CODE切替設定 -->
     <div style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;letter-spacing:0.5px;">⚙️ 新CODE切替設定</div>
       <div id="newCodeStatus" style="margin-bottom:12px;"></div>
