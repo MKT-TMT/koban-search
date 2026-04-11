@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>TIME TABLE MK-83</title>
+<title>TIME TABLE MK-84</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -1004,7 +1004,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-83</div>
+    <div class="auth-logo">MK-84</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -1019,7 +1019,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-83 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-84 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1433,7 +1433,6 @@ function switchView(v) {
   document.querySelectorAll('.tab').forEach((t, i) => {
     t.classList.toggle('active', ['month','day','stats','spec'][i] === v);
   });
-  if (v === 'week') weekStart = getWeekStart(new Date(selectedDate));
   render();
 }
 function navPrev() {
@@ -1665,7 +1664,7 @@ function togglePublicHoliday(year, month, dowIndex) {
     arr.sort();
   }
   appData[phKey] = arr;
-  saveAppData();
+  saveData(appData);
   renderMonth();
   updateNavTitle();
 }
@@ -3566,7 +3565,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-83<br>
+        <b>現バージョン：</b>MK-84<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -3594,7 +3593,7 @@ function renderSpec() {
           <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：TIME_TABLE_MK-83.html）。アップロード時はTIME_TABLE_MK-49.htmlに改名して上書き</span>
+          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：TIME_TABLE_MK-84.html）。アップロード時はTIME_TABLE_MK-49.htmlに改名して上書き</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;">
           <span style="flex-shrink:0;">👤</span><span>ユーザー名はまことさん。AIの名前はEDITH（イディス）</span>
@@ -3690,6 +3689,7 @@ function renderSpec() {
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📝 変更履歴</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>MK-84：</b>switchView残骸削除・saveAppDataバグ修正<br>
         <b>MK-83：</b>週タブ廃止・月タブにグリッド／リスト切り替え追加・1日2行縦リスト表示を実装<br>
         <b>MK-82：</b>仕様書タブをEDITHタブに刷新・EDITHルール・表示色・データ構造を追加<br>
         <b>MK-81：</b>新交番切替設定（newKobanConfig）をFirestore同期対応に変更・全デバイス自動反映<br>
