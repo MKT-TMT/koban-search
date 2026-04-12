@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>TIME TABLE MK-84</title>
+<title>TIME TABLE MK-86</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -247,37 +247,37 @@
     padding: 8px 4px; border-right: 1px solid var(--border);
     background: var(--surface2); gap: 3px;
   }
-  .wvl-dow { font-size: 13px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; }
+  .wvl-dow { font-size: 15px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; }
   .wvl-dow.sat { color: var(--sky); }
   .wvl-dow.sun { color: var(--red); }
-  .wvl-daynum { font-size: 24px; font-weight: 600; color: var(--text); line-height: 1.1; font-family: var(--mono); }
+  .wvl-daynum { font-size: 28px; font-weight: 600; color: var(--text); line-height: 1.1; font-family: var(--mono); }
   .wvl-daynum.sat { color: var(--sky); }
   .wvl-daynum.sun { color: var(--red); }
   .wvl-daynum.today-circle {
     background: var(--accent); color: #fff; border-radius: 50%;
-    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-    font-size: 20px; box-shadow: 0 2px 8px rgba(14,168,216,.35);
+    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; box-shadow: 0 2px 8px rgba(14,168,216,.35);
   }
   .wvl-row1 { display: flex; align-items: center; padding: 8px 12px; gap: 10px; flex-wrap: wrap; }
   .wvl-row2 { display: flex; align-items: center; padding: 7px 12px; gap: 10px; flex-wrap: wrap; background: var(--surface2); border-top: 1px dashed var(--border); }
-  .wvl-badge { font-size: 14px; font-weight: 700; padding: 3px 10px; border-radius: 5px; white-space: nowrap; }
+  .wvl-badge { font-size: 16px; font-weight: 700; padding: 4px 11px; border-radius: 5px; white-space: nowrap; }
   .wvl-badge.b-work { background: #c8eef8; color: #0878a0; }
   .wvl-badge.b-off  { background: #ffd9d9; color: #c01010; }
   .wvl-badge.b-plan { background: #ffe5b0; color: #a06000; border: 1px dashed #e0a030; }
   .wvl-badge.b-task { background: #d4f5e5; color: #0a5e2a; }
-  .wvl-timerange { font-size: 14px; color: var(--muted); font-family: var(--mono); white-space: nowrap; }
-  .wvl-sep { font-size: 13px; color: var(--border2); }
+  .wvl-timerange { font-size: 16px; color: var(--muted); font-family: var(--mono); white-space: nowrap; }
+  .wvl-sep { font-size: 14px; color: var(--border2); }
   .wvl-metric-group { display: flex; align-items: center; gap: 5px; }
-  .wvl-lbl { font-size: 13px; color: var(--muted); white-space: nowrap; font-weight: 500; }
-  .wvl-metric { font-size: 14px; padding: 2px 8px; border-radius: 5px; white-space: nowrap; font-family: var(--mono); font-weight: 700; }
+  .wvl-lbl { font-size: 14px; color: var(--muted); white-space: nowrap; font-weight: 500; }
+  .wvl-metric { font-size: 15px; padding: 3px 9px; border-radius: 5px; white-space: nowrap; font-family: var(--mono); font-weight: 700; }
   .wvl-metric.m-ok   { background: #d4f5e5; color: #0a5e2a; }
   .wvl-metric.m-warn { background: #fff4df; color: #a06000; border: 1px solid #e0a030; }
   .wvl-metric.m-bad  { background: #ffd9d9; color: #c01010; }
   .wvl-metric.m-none { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-  .wvl-life { font-size: 14px; color: var(--text); white-space: nowrap; display: flex; align-items: center; gap: 3px; font-family: var(--mono); }
-  .wvl-life-icon { font-size: 15px; }
-  .wvl-irodori { font-size: 16px; }
-  .wvl-none { font-size: 13px; color: var(--muted); }
+  .wvl-life { font-size: 15px; color: var(--text); white-space: nowrap; display: flex; align-items: center; gap: 3px; font-family: var(--mono); }
+  .wvl-life-icon { font-size: 16px; }
+  .wvl-irodori { font-size: 17px; }
+  .wvl-none { font-size: 14px; color: var(--muted); }
 
   /* ══════════════ DAY VIEW ══════════════ */
   .day-view { padding: 0 16px 40px; max-width: 620px; margin: 0 auto; }
@@ -1004,7 +1004,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-84</div>
+    <div class="auth-logo">MK-86</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -1019,7 +1019,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-84 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-86 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1590,13 +1590,14 @@ function renderMonth() {
   const year = cursor.getFullYear(), month = cursor.getMonth();
   const todayKey = fmtDate(today);
 
-  // グリッド/リスト切り替えボタン
+  // グリッド/リスト切り替えボタン＋印刷ボタン
   const isList = window._monthViewMode === 'list';
-  const toggleBtn = `<div style="display:flex;justify-content:flex-end;padding:6px 14px 2px;">
+  const toggleBtn = `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 14px 2px;">
     <div style="display:flex;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);overflow:hidden;">
       <button onclick="window._monthViewMode='grid';renderMonth()" style="font-size:13px;font-weight:700;padding:6px 14px;border:none;cursor:pointer;font-family:var(--sans);background:${!isList?'var(--accent)':'transparent'};color:${!isList?'#fff':'var(--muted)'};">📅 グリッド</button>
       <button onclick="window._monthViewMode='list';renderMonth()" style="font-size:13px;font-weight:700;padding:6px 14px;border:none;cursor:pointer;font-family:var(--sans);background:${isList?'var(--accent)':'transparent'};color:${isList?'#fff':'var(--muted)'};">📋 リスト</button>
     </div>
+    ${isList ? `<button onclick="showPrintModal()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--border2);background:var(--surface);font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--sans);" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">🖨️ 印刷</button>` : ''}
   </div>`;
 
   if (isList) {
@@ -3509,6 +3510,184 @@ function decideCompound(dateKey) {
 
 
 
+// ══════════════════════════════════════════
+// LIST PRINT
+// ══════════════════════════════════════════
+function showPrintModal() {
+  // モーダルが既にあれば削除
+  const existing = document.getElementById('printModal');
+  if (existing) existing.remove();
+
+  const year = cursor.getFullYear(), month = cursor.getMonth();
+  let selectedStart = null;
+
+  function buildModal() {
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    const startDow = new Date(year, month, 1).getDay();
+    const DOW_LABELS = ['日','月','火','水','木','金','土'];
+
+    // ミニカレンダーのセル生成
+    let cells = '';
+    // 前月の空白
+    for (let i = 0; i < startDow; i++) cells += `<div></div>`;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateKey = fmtDate(new Date(year, month, d));
+      const dow = new Date(year, month, d).getDay();
+      const isToday = dateKey === fmtDate(today);
+      const isSelected = dateKey === selectedStart;
+      // 選択済みの場合、10日間のレンジ計算
+      let inRange = false;
+      if (selectedStart) {
+        const selD = new Date(selectedStart);
+        const endD = new Date(selectedStart);
+        endD.setDate(endD.getDate() + 9);
+        const thisD = new Date(year, month, d);
+        inRange = thisD >= selD && thisD <= endD;
+      }
+      const dowCls = dow === 0 ? 'color:#e03535;' : dow === 6 ? 'color:#0ea8d8;' : '';
+      let bg = '#fff', border = '1.5px solid transparent';
+      if (isSelected) { bg = '#d4f5e5'; border = '1.5px solid #3dbf7a'; }
+      else if (inRange) { bg = '#e8f7f9'; }
+      else if (isToday) { bg = '#0ea8d8'; }
+      const color = isToday && !isSelected ? '#fff' : '';
+      const borderRadius = isToday && !isSelected ? '50%' : '6px';
+      cells += `<div onclick="window._printSelDate='${dateKey}';document.getElementById('printModal').remove();showPrintModal();"
+        style="text-align:center;font-size:13px;font-weight:600;padding:5px 2px;border-radius:${borderRadius};cursor:pointer;
+        background:${bg};border:${border};color:${dowCls||color};font-family:'DM Mono',monospace;transition:background .1s;"
+        onmouseover="if(this.style.background!='#d4f5e5')this.style.background='#f0fafb'"
+        onmouseout="if(this.style.background!='#d4f5e5')this.style.background='${bg}'">${d}</div>`;
+    }
+
+    // ヒントテキスト
+    let hint = '開始日をタップしてください';
+    if (selectedStart) {
+      const endD = new Date(selectedStart); endD.setDate(endD.getDate()+9);
+      hint = `📅 ${selectedStart.slice(5).replace('-','/')}（${DOW[new Date(selectedStart).getDay()]}）から10日間 → ${fmtDate(endD).slice(5).replace('-','/')} まで印刷`;
+    }
+
+    return `<div id="printModal" style="position:fixed;inset:0;z-index:9000;background:rgba(13,42,48,0.5);display:flex;align-items:center;justify-content:center;padding:16px;">
+      <div style="background:#fff;border-radius:16px;border:1.5px solid var(--border2);width:100%;max-width:340px;box-shadow:0 8px 32px rgba(14,168,216,.2);overflow:hidden;">
+        <div style="background:var(--accent);padding:14px 16px;font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;">
+          🖨️ 印刷する期間を選択
+        </div>
+        <div style="padding:16px;">
+          <div style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:10px;">開始日をタップしてください</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:14px;font-weight:700;color:var(--text);">${year}年${month+1}月</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">
+            ${DOW_LABELS.map((d,i)=>`<div style="text-align:center;font-size:10px;font-weight:700;padding:2px 0;color:${i===0?'#e03535':i===6?'#0ea8d8':'var(--muted)'};">${d}</div>`).join('')}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:12px;">${cells}</div>
+          <div style="font-size:12px;color:var(--muted);background:var(--surface2);border-radius:8px;padding:8px 12px;border:1px solid var(--border);margin-bottom:14px;">${hint}</div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="document.getElementById('printModal').remove();window._printSelDate=null;" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--border2);background:#fff;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--sans);">キャンセル</button>
+            <button onclick="${selectedStart ? `printList('${selectedStart}')` : ''}" style="flex:2;padding:11px;border-radius:10px;border:none;background:${selectedStart?'var(--accent)':'#b8e4ec'};font-size:14px;font-weight:700;color:#fff;cursor:${selectedStart?'pointer':'default'};font-family:var(--sans);">🖨️ この範囲で印刷</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // 前回の選択を引き継ぐ
+  selectedStart = window._printSelDate || null;
+  document.body.insertAdjacentHTML('beforeend', buildModal());
+}
+
+function printList(startDateKey) {
+  document.getElementById('printModal').remove();
+  window._printSelDate = null;
+
+  const DOW_JP = ['日','月','火','水','木','金','土'];
+  const startD = new Date(startDateKey);
+  const endD = new Date(startDateKey); endD.setDate(endD.getDate()+9);
+  const title = `${startD.getFullYear()}年${startD.getMonth()+1}月${startD.getDate()}日（${DOW_JP[startD.getDay()]}）〜 ${endD.getMonth()+1}月${endD.getDate()}日（${DOW_JP[endD.getDay()]}）`;
+  const printDate = fmtDate(today);
+
+  let rows = '';
+  for (let i = 0; i < 10; i++) {
+    const d = new Date(startDateKey); d.setDate(d.getDate()+i);
+    const dateKey = fmtDate(d);
+    const dow = d.getDay();
+    const info = getShiftInfo(dateKey);
+    const rec = appData[dateKey] || {};
+    const life = rec.life || {};
+
+    const dowColor = dow === 0 ? '#e03535' : dow === 6 ? '#0ea8d8' : '#5a8a96';
+    const numColor = dow === 0 ? '#e03535' : dow === 6 ? '#0ea8d8' : '#0d2a30';
+    const isToday = dateKey === fmtDate(today);
+    const rowBg = isToday ? '#e8f9fc' : '#fff';
+
+    // バッジ
+    let badge = '', timeRange = '';
+    if (info) {
+      const bc = info.type==='work'?'#c8eef8;color:#0878a0':info.type==='holiday'||info.type==='paid'||info.type==='off'?'#ffd9d9;color:#c01010':'#ffe5b0;color:#a06000';
+      badge = `<span style="background:${bc.split(';')[0]};${bc.split(';')[1]};font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">${info.label}</span>`;
+      if (info.start && info.end) timeRange = `<span style="font-size:22px;font-weight:700;color:#0d2a30;font-family:'DM Mono',monospace;margin-left:4px;">${info.start}–${info.end}</span>`;
+    } else {
+      badge = `<span style="font-size:11px;color:#5a8a96;">— 未入力 —</span>`;
+    }
+
+    // サマリー
+    function metCell(label, val, cls) {
+      const bg = cls==='ok'?'#d4f5e5':cls==='warn'?'#fff4df':cls==='bad'?'#ffd9d9':'#f0fafb';
+      const co = cls==='ok'?'#0a5e2a':cls==='warn'?'#a06000':cls==='bad'?'#c01010':'#5a8a96';
+      return `<span style="font-size:10px;color:#5a8a96;margin-right:2px;">${label}</span><span style="font-size:11px;font-weight:700;background:${bg};color:${co};border-radius:3px;padding:1px 5px;font-family:'DM Mono',monospace;margin-right:6px;">${val}</span>`;
+    }
+    let workVal='—', workCls='none';
+    if (info&&info.start&&info.end){const wm=diffMin(parseTime(info.start),parseTime(info.end));workVal=fmtMin(wm);workCls=wm>780?'warn':'ok';}
+    const im=getIntervalHours(dateKey);
+    const sm=getSleepHours(dateKey);
+
+    rows += `<div style="display:grid;grid-template-columns:44px 1fr;border-bottom:1px solid #e0eff2;background:${rowBg};">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5px 2px;border-right:1px solid #e0eff2;background:#f5fbfc;">
+        <div style="font-size:10px;font-weight:700;color:${dowColor};">${DOW_JP[dow]}</div>
+        <div style="font-size:${isToday?'14px':'17px'};font-weight:600;color:${isToday?'#fff':numColor};font-family:'DM Mono',monospace;line-height:1;${isToday?`background:var(--accent);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;`:''}">${d.getDate()}</div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;padding:5px 8px;gap:6px;flex-wrap:wrap;">
+          ${badge}${timeRange}
+          <span style="font-size:11px;color:#b8e4ec;margin:0 2px;">|</span>
+          ${metCell('勤務時間', workVal, workCls)}
+          ${metCell('勤務間', im===null?'—':fmtMin(im), im===null?'none':im<600?'bad':im<660?'warn':'ok')}
+          ${metCell('睡眠', sm===null?'—':fmtMin(sm), sm===null?'none':sm<360?'bad':sm<420?'warn':'ok')}
+        </div>
+        <div style="display:flex;align-items:center;padding:6px 8px;gap:12px;background:#f8fdfe;border-top:1px dashed #d0eaf0;flex-wrap:wrap;">
+          <span style="font-size:20px;font-weight:600;font-family:'DM Mono',monospace;">💤${life.sleep||'—'}</span>
+          <span style="font-size:20px;font-weight:600;font-family:'DM Mono',monospace;">☀️${life.wake||'—'}</span>
+          <span style="font-size:20px;font-weight:600;font-family:'DM Mono',monospace;">🚿${life.ready||'—'}</span>
+          <span style="font-size:20px;font-weight:600;font-family:'DM Mono',monospace;">🚃${life.commute||'—'}</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const w = window.open('','_blank','width=794,height=1123');
+  w.document.write(`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
+  <title>TIME TABLE ${title}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=DM+Mono:wght@400;700&display=swap');
+    @page { size: A4 portrait; margin: 15mm 12mm; }
+    body { font-family:'Noto Sans JP',sans-serif; margin:0; padding:0; background:#fff; color:#0d2a30; }
+    .header { display:flex; align-items:baseline; justify-content:space-between; border-bottom:2px solid #0ea8d8; padding-bottom:8px; margin-bottom:12px; }
+    .header-title { font-size:14px; font-weight:700; color:#0ea8d8; letter-spacing:1px; }
+    .header-range { font-size:11px; color:#5a8a96; font-family:'DM Mono',monospace; }
+    .footer { margin-top:10px; text-align:right; font-size:9px; color:#5a8a96; }
+    .print-btn { position:fixed; bottom:20px; right:20px; padding:10px 24px; background:#0ea8d8; border:none; border-radius:8px; color:#fff; font-size:14px; font-weight:700; cursor:pointer; }
+    @media print { .print-btn { display:none; } }
+  </style>
+  </head><body>
+  <div class="header">
+    <div class="header-title">MK-86 TIME TABLE</div>
+    <div class="header-range">${title}</div>
+  </div>
+  ${rows}
+  <div class="footer">印刷日：${printDate}</div>
+  <button class="print-btn" onclick="window.print()">🖨️ 印刷する</button>
+  </body></html>`);
+  w.document.close();
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -3565,7 +3744,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-84<br>
+        <b>現バージョン：</b>MK-86<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -3593,7 +3772,7 @@ function renderSpec() {
           <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：TIME_TABLE_MK-84.html）。アップロード時はTIME_TABLE_MK-49.htmlに改名して上書き</span>
+          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：TIME_TABLE_MK-86.html）。アップロード時はTIME_TABLE_MK-49.htmlに改名して上書き</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;">
           <span style="flex-shrink:0;">👤</span><span>ユーザー名はまことさん。AIの名前はEDITH（イディス）</span>
@@ -3689,6 +3868,8 @@ function renderSpec() {
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📝 変更履歴</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>MK-86：</b>印刷プレビューの時間表示フォントサイズ拡大（勤務時間帯22px・生活記録時刻20px）<br>
+        <b>MK-85：</b>リスト表示フォントサイズ拡大・印刷機能追加（日付選択モーダル・A4印刷）<br>
         <b>MK-84：</b>switchView残骸削除・saveAppDataバグ修正<br>
         <b>MK-83：</b>週タブ廃止・月タブにグリッド／リスト切り替え追加・1日2行縦リスト表示を実装<br>
         <b>MK-82：</b>仕様書タブをEDITHタブに刷新・EDITHルール・表示色・データ構造を追加<br>
