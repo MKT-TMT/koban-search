@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRODORI MK-21</title>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<title>IRODORI MK-23</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -477,7 +478,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-21</div>
+    <div class="auth-logo">IRODORI MK-23</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -492,7 +493,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-21 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-23 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -725,7 +726,7 @@ function switchView(v) {
     t.classList.toggle('active', ['month','day','kino','spec'][i] === v);
   });
   const fab = document.getElementById('fab');
-  fab.style.display = (v === 'kino' || v === 'spec' || v === 'okusuri' || v === 'okusuri_input' || v === 'okusuri_detail') ? 'none' : 'flex';
+  fab.style.display = (v === 'kino' || v === 'spec' || v === 'okusuri' || v === 'okusuri_input' || v === 'okusuri_detail' || v === 'okusuri_qr') ? 'none' : 'flex';
   render();
 }
 
@@ -767,6 +768,8 @@ function updateNavTitle() {
     el.textContent = 'お薬を登録';
   } else if (view === 'okusuri_detail') {
     el.textContent = '処方履歴';
+  } else if (view === 'okusuri_qr') {
+    el.textContent = 'QR読み取り';
   } else if (view === 'spec') {
     el.textContent = 'EDITH';
   } else {
@@ -781,6 +784,7 @@ function render() {
   else if (view === 'input')         renderInput();
   else if (view === 'kino')          renderKino();
   else if (view === 'okusuri')       renderOkusuri();
+  else if (view === 'okusuri_qr')    renderOkusuriQr();
   else if (view === 'okusuri_input') renderOkusuriInput();
   else if (view === 'okusuri_detail')renderOkusuriDetail();
   else if (view === 'spec')          renderSpec();
@@ -1418,6 +1422,96 @@ function saveDiary(dateKey) {
 }
 
 // ══════════════════════════════════════════
+// QR SCAN VIEW
+// ══════════════════════════════════════════
+function renderOkusuriQr() {
+  const c = document.getElementById('viewContainer');
+  c.innerHTML = `
+  <div style="padding:0 14px 80px;max-width:620px;margin:0 auto;">
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-top:10px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:var(--surface2);padding:11px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--text);">📷 QRコード読み取り</div>
+      <div style="padding:14px 16px;">
+        <div style="background:#000;border-radius:10px;overflow:hidden;margin-bottom:12px;position:relative;min-height:260px;display:flex;align-items:center;justify-content:center;">
+          <video id="qrVideo" style="width:100%;display:block;" playsinline autoplay></video>
+          <div id="qrOverlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+            <div style="width:180px;height:180px;border:3px solid var(--green);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);"></div>
+          </div>
+        </div>
+        <div id="qrStatus" style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px;">カメラを起動中...</div>
+        <button onclick="stopQrScan();switchView('okusuri')" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:11px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--sans);">← キャンセル</button>
+      </div>
+    </div>
+  </div>`;
+  startQrScan();
+}
+
+let qrStream = null;
+let qrAnimFrame = null;
+
+async function startQrScan() {
+  try {
+    qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const video = document.getElementById('qrVideo');
+    if (!video) return;
+    video.srcObject = qrStream;
+    await video.play();
+    document.getElementById('qrStatus').textContent = 'QRコードをかざしてください';
+    scanQrFrame(video);
+  } catch(e) {
+    const el = document.getElementById('qrStatus');
+    if (el) el.textContent = 'カメラへのアクセスが許可されていません';
+  }
+}
+
+function scanQrFrame(video) {
+  if (!document.getElementById('qrVideo')) { stopQrScan(); return; }
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  try {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    if (window.jsQR) {
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      if (code) {
+        stopQrScan();
+        parseJahisQr(code.data);
+        return;
+      }
+    }
+  } catch(e) {}
+  qrAnimFrame = requestAnimationFrame(() => scanQrFrame(video));
+}
+
+function stopQrScan() {
+  if (qrStream) { qrStream.getTracks().forEach(t => t.stop()); qrStream = null; }
+  if (qrAnimFrame) { cancelAnimationFrame(qrAnimFrame); qrAnimFrame = null; }
+}
+
+function parseJahisQr(data) {
+  try {
+    const lines = data.split(/\r?\n/);
+    let drugName = '', hospital = '', date = fmtDate(new Date()), days = '', total = '';
+    lines.forEach(line => {
+      const parts = line.split(',');
+      const no = parts[0];
+      if (no === '101' && parts[4]) hospital = parts[4];
+      if (no === '201' && parts[2]) date = parts[2].replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+      if (no === '281') { if(parts[2]) drugName = parts[2]; if(parts[7]) total = parts[7]; if(parts[8]) days = parts[8]; }
+    });
+    editMode = false;
+    okusuriSelected = null;
+    okusuriForm = { name: drugName, date, hospital, total, days, timings:[{ time:'', meal:'', amount:1, unit:'錠' }], memo:'', status:'active' };
+    showToast('QR読み取り完了 ✓');
+    switchView('okusuri_input');
+  } catch(e) {
+    showToast('QRの読み取りに失敗しました');
+    switchView('okusuri');
+  }
+}
+
+// ══════════════════════════════════════════
 // KINO VIEW（機能一覧）
 // ══════════════════════════════════════════
 function renderKino() {
@@ -1479,8 +1573,8 @@ function renderOkusuri() {
   c.innerHTML = `
   <div style="padding:0 0 80px;">
     <div style="padding:10px 14px;display:flex;gap:8px;">
-      <button onclick="editMode=false;okusuriSelected=null;switchView('okusuri_input')" style="flex:1;background:var(--green);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">📷 QRコード読み取り</button>
-      <button onclick="editMode=false;okusuriSelected=null;switchView('okusuri_input')" style="flex:1;background:var(--surface);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">✏️ 手入力</button>
+      <button onclick="switchView('okusuri_qr')" style="flex:1;background:var(--green);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">📷 QRコード読み取り</button>
+      <button onclick="editMode=false;okusuriSelected=null;initOkusuriForm();switchView('okusuri_input')" style="flex:1;background:var(--surface);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">✏️ 手入力</button>
     </div>
     <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin:0 14px;overflow:hidden;box-shadow:var(--shadow);">
       <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text);">処方履歴</div>
@@ -1513,10 +1607,33 @@ function renderOkusuriInput() {
   const timingRows = okusuriForm.timings.map((t, ti) => {
     const times = ['朝','昼','夕','寝前'];
     const meals = ['食前','食後','食間'];
-    const units = ['錠','袋'];
+    const units = ['錠','袋','滴'];
+    const unitBtns = units.map(un => `<button onclick="setOkusuriTiming(${ti},'unit','${un}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.unit===un?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.unit===un?'var(--surface2)':'var(--surface)'};color:${t.unit===un?'var(--green2)':'var(--muted)'};font-weight:${t.unit===un?'700':'400'};cursor:pointer;font-family:var(--sans);">${un}</button>`).join('');
+
+    if (t.unit === '滴') {
+      const summary = `1日${t.amount||1}滴`;
+      return `
+      <div style="border-left:3px solid var(--green);padding-left:10px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:11px;font-weight:700;color:var(--green2);">点眼液</span>
+          ${okusuriForm.timings.length > 1 ? `<button onclick="removeTiming(${ti})" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">✕ 削除</button>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <span style="font-size:13px;color:var(--green2);font-weight:500;">1日</span>
+          <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--green);border-radius:8px;padding:3px 12px;">
+            <button onclick="changeAmount(${ti},-1)" style="font-size:14px;color:var(--green2);background:none;border:none;cursor:pointer;font-family:var(--sans);">－</button>
+            <span style="font-size:16px;font-weight:700;color:var(--text);min-width:20px;text-align:center;">${t.amount||1}</span>
+            <button onclick="changeAmount(${ti},1)" style="font-size:14px;color:var(--green2);background:none;border:none;cursor:pointer;font-family:var(--sans);">＋</button>
+          </div>
+          <span style="font-size:13px;color:var(--green2);font-weight:500;">滴</span>
+          <div style="background:var(--surface2);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--green2);font-weight:700;">→ ${summary}</div>
+        </div>
+        <div style="display:flex;gap:5px;">${unitBtns}</div>
+      </div>`;
+    }
+
     const timeBtns = times.map(tm => `<button onclick="setOkusuriTiming(${ti},'time','${tm}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.time===tm?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.time===tm?'var(--surface2)':'var(--surface)'};color:${t.time===tm?'var(--green2)':'var(--muted)'};font-weight:${t.time===tm?'700':'400'};cursor:pointer;font-family:var(--sans);">${tm}</button>`).join('');
     const mealBtns = meals.map(ml => `<button onclick="setOkusuriTiming(${ti},'meal','${ml}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.meal===ml?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.meal===ml?'var(--surface2)':'var(--surface)'};color:${t.meal===ml?'var(--green2)':'var(--muted)'};font-weight:${t.meal===ml?'700':'400'};cursor:pointer;font-family:var(--sans);">${ml}</button>`).join('');
-    const unitBtns = units.map(un => `<button onclick="setOkusuriTiming(${ti},'unit','${un}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.unit===un?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.unit===un?'var(--surface2)':'var(--surface)'};color:${t.unit===un?'var(--green2)':'var(--muted)'};font-weight:${t.unit===un?'700':'400'};cursor:pointer;font-family:var(--sans);">${un}</button>`).join('');
     const summary = (t.time||'') + (t.meal ? '・'+t.meal : '') + '・' + (t.amount||1) + (t.unit||'錠');
     return `
     <div style="border-left:3px solid var(--green);padding-left:10px;margin-bottom:10px;">
@@ -1574,7 +1691,10 @@ function renderOkusuriInput() {
         </div>
 
         <div class="field-group">
-          <div class="field-label">用法（服用タイミング）</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div class="field-label" style="margin-bottom:0;">用法（服用タイミング）</div>
+            <span style="font-size:12px;background:var(--surface2);border:1.5px solid var(--green);border-radius:7px;padding:3px 10px;color:var(--green2);font-weight:700;">1日${okusuriForm.timings.length}回</span>
+          </div>
           ${timingRows}
           <button onclick="addTiming()" style="width:100%;border:1.5px dashed var(--green);border-radius:8px;padding:8px;font-size:12px;color:var(--green2);font-weight:700;background:var(--surface);cursor:pointer;font-family:var(--sans);">＋ 服用タイミングを追加</button>
         </div>
@@ -1730,7 +1850,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>IRODORI<br>
-        <b>現バージョン：</b>MK-21<br>
+        <b>現バージョン：</b>MK-23<br>
         <b>用途：</b>プライベート手帳（予定・日記・生活記録）<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -1755,7 +1875,7 @@ function renderSpec() {
           <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：IRODORI_MK-21.html）。アップロード時はIRODORI_MK-9.htmlに改名して上書き</span>
+          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：IRODORI_MK-23.html）。アップロード時はIRODORI_MK-9.htmlに改名して上書き</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;">
           <span style="flex-shrink:0;">👤</span><span>ユーザー名はまことさん。AIの名前はEDITH（イディス）</span>
