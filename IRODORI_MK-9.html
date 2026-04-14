@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRODORI MK-18</title>
+<title>IRODORI MK-21</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -477,7 +477,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-18</div>
+    <div class="auth-logo">IRODORI MK-21</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -492,7 +492,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-18 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-21 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -500,7 +500,8 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   <div class="tab-bar">
     <button class="tab active" onclick="switchView('month')">📅 月</button>
     <button class="tab" onclick="switchView('day')">📋 日</button>
-    <button class="tab" onclick="switchView('diary')">📓 日記</button>
+    <button class="tab" onclick="switchView('kino')">⚙️ 機能</button>
+    <button class="tab" onclick="switchView('spec')">EDITH</button>
   </div>
 </div>
 
@@ -538,7 +539,7 @@ const ICON_CATEGORIES = [
   ]},
   { label:'🛍️ 買い物', icons:[
     {icon:'🛒',label:'買い物'},{icon:'🥦',label:'食料品'},{icon:'🧴',label:'日用品'},
-    {icon:'👗',label:'服'},{icon:'🖥️',label:'家電'},{icon:'💊',label:'薬局'},
+    {icon:'👗',label:'服'},{icon:'🖥️',label:'家電'},{icon:'KANJI:薬',label:'薬局'},
     {icon:'💼',label:'仕事用品'},
   ]},
   { label:'🎉 おでかけ・旅行', icons:[
@@ -554,6 +555,8 @@ const ICON_CATEGORIES = [
     {icon:'🪔',label:'法事'},{icon:'🏥',label:'病院'},{icon:'🎬',label:'映画'},
     {icon:'🎤',label:'カラオケ'},{icon:'⛳',label:'ゴルフ'},{icon:'🔧',label:'DIY'},
     {icon:'💇',label:'散髪'},{icon:'📱',label:'スマホ'},
+    {icon:'🛢️',label:'オイル交換'},{icon:'🔩',label:'エレメント交換'},{icon:'🛞',label:'タイヤ交換'},
+    {icon:'🚗',label:'車検'},{icon:'🦷',label:'歯医者'},
   ]},
 ];
 
@@ -576,6 +579,17 @@ function renderIconDisp(icon, size) {
 // STORAGE
 // ══════════════════════════════════════════
 const STORAGE_KEY = 'irodori_data_v1';
+const OKUSURI_KEY = 'irodori_okusuri_v1';
+
+function loadOkusuriData() {
+  try { return JSON.parse(localStorage.getItem(OKUSURI_KEY) || '[]'); } catch { return []; }
+}
+function saveOkusuriData(d) {
+  localStorage.setItem(OKUSURI_KEY, JSON.stringify(d));
+  showToast('保存しました ✓');
+}
+let okusuriData = loadOkusuriData();
+let okusuriSelected = null;
 const TT_STORAGE_KEY = 'mkx_data_v2'; // TIMETABLE側のデータキー
 
 // ── TIME TABLE共有：シフトテーブル（TIME TABLEと同一データ） ──
@@ -702,17 +716,16 @@ function getTTLife(dateKey) {
 // VIEW SWITCHING
 // ══════════════════════════════════════════
 function switchView(v) {
-  // input画面以外に切り替わる時はフォームをリセット
   if (v !== 'input') {
     formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
     inputStep = 'icons';
   }
   view = v;
   document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['month','day','diary'][i] === v);
+    t.classList.toggle('active', ['month','day','kino','spec'][i] === v);
   });
   const fab = document.getElementById('fab');
-  fab.style.display = (v === 'diary') ? 'none' : 'flex';
+  fab.style.display = (v === 'kino' || v === 'spec' || v === 'okusuri' || v === 'okusuri_input' || v === 'okusuri_detail') ? 'none' : 'flex';
   render();
 }
 
@@ -746,8 +759,18 @@ function updateNavTitle() {
   } else if (view === 'day') {
     const d = parseDate(selectedDate);
     el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
+  } else if (view === 'kino') {
+    el.textContent = '機能';
+  } else if (view === 'okusuri') {
+    el.textContent = 'お薬手帳';
+  } else if (view === 'okusuri_input') {
+    el.textContent = 'お薬を登録';
+  } else if (view === 'okusuri_detail') {
+    el.textContent = '処方履歴';
+  } else if (view === 'spec') {
+    el.textContent = 'EDITH';
   } else {
-    el.textContent = '日記';
+    el.textContent = '';
   }
 }
 
@@ -755,8 +778,13 @@ function render() {
   updateNavTitle();
   if (view === 'month')      renderMonth();
   else if (view === 'day')   renderDay();
-  else if (view === 'input') renderInput();
-  else                       renderDiary();
+  else if (view === 'input')         renderInput();
+  else if (view === 'kino')          renderKino();
+  else if (view === 'okusuri')       renderOkusuri();
+  else if (view === 'okusuri_input') renderOkusuriInput();
+  else if (view === 'okusuri_detail')renderOkusuriDetail();
+  else if (view === 'spec')          renderSpec();
+  else                               renderDay();
 }
 
 // ══════════════════════════════════════════
@@ -1000,7 +1028,6 @@ function renderDay() {
     <div class="diary-day-card">
       <div class="diary-day-head">
         <span>📓 今日の記録</span>
-        <button class="small-btn amber" onclick="inputDate='${key}';switchView('diary')">✏️ 編集</button>
       </div>
       <div class="diary-day-body">${diaryHtml}</div>
     </div>
@@ -1391,6 +1418,382 @@ function saveDiary(dateKey) {
 }
 
 // ══════════════════════════════════════════
+// KINO VIEW（機能一覧）
+// ══════════════════════════════════════════
+function renderKino() {
+  const c = document.getElementById('viewContainer');
+  c.innerHTML = `
+  <div style="padding:16px;max-width:620px;margin:0 auto;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div onclick="switchView('okusuri')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:var(--shadow);">
+        <span style="font-size:36px;">💊</span>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:var(--text);">お薬手帳</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">処方履歴・服薬記録の管理</div>
+        </div>
+        <span style="font-size:18px;color:var(--green2);">›</span>
+      </div>
+      <div style="background:var(--surface);border:1.5px dashed var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;opacity:0.45;">
+        <span style="font-size:36px;">➕</span>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);">追加予定の機能</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Coming soon...</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// OKUSURI VIEW（お薬手帳一覧）
+// ══════════════════════════════════════════
+function renderOkusuri() {
+  okusuriData = loadOkusuriData();
+  const c = document.getElementById('viewContainer');
+  const rows = okusuriData.map((drug, i) => {
+    const statusMap = { active:'服用中', continuous:'継続処方', done:'終了' };
+    const statusBg  = { active:'#d4f5e5', continuous:'#fff0d9', done:'#ebebeb' };
+    const statusCol = { active:'#0a5e2a', continuous:'#a05000', done:'#555' };
+    const st = drug.status || 'active';
+    const lastDose = drug.history && drug.history.length > 0 ? drug.history[drug.history.length-1].date : '';
+    const yoho = (drug.timings||[]).map(t=>`${t.time||''}${t.meal||''}・${t.amount||1}${t.unit||'錠'}`).join(' / ');
+    return `
+    <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="flex:1;" onclick="okusuriSelected=${i};switchView('okusuri_detail')">
+          <div style="font-size:14px;font-weight:700;color:var(--text);">${drug.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${yoho}</div>
+          <div style="font-size:11px;color:var(--muted);">処方：${lastDose} / ${drug.hospital||''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+          <span style="font-size:10px;background:${statusBg[st]};color:${statusCol[st]};border-radius:4px;padding:2px 7px;font-weight:700;">${statusMap[st]||'服用中'}</span>
+          <div style="display:flex;gap:5px;">
+            <button onclick="okusuriSelected=${i};editMode=true;switchView('okusuri_input')" style="font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--text);">✏️ 編集</button>
+            <span onclick="okusuriSelected=${i};switchView('okusuri_detail')" style="font-size:16px;color:var(--green2);cursor:pointer;">›</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  c.innerHTML = `
+  <div style="padding:0 0 80px;">
+    <div style="padding:10px 14px;display:flex;gap:8px;">
+      <button onclick="editMode=false;okusuriSelected=null;switchView('okusuri_input')" style="flex:1;background:var(--green);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">📷 QRコード読み取り</button>
+      <button onclick="editMode=false;okusuriSelected=null;switchView('okusuri_input')" style="flex:1;background:var(--surface);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">✏️ 手入力</button>
+    </div>
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin:0 14px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text);">処方履歴</div>
+      ${okusuriData.length === 0
+        ? `<div style="text-align:center;padding:30px;font-size:13px;color:var(--muted);">まだ登録されていません</div>`
+        : rows}
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// OKUSURI INPUT VIEW（お薬登録・編集）
+// ══════════════════════════════════════════
+editMode = false;
+let okusuriForm = { name:'', date:'', hospital:'', total:'', days:'', timings:[], memo:'', status:'active' };
+
+function initOkusuriForm() {
+  if (editMode && okusuriSelected !== null) {
+    const d = okusuriData[okusuriSelected];
+    okusuriForm = JSON.parse(JSON.stringify(d));
+  } else {
+    okusuriForm = { name:'', date:fmtDate(new Date()), hospital:'', total:'', days:'', timings:[{ time:'', meal:'', amount:1, unit:'錠' }], memo:'', status:'active' };
+  }
+}
+
+function renderOkusuriInput() {
+  if (!okusuriForm.timings || okusuriForm.name === undefined) initOkusuriForm();
+  const c = document.getElementById('viewContainer');
+
+  const timingRows = okusuriForm.timings.map((t, ti) => {
+    const times = ['朝','昼','夕','寝前'];
+    const meals = ['食前','食後','食間'];
+    const units = ['錠','袋'];
+    const timeBtns = times.map(tm => `<button onclick="setOkusuriTiming(${ti},'time','${tm}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.time===tm?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.time===tm?'var(--surface2)':'var(--surface)'};color:${t.time===tm?'var(--green2)':'var(--muted)'};font-weight:${t.time===tm?'700':'400'};cursor:pointer;font-family:var(--sans);">${tm}</button>`).join('');
+    const mealBtns = meals.map(ml => `<button onclick="setOkusuriTiming(${ti},'meal','${ml}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.meal===ml?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.meal===ml?'var(--surface2)':'var(--surface)'};color:${t.meal===ml?'var(--green2)':'var(--muted)'};font-weight:${t.meal===ml?'700':'400'};cursor:pointer;font-family:var(--sans);">${ml}</button>`).join('');
+    const unitBtns = units.map(un => `<button onclick="setOkusuriTiming(${ti},'unit','${un}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.unit===un?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.unit===un?'var(--surface2)':'var(--surface)'};color:${t.unit===un?'var(--green2)':'var(--muted)'};font-weight:${t.unit===un?'700':'400'};cursor:pointer;font-family:var(--sans);">${un}</button>`).join('');
+    const summary = (t.time||'') + (t.meal ? '・'+t.meal : '') + '・' + (t.amount||1) + (t.unit||'錠');
+    return `
+    <div style="border-left:3px solid var(--green);padding-left:10px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--green2);margin-bottom:6px;">${ti+1}回目</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">${timeBtns}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">${mealBtns}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);">服用量</span>
+        <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--green);border-radius:8px;padding:3px 10px;">
+          <button onclick="changeAmount(${ti},-1)" style="font-size:14px;color:var(--green2);background:none;border:none;cursor:pointer;font-family:var(--sans);">－</button>
+          <span style="font-size:13px;font-weight:700;color:var(--text);min-width:18px;text-align:center;">${t.amount||1}</span>
+          <button onclick="changeAmount(${ti},1)" style="font-size:14px;color:var(--green2);background:none;border:none;cursor:pointer;font-family:var(--sans);">＋</button>
+        </div>
+        <div style="display:flex;gap:5px;">${unitBtns}</div>
+        ${okusuriForm.timings.length > 1 ? `<button onclick="removeTiming(${ti})" style="margin-left:auto;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">✕ 削除</button>` : ''}
+      </div>
+      <div style="margin-top:6px;background:var(--surface2);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--green2);font-weight:700;display:inline-block;">→ ${summary}</div>
+    </div>`;
+  }).join('');
+
+  const statusOpts = [['active','服用中'],['continuous','継続処方'],['done','終了']];
+  const statusBtns = statusOpts.map(([val,lbl]) => `<button onclick="okusuriForm.status='${val}';renderOkusuriInput()" style="font-size:12px;padding:5px 12px;border-radius:7px;border:${okusuriForm.status===val?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${okusuriForm.status===val?'var(--surface2)':'var(--surface)'};color:${okusuriForm.status===val?'var(--green2)':'var(--muted)'};font-weight:${okusuriForm.status===val?'700':'400'};cursor:pointer;font-family:var(--sans);">${lbl}</button>`).join('');
+
+  c.innerHTML = `
+  <div style="padding:0 14px 80px;max-width:620px;margin:0 auto;">
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-top:10px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:var(--surface2);padding:11px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--text);">💊 ${editMode?'お薬を編集':'お薬を登録する'}</div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+
+        <div class="field-group">
+          <div class="field-label">薬の名前</div>
+          <input class="place-inp" value="${okusuriForm.name||''}" placeholder="例）ロキソプロフェン錠 60mg" oninput="okusuriForm.name=this.value">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="field-group">
+            <div class="field-label">処方日</div>
+            <input type="date" class="date-inp" value="${okusuriForm.date||fmtDate(new Date())}" oninput="okusuriForm.date=this.value">
+          </div>
+          <div class="field-group">
+            <div class="field-label">病院・薬局名</div>
+            <input class="place-inp" value="${okusuriForm.hospital||''}" placeholder="例）△△病院" oninput="okusuriForm.hospital=this.value">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="field-group">
+            <div class="field-label">処方量</div>
+            <input class="place-inp" type="number" value="${okusuriForm.total||''}" placeholder="例）30" oninput="okusuriForm.total=this.value">
+          </div>
+          <div class="field-group">
+            <div class="field-label">日数</div>
+            <input class="place-inp" type="number" value="${okusuriForm.days||''}" placeholder="例）30" oninput="okusuriForm.days=this.value">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">用法（服用タイミング）</div>
+          ${timingRows}
+          <button onclick="addTiming()" style="width:100%;border:1.5px dashed var(--green);border-radius:8px;padding:8px;font-size:12px;color:var(--green2);font-weight:700;background:var(--surface);cursor:pointer;font-family:var(--sans);">＋ 服用タイミングを追加</button>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">ステータス</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">${statusBtns}</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">備考・服用条件（任意）</div>
+          <textarea class="memo-inp" placeholder="痛い時に服用。1日2回まで。など…" oninput="okusuriForm.memo=this.value">${okusuriForm.memo||''}</textarea>
+        </div>
+
+        <button onclick="saveOkusuriEntry()" class="reg-btn">💊 保存する</button>
+        ${editMode ? `<button onclick="deleteOkusuri()" style="width:100%;background:none;border:1.5px solid var(--red);border-radius:10px;padding:11px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--sans);margin-top:4px;">🗑️ この記録を削除</button>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function setOkusuriTiming(ti, key, val) {
+  okusuriForm.timings[ti][key] = val;
+  renderOkusuriInput();
+}
+function changeAmount(ti, delta) {
+  okusuriForm.timings[ti].amount = Math.max(1, (okusuriForm.timings[ti].amount||1) + delta);
+  renderOkusuriInput();
+}
+function addTiming() {
+  okusuriForm.timings.push({ time:'', meal:'', amount:1, unit:'錠' });
+  renderOkusuriInput();
+}
+function removeTiming(ti) {
+  okusuriForm.timings.splice(ti, 1);
+  renderOkusuriInput();
+}
+function saveOkusuriEntry() {
+  if (!okusuriForm.name) { showToast('薬の名前を入力してください'); return; }
+  okusuriData = loadOkusuriData();
+  const entry = { ...okusuriForm, history: [] };
+  if (editMode && okusuriSelected !== null) {
+    entry.history = okusuriData[okusuriSelected].history || [];
+  }
+  const histEntry = { date: okusuriForm.date, hospital: okusuriForm.hospital, total: okusuriForm.total, days: okusuriForm.days };
+  if (!editMode) {
+    entry.history = [histEntry];
+    okusuriData.push(entry);
+  } else {
+    const existing = entry.history.find(h => h.date === okusuriForm.date);
+    if (!existing) entry.history.push(histEntry);
+    okusuriData[okusuriSelected] = entry;
+  }
+  saveOkusuriData(okusuriData);
+  editMode = false;
+  okusuriSelected = null;
+  okusuriForm = {};
+  switchView('okusuri');
+}
+function deleteOkusuri() {
+  if (!confirm('この記録を削除しますか？')) return;
+  okusuriData = loadOkusuriData();
+  okusuriData.splice(okusuriSelected, 1);
+  saveOkusuriData(okusuriData);
+  editMode = false;
+  okusuriSelected = null;
+  switchView('okusuri');
+}
+
+// ══════════════════════════════════════════
+// OKUSURI DETAIL VIEW（薬の処方履歴詳細）
+// ══════════════════════════════════════════
+function renderOkusuriDetail() {
+  okusuriData = loadOkusuriData();
+  if (okusuriSelected === null) { switchView('okusuri'); return; }
+  const drug = okusuriData[okusuriSelected];
+  const c = document.getElementById('viewContainer');
+  const history = drug.history || [];
+  const totalCount = history.length;
+  const totalUnits = history.reduce((s, h) => s + (parseInt(h.total)||0), 0);
+  const avgDays = history.length > 0 ? Math.round(history.reduce((s,h)=>s+(parseInt(h.days)||0),0)/history.length) : 0;
+  const yoho = (drug.timings||[]).map(t=>`${t.time||''}${t.meal?'・'+t.meal:''}・${t.amount||1}${t.unit||'錠'}`).join(' / ');
+  const statusMap = { active:'服用中', continuous:'継続処方', done:'終了' };
+  const statusBg  = { active:'#d4f5e5', continuous:'#fff0d9', done:'#ebebeb' };
+  const statusCol = { active:'#0a5e2a', continuous:'#a05000', done:'#555' };
+  const st = drug.status || 'active';
+
+  const histRows = [...history].reverse().map(h => `
+    <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">${h.date}　${h.hospital||''}</div>
+          <div style="font-size:11px;color:var(--muted);">${h.total||''}${drug.timings?.[0]?.unit||'錠'} / ${h.days||''}日分</div>
+        </div>
+        <span style="font-size:10px;background:${statusBg[st]};color:${statusCol[st]};border-radius:4px;padding:2px 7px;font-weight:700;">${statusMap[st]}</span>
+      </div>
+    </div>`).join('');
+
+  c.innerHTML = `
+  <div style="padding:0 14px 80px;max-width:620px;margin:0 auto;">
+    <div style="background:#e0f7fa;border:1.5px solid var(--workbd);border-radius:14px;margin-top:10px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:#d4f2fa;padding:12px 16px;border-bottom:1px solid var(--workbd);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#007c91;">${drug.name}</div>
+            <div style="font-size:11px;color:#007c91;margin-top:3px;">${yoho}</div>
+            ${drug.memo ? `<div style="font-size:11px;color:#007c91;margin-top:2px;">📝 ${drug.memo}</div>` : ''}
+          </div>
+          <button onclick="okusuriSelected=${okusuriSelected};editMode=true;switchView('okusuri_input')" style="font-size:11px;background:#fff;border:1px solid var(--workbd);border-radius:7px;padding:4px 10px;cursor:pointer;color:#007c91;font-family:var(--sans);">✏️ 編集</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <div style="background:#fff;border-radius:8px;padding:6px 10px;text-align:center;flex:1;border:1px solid var(--workbd);">
+            <div style="font-size:20px;font-weight:700;color:#007c91;">${totalCount}</div>
+            <div style="font-size:9px;color:#007c91;">処方回数</div>
+          </div>
+          <div style="background:#fff;border-radius:8px;padding:6px 10px;text-align:center;flex:1;border:1px solid var(--workbd);">
+            <div style="font-size:20px;font-weight:700;color:#007c91;">${totalUnits}</div>
+            <div style="font-size:9px;color:#007c91;">累計${drug.timings?.[0]?.unit||'錠'}数</div>
+          </div>
+          <div style="background:#fff;border-radius:8px;padding:6px 10px;text-align:center;flex:1;border:1px solid var(--workbd);">
+            <div style="font-size:20px;font-weight:700;color:#007c91;">${avgDays}</div>
+            <div style="font-size:9px;color:#007c91;">平均日数</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface);">
+        <div style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);">処方履歴</div>
+        ${history.length === 0
+          ? `<div style="text-align:center;padding:20px;font-size:13px;color:var(--muted);">履歴がありません</div>`
+          : histRows}
+      </div>
+    </div>
+    <button onclick="switchView('okusuri')" style="width:100%;margin-top:10px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:11px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--sans);">← 一覧に戻る</button>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// SPEC VIEW（仕様書）
+// ══════════════════════════════════════════
+function renderSpec() {
+  const c = document.getElementById('viewContainer');
+  c.innerHTML = `
+  <div style="padding:16px;max-width:680px;margin:0 auto;font-family:var(--sans);">
+
+    <!-- EDITHヘッダー -->
+    <div style="background:linear-gradient(135deg,#0a2e14,#1a6e3c);border-radius:12px;padding:18px;margin-bottom:14px;text-align:center;border:1px solid #2ecf7a;">
+      <div style="font-size:24px;font-weight:900;color:#2ecf7a;letter-spacing:5px;margin-bottom:4px;">E D I T H</div>
+      <div style="font-size:10px;color:#8ee0b8;letter-spacing:1px;">Even Dead I'm The Hero — IRODORI AI Assistant</div>
+    </div>
+
+    <!-- アプリ基本情報 -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>アプリ名：</b>IRODORI<br>
+        <b>現バージョン：</b>MK-21<br>
+        <b>用途：</b>プライベート手帳（予定・日記・生活記録）<br>
+        <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
+        <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
+        <b>GitHub：</b>MKT-TMT/koban-search<br>
+        <b>固定ファイル名：</b>IRODORI_MK-9.html（上書き更新）<br>
+        <b>Firebase：</b>schedule-app-d1ba4 / schedules/irodori_mkdata<br>
+        <b>バージョン管理：</b>アップデートのたびにMK番号を必ず+1する
+      </div>
+    </div>
+
+    <!-- EDITHルール -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">🤖 EDITHルール（AI向け）</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;">
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🔢</span><span>アップデートのたびにMK番号を必ず+1する。同じ番号を再利用しない</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🖼️</span><span>修正・新機能はイメージ図を先に見せてから実装する</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：IRODORI_MK-21.html）。アップロード時はIRODORI_MK-9.htmlに改名して上書き</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;">
+          <span style="flex-shrink:0;">👤</span><span>ユーザー名はまことさん。AIの名前はEDITH（イディス）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- タブ構成 -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">🗂️ タブ構成・使い方</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>📅 月：</b>月間カレンダー。各日の予定・シフトを表示。タップで日ビューへ遷移<br>
+        <b>📋 日：</b>選択日の詳細。予定・仕事・日記の確認と編集<br>
+        <b>⚙️ 機能：</b>お薬手帳など追加機能の一覧<br>
+        <b>EDITH（本画面）：</b>アプリ仕様書・EDITHルール確認
+      </div>
+    </div>
+
+    <!-- 今後の予定機能 -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--amberbd);">
+      <div style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:10px;letter-spacing:0.5px;">🔮 今後追加予定の機能</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.8;">
+        <b>💊 お薬手帳機能</b>
+        <div style="padding-left:12px;color:var(--muted);line-height:2;margin-top:4px;">
+          ・調剤明細書QRコード読み取り＋手入力による服薬記録<br>
+          ・処方履歴一覧（薬名・処方日・病院名・ステータス）<br>
+          ・薬ごとの処方履歴詳細（処方回数・累計錠数・日数）<br>
+          ・次回受診日リマインダー<br>
+          ・飲み合わせメモ<br>
+          ・カレンダーとの連携
+        </div>
+      </div>
+    </div>
+
+  </div>`;
+}
+
+// ══════════════════════════════════════════
 // TOAST
 // ══════════════════════════════════════════
 function showToast(msg) {
@@ -1404,7 +1807,7 @@ function showToast(msg) {
 // AUTH
 // ══════════════════════════════════════════
 (function() {
-  const PASS = 'irodori2026';
+  const PASS = 'elimako15';
   const LOCAL_KEY   = 'irodori_auth_remember';
   const SESSION_KEY = 'irodori_auth_session';
   if (localStorage.getItem(LOCAL_KEY)==='ok' || sessionStorage.getItem(SESSION_KEY)==='ok') {
@@ -1415,7 +1818,7 @@ function showToast(msg) {
 })();
 
 function checkAuth() {
-  const PASS = 'irodori2026';
+  const PASS = 'elimako15';
   const LOCAL_KEY   = 'irodori_auth_remember';
   const SESSION_KEY = 'irodori_auth_session';
   const val = document.getElementById('authInput').value;
