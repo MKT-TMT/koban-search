@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RouteTrack MK-12</title>
+<title>RouteTrack MK-13</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:sans-serif;background:#e8f5e9;padding:1rem}
@@ -166,7 +166,7 @@ RECS_DOC.onSnapshot(snap => {
 
 <div id="main" style="display:none">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-    <div style="font-size:15px;font-weight:600;color:#2e7d32">RouteTrack <span style="font-size:12px;color:#7aab80">MK-12 R8年度</span></div>
+    <div style="font-size:15px;font-weight:600;color:#2e7d32">RouteTrack <span style="font-size:12px;color:#7aab80">MK-13 R8年度</span></div>
     <div style="display:flex;gap:6px">
       <button class="btn" style="font-size:12px;padding:4px 10px" onclick="openMaster()">CODE編集</button>
       <button class="btn" style="font-size:12px;padding:4px 10px" onclick="logout()">ログアウト</button>
@@ -187,17 +187,31 @@ RECS_DOC.onSnapshot(snap => {
   </div>
 
   <div id="sec-tant" class="sec">
+    <div style="display:flex;gap:8px;margin-bottom:1rem;border-bottom:1px solid #c8e6c9">
+      <button id="sub-top20-btn" onclick="swSubTant('top20')" style="padding:8px 16px;font-size:13px;font-weight:600;color:#2e7d32;border:none;border-bottom:2px solid #43a047;background:none;cursor:pointer">担当回数 TOP20</button>
+      <button id="sub-all-btn" onclick="swSubTant('all')" style="padding:8px 16px;font-size:13px;color:#7aab80;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer">全担当TRIP</button>
+    </div>
     <div id="tant-box"></div>
+    <div id="tant-all-box" style="display:none"></div>
   </div>
 
   <div id="sec-spec" class="sec">
     <div class="card">
       <div class="sec-ttl">RouteTrack 仕様書</div>
-      <div style="font-size:12px;color:#7aab80;margin-bottom:12px">ジャービスとの打ち合わせ内容・アプリ仕様の一覧</div>
+      <div style="font-size:12px;color:#7aab80;margin-bottom:12px">EDITHとの打ち合わせ内容・アプリ仕様の一覧</div>
+      <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:0.5px solid #c8e6c9;background:#fff8e1;border-radius:8px;padding:10px 14px">
+        <div style="font-size:13px;font-weight:500;color:#c62828;margin-bottom:6px">⚠ EDITHへの実装ルール</div>
+        <div style="font-size:12px;color:#1b3a1e;line-height:1.8">
+          ・アップデートの実装はユーザーの指示を待って行う<br>
+          ・指示されていない機能の追加・変更・改善は一切行わない<br>
+          ・不明点は必ず確認してから実装する<br>
+          ・仕様の節約のため、先走り実装は厳禁
+        </div>
+      </div>
       <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:0.5px solid #c8e6c9">
         <div style="font-size:13px;font-weight:500;color:#2e7d32;margin-bottom:6px">バージョン管理</div>
         <div style="font-size:12px;color:#1b3a1e;line-height:1.8">
-          ・アップデートのたびにMK番号が1つ上がる（例：MK-12 → MK-12）<br>
+          ・アップデートのたびにMK番号が1つ上がる（例：MK-12 → MK-13）<br>
           ・ファイル名・アプリ内表示・GitHubアップロードファイル名すべて統一<br>
           ・GitHubの固定URL：routetrack.html で運用（URLは変わらない）<br>
           ・タブ構成：検索・確認 / 記録入力 / 担当状況 / 仕様
@@ -246,9 +260,10 @@ RECS_DOC.onSnapshot(snap => {
       <div>
         <div style="font-size:13px;font-weight:500;color:#2e7d32;margin-bottom:6px">担当状況タブ</div>
         <div style="font-size:12px;color:#1b3a1e;line-height:1.8">
-          ・担当回数の多いTRIP上位20件を表示<br>
-          ・表示項目：順位・TRIP・区間・担当回数・平均混雑度・遅延平均・車椅子平均・備考<br>
-          ・1〜3位は金・銀・銅で色分け表示
+          ・サブタブ構成：「担当回数 TOP20」と「全担当TRIP」の2つ<br>
+          ・TOP20：担当回数の多いTRIP上位20件を表示、1〜3位は金・銀・銅で色分け<br>
+          ・全担当TRIP：担当実績のある全TRIPを回数多い順に表示<br>
+          ・表示項目：TRIP・区間・担当回数・平均混雑度・遅延平均・車椅子平均・備考
         </div>
         </div>
       </div>
@@ -768,14 +783,9 @@ function doSearch(){
   el.innerHTML=html;
 }
 function saveMemo(q){kobanMemos[q]=document.getElementById(`memo-${q}`).value;saveMemos();const s=document.getElementById(`memo-saved-${q}`);s.style.display='inline';setTimeout(()=>s.style.display='none',2000);}
-function renderTantou(){
-  const el=document.getElementById('tant-box');if(!el)return;
-  if(!recs.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:#aaa;font-size:14px">記録がありません</div>';return;}
-  const tripCount={};
-  recs.forEach(r=>{tripCount[r.route]=(tripCount[r.route]||0)+1;});
-  const sorted=Object.entries(tripCount).sort((a,b)=>b[1]-a[1]).slice(0,20);
+function buildTantouRows(sorted,showRank){
   const rankColors=['#c8960a','#888','#a0522d'];
-  let html=`<div class="card"><div style="font-size:14px;font-weight:500;color:#2e7d32;margin-bottom:4px">担当状況</div><div style="font-size:12px;color:#7aab80;margin-bottom:10px">担当回数の多いTRIP・上位20件</div><div style="overflow-x:auto"><table class="rtable"><tr><th style="width:30px;text-align:center">順位</th><th style="width:66px">TRIP</th><th style="width:110px">区間</th><th style="width:36px;text-align:center">担当回数</th><th style="width:110px">平均混雑度</th><th style="width:80px">遅延平均</th><th style="width:60px;text-align:center">車椅子平均</th><th>備考</th></tr>`;
+  let rows='';
   sorted.forEach(([rid,cnt],i)=>{
     const rm=recs.filter(r=>r.route===rid);
     const ri=routeInfo(rid);
@@ -784,7 +794,33 @@ function renderTantou(){
     const wAvg=wcAvg(rm);
     const notes=[...new Set(rm.map(m=>m.note).filter(Boolean))];
     const noteId='rk'+rid.replace(/\W/g,'');
-    const rankColor=rankColors[i]||(i<20?'#5d8a62':'#5d8a62');
+    const rankColor=rankColors[i]||'#5d8a62';
+    const delayCell=dAvg!==null?`<span style="color:#c62828;font-size:11px">遅延 ${dAvg.toFixed(1)}分</span>`:`<span style="color:#aaa">—</span>`;
+    const wcCell=wAvg!==null?`<span style="font-size:11px">${wAvg.toFixed(1)}人</span>`:`<span style="color:#aaa">—</span>`;
+    const noteCell=notes.length?`<span class="chip" style="font-size:11px;padding:2px 8px;cursor:pointer" onclick="toggleNotes('${noteId}')">備考 ${notes.length}件</span><div id="notes-${noteId}" class="chips" style="margin-top:4px;display:none">${notes.map(n=>`<span class="chip-static">${n}</span>`).join('')}</div>`:`<span style="color:#aaa">—</span>`;
+    const rankCell=showRank?`<td style="text-align:center;font-weight:500;color:${rankColor}">${i+1}</td>`:'';
+    const rankTh=showRank?`<th style="width:30px;text-align:center">順位</th>`:'';
+    rows+=`<tr${i%2===0?' class="has-rec"':''}>${rankCell}<td style="font-weight:500">${rid}</td><td style="font-size:11px;color:#888">${ri?ri.dep+'→'+ri.arr:'—'}</td><td style="text-align:center;font-weight:500;color:#2e7d32">${cnt}</td><td>${crowdText(avg)}</td><td>${delayCell}</td><td style="text-align:center">${wcCell}</td><td>${noteCell}</td></tr>`;
+  });
+  return rows;
+}
+function renderTantou(){
+  const el=document.getElementById('tant-box');if(!el)return;
+  if(!recs.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:#aaa;font-size:14px">記録がありません</div>';return;}
+  const tripCount={};
+  recs.forEach(r=>{tripCount[r.route]=(tripCount[r.route]||0)+1;});
+  const sorted=Object.entries(tripCount).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  let html=`<div class="card"><div style="font-size:14px;font-weight:500;color:#2e7d32;margin-bottom:4px">担当状況</div><div style="font-size:12px;color:#7aab80;margin-bottom:10px">担当回数の多いTRIP・上位20件</div><div style="overflow-x:auto"><table class="rtable"><tr><th style="width:30px;text-align:center">順位</th><th style="width:66px">TRIP</th><th style="width:110px">区間</th><th style="width:36px;text-align:center">担当回数</th><th style="width:110px">平均混雑度</th><th style="width:80px">遅延平均</th><th style="width:60px;text-align:center">車椅子平均</th><th>備考</th></tr>`;
+  const rankColors=['#c8960a','#888','#a0522d'];
+  sorted.forEach(([rid,cnt],i)=>{
+    const rm=recs.filter(r=>r.route===rid);
+    const ri=routeInfo(rid);
+    const avg=crowdAvg(rm.map(m=>m.crowd).filter(v=>v!==''&&v!==undefined));
+    const dAvg=delayAvg(rm);
+    const wAvg=wcAvg(rm);
+    const notes=[...new Set(rm.map(m=>m.note).filter(Boolean))];
+    const noteId='rk'+rid.replace(/\W/g,'');
+    const rankColor=rankColors[i]||'#5d8a62';
     const delayCell=dAvg!==null?`<span style="color:#c62828;font-size:11px">遅延 ${dAvg.toFixed(1)}分</span>`:`<span style="color:#aaa">—</span>`;
     const wcCell=wAvg!==null?`<span style="font-size:11px">${wAvg.toFixed(1)}人</span>`:`<span style="color:#aaa">—</span>`;
     const noteCell=notes.length?`<span class="chip" style="font-size:11px;padding:2px 8px;cursor:pointer" onclick="toggleNotes('${noteId}')">備考 ${notes.length}件</span><div id="notes-${noteId}" class="chips" style="margin-top:4px;display:none">${notes.map(n=>`<span class="chip-static">${n}</span>`).join('')}</div>`:`<span style="color:#aaa">—</span>`;
@@ -793,7 +829,46 @@ function renderTantou(){
   html+=`</table></div></div>`;
   el.innerHTML=html;
 }
-function swTab(name,btn){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));btn.classList.add('active');document.getElementById('sec-'+name).classList.add('active');if(name==='inp')renderHist();if(name==='tant')renderTantou();}
+function renderTantouAll(){
+  const el=document.getElementById('tant-all-box');if(!el)return;
+  if(!recs.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:#aaa;font-size:14px">記録がありません</div>';return;}
+  const tripCount={};
+  recs.forEach(r=>{tripCount[r.route]=(tripCount[r.route]||0)+1;});
+  const sorted=Object.entries(tripCount).sort((a,b)=>b[1]-a[1]);
+  let html=`<div class="card"><div style="font-size:14px;font-weight:500;color:#2e7d32;margin-bottom:4px">全担当TRIP</div><div style="font-size:12px;color:#7aab80;margin-bottom:10px">担当実績のある全TRIP（${sorted.length}件）・回数多い順</div><div style="overflow-x:auto"><table class="rtable"><tr><th style="width:66px">TRIP</th><th style="width:110px">区間</th><th style="width:36px;text-align:center">担当回数</th><th style="width:110px">平均混雑度</th><th style="width:80px">遅延平均</th><th style="width:60px;text-align:center">車椅子平均</th><th>備考</th></tr>`;
+  sorted.forEach(([rid,cnt],i)=>{
+    const rm=recs.filter(r=>r.route===rid);
+    const ri=routeInfo(rid);
+    const avg=crowdAvg(rm.map(m=>m.crowd).filter(v=>v!==''&&v!==undefined));
+    const dAvg=delayAvg(rm);
+    const wAvg=wcAvg(rm);
+    const notes=[...new Set(rm.map(m=>m.note).filter(Boolean))];
+    const noteId='all'+rid.replace(/\W/g,'');
+    const delayCell=dAvg!==null?`<span style="color:#c62828;font-size:11px">遅延 ${dAvg.toFixed(1)}分</span>`:`<span style="color:#aaa">—</span>`;
+    const wcCell=wAvg!==null?`<span style="font-size:11px">${wAvg.toFixed(1)}人</span>`:`<span style="color:#aaa">—</span>`;
+    const noteCell=notes.length?`<span class="chip" style="font-size:11px;padding:2px 8px;cursor:pointer" onclick="toggleNotes('${noteId}')">備考 ${notes.length}件</span><div id="notes-${noteId}" class="chips" style="margin-top:4px;display:none">${notes.map(n=>`<span class="chip-static">${n}</span>`).join('')}</div>`:`<span style="color:#aaa">—</span>`;
+    html+=`<tr${i%2===0?' class="has-rec"':''}><td style="font-weight:500">${rid}</td><td style="font-size:11px;color:#888">${ri?ri.dep+'→'+ri.arr:'—'}</td><td style="text-align:center;font-weight:500;color:#2e7d32">${cnt}</td><td>${crowdText(avg)}</td><td>${delayCell}</td><td style="text-align:center">${wcCell}</td><td>${noteCell}</td></tr>`;
+  });
+  html+=`</table></div></div>`;
+  el.innerHTML=html;
+}
+function swSubTant(name){
+  const top20Btn=document.getElementById('sub-top20-btn');
+  const allBtn=document.getElementById('sub-all-btn');
+  const top20Box=document.getElementById('tant-box');
+  const allBox=document.getElementById('tant-all-box');
+  if(name==='top20'){
+    top20Btn.style.color='#2e7d32';top20Btn.style.fontWeight='600';top20Btn.style.borderBottom='2px solid #43a047';
+    allBtn.style.color='#7aab80';allBtn.style.fontWeight='400';allBtn.style.borderBottom='2px solid transparent';
+    top20Box.style.display='block';allBox.style.display='none';
+  }else{
+    allBtn.style.color='#2e7d32';allBtn.style.fontWeight='600';allBtn.style.borderBottom='2px solid #43a047';
+    top20Btn.style.color='#7aab80';top20Btn.style.fontWeight='400';top20Btn.style.borderBottom='2px solid transparent';
+    top20Box.style.display='none';allBox.style.display='block';
+    renderTantouAll();
+  }
+}
+function swTab(name,btn){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));btn.classList.add('active');document.getElementById('sec-'+name).classList.add('active');if(name==='inp')renderHist();if(name==='tant'){renderTantou();swSubTant('top20');}}
 </script>
 </body>
 </html>
