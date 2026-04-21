@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<title>IRODORI MK-23</title>
+<title>IRODORI MK-24</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -478,7 +478,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-23</div>
+    <div class="auth-logo">IRODORI MK-24</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -493,7 +493,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-23 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-24 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -509,10 +509,16 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- NAV ROW -->
 <div class="nav-row">
   <div class="nav-title" id="navTitle"></div>
-  <div class="nav-btns">
-    <button class="nav-btn" onclick="navPrev()">‹</button>
-    <button class="nav-btn" onclick="goToday()" style="font-size:11px;font-family:var(--sans);font-weight:700;">今日</button>
-    <button class="nav-btn" onclick="navNext()">›</button>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <div id="calModeToggle" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px;">
+      <button id="calModeList" onclick="setCalMode('list')" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;font-family:var(--sans);">リスト</button>
+      <button id="calModeGrid" onclick="setCalMode('grid')" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);">グリッド</button>
+    </div>
+    <div class="nav-btns">
+      <button class="nav-btn" onclick="navPrev()">‹</button>
+      <button class="nav-btn" onclick="goToday()" style="font-size:11px;font-family:var(--sans);font-weight:700;">今日</button>
+      <button class="nav-btn" onclick="navNext()">›</button>
+    </div>
   </div>
 </div>
 
@@ -558,6 +564,8 @@ const ICON_CATEGORIES = [
     {icon:'💇',label:'散髪'},{icon:'📱',label:'スマホ'},
     {icon:'🛢️',label:'オイル交換'},{icon:'🔩',label:'エレメント交換'},{icon:'🛞',label:'タイヤ交換'},
     {icon:'🚗',label:'車検'},{icon:'🦷',label:'歯医者'},
+    {icon:'👔',label:'クリーニング'},{icon:'👟',label:'靴のメンテ'},{icon:'🎣',label:'釣り'},
+    {icon:'🍻',label:'飲み会'},{icon:'📌',label:'その他'},
   ]},
 ];
 
@@ -636,6 +644,7 @@ let appData = loadData();
 // ══════════════════════════════════════════
 const today = new Date();
 let view = 'month';
+let calMode = 'list'; // 'list' or 'grid'
 let cursor = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = fmtDate(today);
 let inputDate = fmtDate(today);
@@ -753,27 +762,44 @@ function goToday() {
   render();
 }
 
+function setCalMode(mode) {
+  calMode = mode;
+  const toggle = document.getElementById('calModeToggle');
+  if (toggle) {
+    document.getElementById('calModeList').style.background = mode === 'list' ? 'var(--green)' : 'transparent';
+    document.getElementById('calModeList').style.color      = mode === 'list' ? '#fff' : 'var(--muted)';
+    document.getElementById('calModeGrid').style.background = mode === 'grid' ? 'var(--green)' : 'transparent';
+    document.getElementById('calModeGrid').style.color      = mode === 'grid' ? '#fff' : 'var(--muted)';
+  }
+  renderMonth();
+}
+
 function updateNavTitle() {
   const el = document.getElementById('navTitle');
+  const toggle = document.getElementById('calModeToggle');
   if (view === 'month') {
     el.textContent = `${cursor.getFullYear()}年${cursor.getMonth()+1}月`;
-  } else if (view === 'day') {
-    const d = parseDate(selectedDate);
-    el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
-  } else if (view === 'kino') {
-    el.textContent = '機能';
-  } else if (view === 'okusuri') {
-    el.textContent = 'お薬手帳';
-  } else if (view === 'okusuri_input') {
-    el.textContent = 'お薬を登録';
-  } else if (view === 'okusuri_detail') {
-    el.textContent = '処方履歴';
-  } else if (view === 'okusuri_qr') {
-    el.textContent = 'QR読み取り';
-  } else if (view === 'spec') {
-    el.textContent = 'EDITH';
+    if (toggle) toggle.style.display = 'flex';
   } else {
-    el.textContent = '';
+    if (toggle) toggle.style.display = 'none';
+    if (view === 'day') {
+      const d = parseDate(selectedDate);
+      el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
+    } else if (view === 'kino') {
+      el.textContent = '機能';
+    } else if (view === 'okusuri') {
+      el.textContent = 'お薬手帳';
+    } else if (view === 'okusuri_input') {
+      el.textContent = 'お薬を登録';
+    } else if (view === 'okusuri_detail') {
+      el.textContent = '処方履歴';
+    } else if (view === 'okusuri_qr') {
+      el.textContent = 'QR読み取り';
+    } else if (view === 'spec') {
+      el.textContent = 'EDITH';
+    } else {
+      el.textContent = '';
+    }
   }
 }
 
@@ -792,9 +818,14 @@ function render() {
 }
 
 // ══════════════════════════════════════════
-// MONTH VIEW（1日1行リスト表示）
+// MONTH VIEW（リスト／グリッド切り替え）
 // ══════════════════════════════════════════
 function renderMonth() {
+  if (calMode === 'grid') renderMonthGrid();
+  else renderMonthList();
+}
+
+function renderMonthList() {
   const c = document.getElementById('viewContainer');
   const year = cursor.getFullYear(), month = cursor.getMonth();
   const daysInMonth = new Date(year, month+1, 0).getDate();
@@ -816,13 +847,11 @@ function renderMonth() {
     if (isSun)   rowCls += ' ml-sun';
     if (isSat)   rowCls += ' ml-sat';
 
-    // 日付列
     const dateCls = isSun ? 'ml-date ml-date--sun' : isSat ? 'ml-date ml-date--sat' : 'ml-date';
     const numCls  = isToday ? 'ml-date-num-today' : (isSun ? 'ml-date-num ml-num--sun' : isSat ? 'ml-date-num ml-num--sat' : 'ml-date-num');
     const dowCls  = isSun ? 'ml-dow ml-dow--sun' : isSat ? 'ml-dow ml-dow--sat' : 'ml-dow';
     const dateInner = `<div class="${numCls}">${d}</div><div class="${dowCls}">${dowLabel}</div>`;
 
-    // シフト列
     let shiftHtml = '<div class="ml-shift-empty"></div>';
     if (ttInfo) {
       if (ttInfo.type === 'plan') {
@@ -846,7 +875,6 @@ function renderMonth() {
       }
     }
 
-    // アイコンチップ列
     let iconsHtml = '';
     if (events.length > 0) {
       iconsHtml = events.map(e => {
@@ -869,6 +897,88 @@ function renderMonth() {
     </div>`;
   }
   html += '</div>';
+  c.innerHTML = html;
+}
+
+function renderMonthGrid() {
+  const c = document.getElementById('viewContainer');
+  const year = cursor.getFullYear(), month = cursor.getMonth();
+  const todayKey = fmtDate(today);
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
+
+  let html = '<div class="month-grid"><div class="dow-row">';
+  ['日','月','火','水','木','金','土'].forEach((d,i) => {
+    const cls = i===0?'dow-cell sun':i===6?'dow-cell sat':'dow-cell';
+    html += `<div class="${cls}">${d}</div>`;
+  });
+  html += '</div><div class="cal-grid">';
+
+  // 前月の空白
+  for (let i = 0; i < firstDow; i++) {
+    const d = prevDays - firstDow + 1 + i;
+    html += `<div class="cal-cell other-month"><div class="cal-date">${d}</div></div>`;
+  }
+
+  // 当月
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateKey = fmtDate(new Date(year, month, d));
+    const dow = new Date(year, month, d).getDay();
+    const isToday = dateKey === todayKey;
+    const isSun = dow === 0, isSat = dow === 6;
+    const ttInfo = getTTShiftInfo(dateKey);
+    const rec = appData[dateKey] || {};
+    const events = rec.events || [];
+
+    let cellCls = 'cal-cell';
+    if (isSun) cellCls += ' sun';
+    if (isSat) cellCls += ' sat';
+    if (isToday) cellCls += ' today';
+
+    let shiftChip = '';
+    if (ttInfo) {
+      const cls = ttInfo.type === 'work' ? 'work' : (ttInfo.type === 'paid' || ttInfo.type === 'off') ? 'off' : 'plan';
+      const ttRec = loadTTData()[dateKey] || {};
+      let lbl = ttInfo.label;
+      if (ttInfo.type === 'work') {
+        if (ttRec.shift === 'compound') {
+          const kobans = ttRec.compoundKobans || [];
+          lbl = kobans.map(n => String(n).padStart(3,'0')).join('＆') || '複合';
+        } else {
+          lbl = ttInfo.label.replace('交番','').trim().padStart(3,'0');
+        }
+      }
+      shiftChip = `<span class="cal-shift ${cls}">${lbl}</span>`;
+    }
+
+    let iconHtml = '';
+    if (events.length > 0) {
+      iconHtml = '<div class="cal-irodori-icons">';
+      events.forEach(e => {
+        const icList = e.icons || (e.icon ? [{icon:e.icon}] : []);
+        icList.forEach(ic => {
+          const raw = ic.icon.startsWith('KANJI:') ? ic.icon.replace('KANJI:','') : ic.icon;
+          iconHtml += `<span class="cal-irodori-icon">${isKanjiIcon(raw)||ic.icon.startsWith('KANJI:') ? raw : ic.icon}</span>`;
+        });
+      });
+      iconHtml += '</div>';
+    }
+
+    html += `<div class="${cellCls}" onclick="selectDate('${dateKey}')">
+      <div class="cal-date">${d}</div>
+      ${shiftChip}${iconHtml}
+    </div>`;
+  }
+
+  // 翌月の空白
+  const total = firstDow + daysInMonth;
+  const remain = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= remain; i++) {
+    html += `<div class="cal-cell other-month"><div class="cal-date">${i}</div></div>`;
+  }
+
+  html += '</div></div>';
   c.innerHTML = html;
 }
 
@@ -1850,7 +1960,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>IRODORI<br>
-        <b>現バージョン：</b>MK-23<br>
+        <b>現バージョン：</b>MK-24<br>
         <b>用途：</b>プライベート手帳（予定・日記・生活記録）<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -1869,13 +1979,16 @@ function renderSpec() {
           <span style="flex-shrink:0;">🔢</span><span>アップデートのたびにMK番号を必ず+1する。同じ番号を再利用しない</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">🖼️</span><span>修正・新機能はイメージ図を先に見せてから実装する</span>
+          <span style="flex-shrink:0;">🖼️</span><span>修正・新機能はイメージ図を先に見せてから実装する。イメージ図OKの後も、必ずまことさんから「実装してください」の指示があるまで実装に進まない</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する</span>
+          <span style="flex-shrink:0;">🔍</span><span>アップデートの際は実装前にプログラムの確認を行い不具合が無いか見直す様に進める</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：IRODORI_MK-23.html）。アップロード時はIRODORI_MK-9.htmlに改名して上書き</span>
+          <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する。勝手に先へ進まない</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：IRODORI_MK-24.html）。アップロード時はIRODORI_MK-9.htmlに改名して上書き</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;">
           <span style="flex-shrink:0;">👤</span><span>ユーザー名はまことさん。AIの名前はEDITH（イディス）</span>
