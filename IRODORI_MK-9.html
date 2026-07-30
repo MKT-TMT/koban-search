@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<title>IRODORI MK-24</title>
+<title>IRODORI MK-28</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -212,6 +212,41 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 }
 .diary-empty { text-align:center; padding:20px; font-size:13px; color:var(--muted); }
 
+/* ══ タイムライン（日ビュー） ══ */
+.tl-wrap {
+  background:var(--surface); border:1.5px solid var(--border);
+  border-radius:14px; margin-bottom:10px; padding:10px 12px 14px; box-shadow:var(--shadow);
+}
+.tl-body { position:relative; }
+.tl-hours { position:absolute; left:0; top:0; width:34px; }
+.tl-hour-label { position:absolute; font-family:var(--mono); font-size:10px; color:var(--muted); transform:translateY(-50%); }
+.tl-track { position:absolute; left:38px; right:0; top:0; border-left:1px solid var(--border); }
+.tl-gridline { position:absolute; left:0; right:0; border-top:1px solid #eef7ee; }
+.tl-band {
+  position:absolute; border-radius:7px; box-sizing:border-box; overflow:hidden;
+  padding:4px 7px; margin:0 2px;
+}
+.tl-band-cat  { font-size:11px; font-weight:800; line-height:1.25; }
+.tl-band-time { font-family:var(--mono); font-size:10px; font-weight:600; line-height:1.3; opacity:0.9; }
+.tl-band-sub  { font-size:9px; opacity:0.75; margin-top:1px; }
+.tl-now-line  { position:absolute; left:-4px; right:0; height:0; border-top:2px solid var(--red); z-index:5; }
+.tl-now-dot   { position:absolute; left:-6px; width:8px; height:8px; border-radius:50%; background:var(--red); z-index:6; }
+.tl-fab-row { display:flex; align-items:center; justify-content:space-between; padding:0 2px 8px; }
+.tl-fab-add {
+  width:32px; height:32px; border-radius:50%; background:var(--green); border:none;
+  display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px;
+  cursor:pointer; box-shadow:0 2px 8px rgba(46,207,122,.35); font-weight:700;
+}
+.tl-unscheduled { margin-bottom:10px; }
+.tl-unscheduled-label { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:6px; padding:0 2px; }
+.tl-unscheduled-list { display:flex; flex-wrap:wrap; gap:8px; }
+.tl-unscheduled-chip {
+  display:flex; align-items:center; gap:6px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:20px; padding:6px 12px; cursor:pointer;
+}
+.tl-unscheduled-name { font-size:12px; font-weight:600; color:var(--text); }
+.tl-unscheduled-cat  { font-size:9px; color:var(--muted); }
+
 .small-btn {
   font-size:11px; font-weight:700; color:var(--green2);
   background:var(--surface); border:1.5px solid var(--green);
@@ -258,6 +293,8 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   margin-bottom:6px; padding-bottom:3px; border-bottom:1px solid var(--surface2);
 }
 .icon-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; }
+.cat-subsection { margin-bottom:10px; padding-left:2px; }
+.cat-subtitle { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:5px; }
 .icon-btn {
   display:flex; flex-direction:column; align-items:center; gap:3px;
   background:var(--surface2); border:1.5px solid var(--border);
@@ -478,7 +515,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-24</div>
+    <div class="auth-logo">IRODORI MK-28</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -493,7 +530,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-24 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-28 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -536,38 +573,99 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 // CONSTANTS — アイコン定義
 // ══════════════════════════════════════════
 const ICON_CATEGORIES = [
-  { label:'🍽️ 食事・カフェ', icons:[
+  { label:'🍽️ 食事・カフェ', key:'food', icons:[
     {icon:'🌅',label:'モーニング'},{icon:'🥗',label:'ランチ'},{icon:'🍷',label:'ディナー'},
     {icon:'🥐',label:'パン'},
-    {icon:'🍜',label:'外食'},{icon:'🍱',label:'和食'},{icon:'🥟',label:'中華'},
-    {icon:'🍽️',label:'ビュッフェ'},{icon:'☕',label:'カフェ'},{icon:'🍺',label:'飲み'},
+    {icon:'🍱',label:'和食'},{icon:'🥟',label:'中華'},
+    {icon:'🍽️',label:'ビュッフェ'},{icon:'☕',label:'カフェ'},{icon:'🍻',label:'飲み会'},
     {icon:'🍣',label:'寿司'},{icon:'🍕',label:'洋食'},{icon:'🍖',label:'焼肉'},
-    {icon:'🍛',label:'カレー'},{icon:'鰻',label:'うなぎ'},
+    {icon:'🍛',label:'カレー'},{icon:'鰻',label:'うなぎ'},{icon:'鍋',label:'鍋料理'},
+    {icon:'🍰',label:'スイーツ'},
   ]},
-  { label:'🛍️ 買い物', icons:[
-    {icon:'🛒',label:'買い物'},{icon:'🥦',label:'食料品'},{icon:'🧴',label:'日用品'},
+  { label:'🛍️ 買い物', key:'shopping', icons:[
+    {icon:'🥦',label:'食料品'},{icon:'🧴',label:'日用品'},
     {icon:'👗',label:'服'},{icon:'🖥️',label:'家電'},{icon:'KANJI:薬',label:'薬局'},
     {icon:'💼',label:'仕事用品'},
+    {icon:'📚',label:'本・文具'},{icon:'👞',label:'靴'},{icon:'👜',label:'鞄'},
+    {icon:'🪑',label:'家具'},{icon:'🖼️',label:'インテリアグッズ'},
   ]},
-  { label:'🎉 おでかけ・旅行', icons:[
+  { label:'🎉 おでかけ・旅行', key:'outing', icons:[
     {icon:'✈️',label:'旅行'},{icon:'🚗',label:'ドライブ'},{icon:'♨️',label:'温泉'},
     {icon:'🎡',label:'遊園地'},{icon:'🏞️',label:'観光'},{icon:'🏖️',label:'海'},
     {icon:'🏔️',label:'登山'},{icon:'🎆',label:'花火'},{icon:'⛺',label:'キャンプ'},
+    {icon:'🎬',label:'映画'},{icon:'🎤',label:'カラオケ'},{icon:'⛳',label:'ゴルフ'},
+    {icon:'🎣',label:'釣り'},{icon:'📌',label:'その他'},
   ]},
-  { label:'🌸 季節・イベント', icons:[
-    {icon:'🌸',label:'花見'},{icon:'🍁',label:'紅葉'},{icon:'⛄',label:'雪遊び'},
-    {icon:'🎃',label:'ハロウィン'},{icon:'🎄',label:'クリスマス'},{icon:'🎊',label:'お祝い'},
+  { label:'🔧 メンテナンス', key:'maintenance', subcategories:[
+    { label:'🧍 体のメンテナンス', key:'maintenance_body', icons:[
+      {icon:'🏥',label:'病院'},{icon:'👂',label:'耳鼻科'},{icon:'🦷',label:'歯医者'},
+      {icon:'🩺',label:'内科'},{icon:'😴',label:'睡眠'},{icon:'💇',label:'理容室'},
+      {icon:'👁️',label:'眼科'},{icon:'💉',label:'健康診断'},
+    ]},
+    { label:'🚗 車のメンテナンス', key:'maintenance_car', icons:[
+      {icon:'🚙',label:'車検'},{icon:'🛢️',label:'オイル交換'},{icon:'🔩',label:'エレメント交換'},
+      {icon:'🛞',label:'タイヤ交換'},{icon:'📋',label:'定期点検'},{icon:'🔧',label:'修理'},
+    ]},
+    { label:'🛠️ 道具のメンテナンス', key:'maintenance_tool', icons:[
+      {icon:'👟',label:'靴のインソール'},{icon:'🛏️',label:'枕のメンテ'},{icon:'👔',label:'クリーニング'},
+    ]},
   ]},
-  { label:'🎯 その他・行動', icons:[
-    {icon:'🪔',label:'法事'},{icon:'🏥',label:'病院'},{icon:'🎬',label:'映画'},
-    {icon:'🎤',label:'カラオケ'},{icon:'⛳',label:'ゴルフ'},{icon:'🔧',label:'DIY'},
-    {icon:'💇',label:'散髪'},{icon:'📱',label:'スマホ'},
-    {icon:'🛢️',label:'オイル交換'},{icon:'🔩',label:'エレメント交換'},{icon:'🛞',label:'タイヤ交換'},
-    {icon:'🚗',label:'車検'},{icon:'🦷',label:'歯医者'},
-    {icon:'👔',label:'クリーニング'},{icon:'👟',label:'靴のメンテ'},{icon:'🎣',label:'釣り'},
-    {icon:'🍻',label:'飲み会'},{icon:'📌',label:'その他'},
+  { label:'🎊 冠婚葬祭', key:'ceremony', icons:[
+    {icon:'🙏',label:'法事'},{icon:'🪦',label:'お墓参り'},{icon:'⛩️',label:'初詣'},
+    {icon:'🎋',label:'お盆'},{icon:'🌾',label:'お彼岸'},{icon:'💒',label:'結婚式'},
+    {icon:'🖤',label:'葬儀'},{icon:'🕯️',label:'通夜'},
   ]},
 ];
+
+// カテゴリー・サブカテゴリーの一覧をフラット化（色設定・アイコン検索用）
+// colorGroup: 色設定の単位となるキー（メンテナンスはサブカテゴリー単位、他は大カテゴリー単位）
+const COLOR_GROUPS = [];
+ICON_CATEGORIES.forEach(cat => {
+  if (cat.subcategories) {
+    cat.subcategories.forEach(sub => {
+      COLOR_GROUPS.push({ key: sub.key, label: cat.label + '（' + sub.label.replace(/^[^\s]+\s*/, '') + '）', shortLabel: sub.label });
+    });
+  } else {
+    COLOR_GROUPS.push({ key: cat.key, label: cat.label, shortLabel: cat.label });
+  }
+});
+
+// アイコン文字列 → { categoryLabel, colorGroupKey } の逆引き
+const ICON_LOOKUP = {};
+ICON_CATEGORIES.forEach(cat => {
+  if (cat.subcategories) {
+    cat.subcategories.forEach(sub => {
+      sub.icons.forEach(ic => { ICON_LOOKUP[ic.icon] = { categoryLabel: cat.label, subLabel: sub.label, colorGroupKey: sub.key }; });
+    });
+  } else {
+    cat.icons.forEach(ic => { ICON_LOOKUP[ic.icon] = { categoryLabel: cat.label, subLabel: null, colorGroupKey: cat.key }; });
+  }
+});
+function getIconMeta(icon) {
+  return ICON_LOOKUP[icon] || { categoryLabel: '', subLabel: null, colorGroupKey: null };
+}
+
+// ══════════════════════════════════════════
+// カテゴリー色設定
+// ══════════════════════════════════════════
+const CATEGORY_COLOR_PALETTE = [
+  '#2846D6','#8EDC4B','#D628AB','#4BDCD5','#D69B28','#804BDC','#28D636','#DC4B6A',
+  '#2880D6','#BFDC4B','#C628D6','#4BDCA5','#D66128','#504BDC','#55D628','#DC4B9A',
+  '#28BAD6','#DCC94B','#8C28D6','#4BDC74','#D6282A','#4B76DC','#8FD628','#DC4BCB',
+  '#28D6B7','#DC984B','#5228D6','#52DC4B','#D62864','#4BA7DC',
+];
+const CATEGORY_COLOR_KEY = 'irodori_category_colors_v1';
+function loadCategoryColors() {
+  try { return JSON.parse(localStorage.getItem(CATEGORY_COLOR_KEY) || '{}'); } catch { return {}; }
+}
+function saveCategoryColors(d) {
+  localStorage.setItem(CATEGORY_COLOR_KEY, JSON.stringify(d));
+}
+let categoryColors = loadCategoryColors();
+function getCategoryColor(colorGroupKey) {
+  return categoryColors[colorGroupKey] || '#E7EFE4';
+}
+let colorSettingsEditMode = false;
 
 const DOW = ['日','月','火','水','木','金','土'];
 
@@ -735,7 +833,7 @@ function switchView(v) {
     t.classList.toggle('active', ['month','day','kino','spec'][i] === v);
   });
   const fab = document.getElementById('fab');
-  fab.style.display = (v === 'kino' || v === 'spec' || v === 'okusuri' || v === 'okusuri_input' || v === 'okusuri_detail' || v === 'okusuri_qr') ? 'none' : 'flex';
+  fab.style.display = (v === 'kino' || v === 'spec' || v === 'okusuri' || v === 'okusuri_input' || v === 'okusuri_detail' || v === 'okusuri_qr' || v === 'colorsettings') ? 'none' : 'flex';
   render();
 }
 
@@ -813,6 +911,7 @@ function render() {
   else if (view === 'okusuri_qr')    renderOkusuriQr();
   else if (view === 'okusuri_input') renderOkusuriInput();
   else if (view === 'okusuri_detail')renderOkusuriDetail();
+  else if (view === 'colorsettings') renderColorSettings();
   else if (view === 'spec')          renderSpec();
   else                               renderDay();
 }
@@ -990,6 +1089,176 @@ function selectDate(key) {
 // ══════════════════════════════════════════
 // DAY VIEW
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// タイムライン構築ユーティリティ
+// ══════════════════════════════════════════
+function getTTCalc(dateKey) {
+  const ttData = loadTTData();
+  const rec = ttData[dateKey];
+  if (!rec || !rec.calc) return null;
+  return rec.calc;
+}
+function parseHM(s) {
+  if (!s || typeof s !== 'string' || s.indexOf(':') === -1) return null;
+  const parts = s.split(':').map(Number);
+  if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+  return parts[0]*60 + parts[1];
+}
+function fmtHM(min) {
+  min = ((Math.round(min) % 1440) + 1440) % 1440;
+  const h = Math.floor(min/60), m = min % 60;
+  return `${h}:${String(m).padStart(2,'0')}`;
+}
+
+const TL_PX_PER_MIN = 32/60; // 1時間=32px
+const TL_TOTAL_H = Math.round(1440 * TL_PX_PER_MIN);
+
+function buildTimelineBands(dateKey) {
+  const bands = [];
+  const ttInfo = getTTShiftInfo(dateKey);
+  const ttLife = getTTLife(dateKey);
+  const ttCalc = getTTCalc(dateKey);
+
+  const dObj = parseDate(dateKey);
+  const tmrw = new Date(dObj); tmrw.setDate(tmrw.getDate()+1);
+  const tomorrowInfo = getTTShiftInfo(fmtDate(tmrw));
+
+  // 😴 睡眠：0:00〜起床（その日の起床に対応する前夜の就寝から続く分）
+  const wakeMin = ttLife ? parseHM(ttLife.wake) : null;
+  if (wakeMin !== null) {
+    bands.push({ type:'sleep', start:0, end:wakeMin, bg:'#DFF3AE', fg:'#3B6D11',
+      label:'😴 睡眠', timeLabel:`0:00〜${fmtHM(wakeMin)}` });
+  }
+
+  // 🕐 勤務間時間：0:00〜当日の仕事開始
+  const isWork = ttInfo && ttInfo.type === 'work';
+  const workStartMin = isWork ? parseHM(ttInfo.start) : null;
+  const workEndMinRaw = isWork ? parseHM(ttInfo.end) : null;
+  if (workStartMin !== null) {
+    bands.push({ type:'workgap', start:0, end:workStartMin, bg:'#FBDBDB', fg:'#A32D2D',
+      label:'🕐 勤務間', timeLabel:`0:00〜${fmtHM(workStartMin)}` });
+  }
+  // 🕐 勤務間時間（夜）：当日の仕事終了〜24:00（翌日も仕事の場合のみ表示）
+  let workEndMin = workEndMinRaw;
+  if (workEndMin !== null && workStartMin !== null && workEndMin <= workStartMin) workEndMin += 0; // 日跨りは今日分のみ表示
+  if (workEndMin !== null && workEndMin < 1440 && tomorrowInfo && tomorrowInfo.type === 'work') {
+    bands.push({ type:'workgap', start:workEndMin, end:1440, bg:'#FBDBDB', fg:'#A32D2D',
+      label:'🕐 勤務間', timeLabel:`${fmtHM(workEndMin)}〜24:00` });
+  }
+
+  // 🌅 支度帯：起床〜会社到着
+  if (wakeMin !== null) {
+    let arriveMin = ttCalc && ttCalc.arriveTime ? parseHM(ttCalc.arriveTime) : null;
+    if (arriveMin === null && ttLife) arriveMin = parseHM(ttLife.commute);
+    if (arriveMin === null && ttLife) arriveMin = parseHM(ttLife.ready);
+    if (arriveMin === null) arriveMin = wakeMin + 60;
+    const parts = [`🌅${fmtHM(wakeMin)}起床`];
+    if (ttLife && ttLife.ready)   parts.push(`🚿${ttLife.ready}準備`);
+    if (ttLife && ttLife.commute) parts.push(`🚃${ttLife.commute}出社`);
+    if (ttCalc && ttCalc.arriveTime) parts.push(`🏢${ttCalc.arriveTime}到着`);
+    bands.push({ type:'prep', start:wakeMin, end:Math.max(arriveMin, wakeMin+40), bg:'#FCEFB8', fg:'#854F0B',
+      label: parts.join(' → '), timeLabel:'' });
+  }
+
+  // 🚌 仕事
+  if (workStartMin !== null && workEndMinRaw !== null) {
+    const endClamped = workEndMinRaw > workStartMin ? workEndMinRaw : 1440;
+    bands.push({ type:'work', start:workStartMin, end:endClamped, bg:'#DCEBFB', fg:'#0C447C',
+      label:'🚌 仕事', timeLabel:`${fmtHM(workStartMin)}〜${fmtHM(endClamped)}` });
+  }
+
+  // プライベート予定（時刻設定ありのもののみ。未設定は別リストで表示）
+  const rec = appData[dateKey] || {};
+  const events = rec.events || [];
+  events.forEach((e, idx) => {
+    if (!e.timeStart) return;
+    const sMin = parseHM(e.timeStart);
+    if (sMin === null) return;
+    let eMin = e.timeEnd ? parseHM(e.timeEnd) : null;
+    if (eMin === null || eMin <= sMin) eMin = sMin + 30;
+    const icList = e.icons || (e.icon ? [{icon:e.icon, label:e.label||''}] : []);
+    const mainIcon = icList[0] ? icList[0].icon : '';
+    const meta = getIconMeta(mainIcon);
+    const bg = getCategoryColor(meta.colorGroupKey);
+    const labelDisp = icList.map(ic => ic.label).join('・');
+    const name = e.place || labelDisp;
+    bands.push({
+      type:'private', start:sMin, end:eMin, bg, fg:'#2b3b28',
+      label:`${renderIconDisp(mainIcon,12)} ${name}`,
+      timeLabel:`${e.timeStart}〜${fmtHM(eMin)}`,
+      subLabel: meta.subLabel || meta.categoryLabel,
+      eventIdx: idx, dateKey
+    });
+  });
+
+  return bands;
+}
+
+// 重なりのある帯をグループ化し、各帯を自身の実時間全体で均等分割する
+function layoutBands(bands) {
+  const sorted = bands.slice().sort((a,b) => a.start - b.start || a.end - b.end);
+  const clusters = [];
+  let cur = [], curMaxEnd = -1;
+  sorted.forEach(b => {
+    if (cur.length === 0 || b.start < curMaxEnd) {
+      cur.push(b);
+      curMaxEnd = Math.max(curMaxEnd, b.end);
+    } else {
+      clusters.push(cur);
+      cur = [b];
+      curMaxEnd = b.end;
+    }
+  });
+  if (cur.length) clusters.push(cur);
+
+  const laidOut = [];
+  clusters.forEach(cluster => {
+    const n = cluster.length;
+    cluster.forEach((b, colIdx) => laidOut.push({ ...b, colIdx, colCount: n }));
+  });
+  return laidOut;
+}
+
+function renderTimelineHtml(dateKey) {
+  const laidOut = layoutBands(buildTimelineBands(dateKey));
+
+  let hourLabelsHtml = '';
+  let gridlinesHtml = '';
+  for (let h = 0; h <= 24; h += 1) {
+    hourLabelsHtml += `<div class="tl-hour-label" style="top:${h*60*TL_PX_PER_MIN}px;">${h}:00</div>`;
+    gridlinesHtml  += `<div class="tl-gridline" style="top:${h*60*TL_PX_PER_MIN}px;"></div>`;
+  }
+
+  const bandsHtml = laidOut.map(b => {
+    const top = b.start * TL_PX_PER_MIN;
+    const height = Math.max((b.end - b.start) * TL_PX_PER_MIN, 16);
+    const width = 100 / b.colCount;
+    const left = b.colIdx * width;
+    const isPrivate = b.type === 'private';
+    const clickAttr = isPrivate ? ` onclick="startEdit('${b.dateKey}',${b.eventIdx})"` : '';
+    const cursorCss = isPrivate ? 'cursor:pointer;' : '';
+    return `<div class="tl-band"${clickAttr} style="top:${top}px;height:${height}px;left:${left}%;width:${width}%;background:${b.bg};color:${b.fg};${cursorCss}">
+      <div class="tl-band-cat">${b.label}</div>
+      ${b.timeLabel ? `<div class="tl-band-time">${b.timeLabel}</div>` : ''}
+      ${b.subLabel ? `<div class="tl-band-sub">${b.subLabel}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  let nowHtml = '';
+  if (dateKey === fmtDate(today)) {
+    const now = new Date();
+    const top = (now.getHours()*60 + now.getMinutes()) * TL_PX_PER_MIN;
+    nowHtml = `<div class="tl-now-line" style="top:${top}px;"></div><div class="tl-now-dot" style="top:${top-4}px;"></div>`;
+  }
+
+  return `<div class="tl-wrap">
+    <div class="tl-body" style="height:${TL_TOTAL_H}px;">
+      <div class="tl-hours" style="height:${TL_TOTAL_H}px;">${hourLabelsHtml}</div>
+      <div class="tl-track" style="height:${TL_TOTAL_H}px;">${gridlinesHtml}${bandsHtml}${nowHtml}</div>
+    </div>
+  </div>`;
+}
+
 function renderDay() {
   const c = document.getElementById('viewContainer');
   const key = selectedDate;
@@ -997,122 +1266,31 @@ function renderDay() {
   const events = rec.events || [];
   const diary  = rec.diary  || null;
 
-  // TIMETABLE連携データ
-  const ttInfo = getTTShiftInfo(key);
-  const ttLife = getTTLife(key);
+  const timelineHtml = renderTimelineHtml(key);
 
-  // 仕事カード
-  let workCardHtml = '';
-  if (ttInfo) {
-    const ttData = loadTTData();
-    const ttRec  = ttData[key] || {};
-    // CODEの番号のみ表示
-    let shiftDisplay = ttInfo.label;
-    if (ttInfo.type === 'work' && ttInfo.label.includes('交番')) {
-      shiftDisplay = ttInfo.label.replace('交番','').trim().padStart(3,'0');
-    } else if (ttInfo.type === 'work' && ttRec.shift === 'compound') {
-      const kobans = ttRec.compoundKobans || [];
-      const modes  = ttRec.compoundKobanModes || {};
-      shiftDisplay = kobans.map(n => modes[n]==='all' ? String(n).padStart(3,'0') : String(n).padStart(3,'0')+'一部').join('＆') || '複合業務';
-    }
-    let timeDisplay  = '';
-    if (ttInfo.start && ttInfo.end) {
-      timeDisplay = `${ttInfo.start} – ${ttInfo.end}`;
-    }
-    let lifeHtml = '';
-    if (ttLife) {
-      const chips = [];
-      if (ttLife.sleep) chips.push(`🌙 就寝 ${ttLife.sleep}`);
-      if (ttLife.wake)  chips.push(`☀️ 起床 ${ttLife.wake}`);
-      if (ttLife.sleep && ttLife.wake) {
-        // 睡眠時間計算
-        const s = ttLife.sleep.split(':').map(Number);
-        const w = ttLife.wake.split(':').map(Number);
-        let sm = s[0]*60+s[1], wm = w[0]*60+w[1];
-        if (wm < sm) wm += 1440;
-        const diff = wm - sm;
-        const h = Math.floor(diff/60), m = diff%60;
-        chips.push(`😴 睡眠 ${h}h${m?m+'m':''}`);
-      }
-      lifeHtml = chips.map(c => `<span class="life-chip">${c}</span>`).join('');
-    }
-    const isPlan = ttInfo.type === 'plan';
-    const cardStyle  = isPlan ? `background:var(--orangebg);border:1.5px solid var(--orangebd);` : '';
-    const headStyle  = isPlan ? `background:#ffe8b0;border-bottom-color:var(--orangebd);color:#a05000;` : '';
-    const badgeStyle = isPlan ? `background:var(--orangebg);color:var(--orange);border:1px solid var(--orangebd);` : '';
-    workCardHtml = `
-    <div class="work-day-card" style="${cardStyle}">
-      <div class="work-day-head" style="${headStyle}">💼 仕事 — TIMETABLE連携</div>
-      <div class="work-day-body">
-        <div class="work-main">
-          <span class="work-badge-lg" style="${badgeStyle}">${shiftDisplay}</span>
-          ${timeDisplay ? `<span class="work-time-lg">${timeDisplay}</span>` : ''}
-        </div>
-        ${lifeHtml ? `<div class="life-chips">${lifeHtml}</div>` : ''}
-      </div>
-    </div>`;
-  }
-
-  // プライベート予定カード
-  let privHtml = '';
-  if (events.length > 0) {
-    const sortedEvents = events
-      .map((e, i) => ({ e, i }))
-      .sort((a, b) => {
-        const ta = a.e.timeStart || '';
-        const tb = b.e.timeStart || '';
-        if (ta && tb) return ta < tb ? -1 : ta > tb ? 1 : 0;
-        if (ta) return -1;
-        if (tb) return 1;
-        return a.i - b.i;
-      });
-    privHtml = sortedEvents.map(({ e, i }) => {
-      // 日跨り表示の組み立て
-      let timeHtml = '';
-      if (e.isMultiDay) {
-        // 開始日の表示
-        const isStartDay = key === e.dateStart;
-        const isEndDay   = key === e.dateEnd;
-        if (isStartDay && isEndDay) {
-          timeHtml = e.timeStart ? `${e.timeStart} – ${e.timeEnd||''}` : '';
-        } else if (isStartDay) {
-          timeHtml = e.timeStart ? `IN ${e.timeStart}` : '開始';
-        } else if (isEndDay) {
-          timeHtml = e.timeEnd ? `OUT ${e.timeEnd}` : '終了';
-        } else {
-          timeHtml = '滞在中';
-        }
-      } else {
-        timeHtml = e.timeStart ? `${e.timeStart}${e.timeEnd?' – '+e.timeEnd:''}` : '';
-      }
-
-      // 日跨りバッジ
-      let multiDayBadge = '';
-      if (e.isMultiDay) {
-        const d1 = new Date(e.dateStart);
-        const d2 = new Date(e.dateEnd);
-        const nights = Math.round((d2-d1)/(1000*60*60*24));
-        multiDayBadge = `<span style="font-size:10px;font-weight:700;background:#e8faf2;color:var(--green2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;margin-left:4px;">${nights}泊</span>`;
-      }
-
-      // アイコン表示（複数対応）
+  // 時刻未設定の予定（タイムラインとは別リストで、日記カードの上に表示）
+  const unscheduled = events.map((e,i)=>({e,i})).filter(({e}) => !e.timeStart);
+  let unschedHtml = '';
+  if (unscheduled.length > 0) {
+    const chips = unscheduled.map(({e,i}) => {
       const icList = e.icons || (e.icon ? [{icon:e.icon, label:e.label||''}] : []);
-      const iconDisp = icList.map(ic => renderIconDisp(ic.icon, 20)).join('');
+      const mainIcon = icList[0] ? icList[0].icon : '';
+      const meta = getIconMeta(mainIcon);
       const labelDisp = icList.map(ic => ic.label).join('・');
-
-      return `<div class="priv-item">
-        <div class="priv-item-icon">${iconDisp}</div>
-        <div class="priv-item-info">
-          <div class="priv-item-name">${e.place || labelDisp}${multiDayBadge}</div>
-          ${e.memo ? `<div class="priv-item-memo">${e.memo}</div>` : ''}
+      const name = e.place || labelDisp;
+      const catName = meta.subLabel || meta.categoryLabel;
+      return `<div class="tl-unscheduled-chip" onclick="startEdit('${key}',${i})">
+        <span>${renderIconDisp(mainIcon,16)}</span>
+        <div>
+          <div class="tl-unscheduled-name">${name}</div>
+          ${catName ? `<div class="tl-unscheduled-cat">${catName}</div>` : ''}
         </div>
-        ${timeHtml ? `<div class="priv-item-time">${timeHtml}</div>` : ''}
-        <button class="priv-item-edit" onclick="startEdit('${key}',${i})" title="編集">✏️</button>
-        <button class="priv-item-del" onclick="deleteEvent('${key}',${i})">✕</button>
       </div>`;
     }).join('');
-  } else {
-    privHtml = `<div class="empty-state"><div class="empty-icon">📅</div>予定がありません<br><span style="font-size:12px;">＋ボタンから追加できます</span></div>`;
+    unschedHtml = `<div class="tl-unscheduled">
+      <div class="tl-unscheduled-label">時刻未設定</div>
+      <div class="tl-unscheduled-list">${chips}</div>
+    </div>`;
   }
 
   // 日記カード
@@ -1129,16 +1307,8 @@ function renderDay() {
   }
 
   c.innerHTML = `<div class="day-view">
-    ${workCardHtml}
-
-    <div class="day-card">
-      <div class="day-card-head">
-        <span class="day-card-title">📅 プライベート</span>
-        <button class="small-btn" onclick="inputDate='${key}';formState={icons:[],place:'',dateStart:'',dateEnd:'',timeStart:'',timeEnd:'',memo:''};inputStep='icons';switchView('input')">＋ 追加</button>
-      </div>
-      <div class="day-card-body">${privHtml}</div>
-    </div>
-
+    ${timelineHtml}
+    ${unschedHtml}
     <div class="diary-day-card">
       <div class="diary-day-head">
         <span>📓 今日の記録</span>
@@ -1146,6 +1316,14 @@ function renderDay() {
       <div class="diary-day-body">${diaryHtml}</div>
     </div>
   </div>`;
+
+  // 現在時刻付近まで自動スクロール
+  if (key === fmtDate(today)) {
+    requestAnimationFrame(() => {
+      const nowLine = c.querySelector('.tl-now-line');
+      if (nowLine) nowLine.scrollIntoView({ block:'center', behavior:'instant' });
+    });
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1169,13 +1347,25 @@ function renderInput() {
     </button>`;
   }
 
-  // カテゴリHTML
+  // カテゴリHTML（メンテナンスはサブカテゴリー単位で表示）
   let catHtml = '';
   ICON_CATEGORIES.forEach(cat => {
-    catHtml += `<div class="cat-section">
-      <div class="cat-title">${cat.label}</div>
-      <div class="icon-grid">${cat.icons.map(iconBtnHtml).join('')}</div>
-    </div>`;
+    if (cat.subcategories) {
+      let subHtml = cat.subcategories.map(sub => `
+        <div class="cat-subsection">
+          <div class="cat-subtitle">${sub.label}</div>
+          <div class="icon-grid">${sub.icons.map(iconBtnHtml).join('')}</div>
+        </div>`).join('');
+      catHtml += `<div class="cat-section">
+        <div class="cat-title">${cat.label}</div>
+        ${subHtml}
+      </div>`;
+    } else {
+      catHtml += `<div class="cat-section">
+        <div class="cat-title">${cat.label}</div>
+        <div class="icon-grid">${cat.icons.map(iconBtnHtml).join('')}</div>
+      </div>`;
+    }
   });
 
   // 選択中チップ
@@ -1257,7 +1447,10 @@ function renderInput() {
             <div class="field-label">✍️ メモ（任意）</div>
             <textarea class="memo-inp" placeholder="メモを入力…" onchange="formState.memo=this.value">${fs.memo}</textarea>
           </div>
-          <button class="reg-btn" onclick="registerEvent()">${editMode ? '✏️ 更新する' : '✅ 登録する'}</button>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            ${editMode ? `<button onclick="if(confirm('この予定を削除しますか？')){deleteEvent('${editDateKey}',${editEventIdx});switchView('day');}" style="flex:1;padding:11px;background:var(--surface);border:1.5px solid var(--red);border-radius:10px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--sans);">🗑 削除</button>` : ''}
+            <button class="reg-btn" style="flex:2;margin-top:0;" onclick="registerEvent()">${editMode ? '✏️ 更新する' : '✅ 登録する'}</button>
+          </div>
           ${editMode ? `<button onclick="cancelEdit()" style="width:100%;margin-top:8px;padding:11px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--sans);">キャンセル</button>` : ''}
         </div>
       </div>
@@ -1478,8 +1671,10 @@ function renderDiary() {
   const diary = rec.diary || { icons:[], text:'' };
   diaryState = { icons:[...(diary.icons||[])], text: diary.text||'' };
 
-  // 全アイコンを1つのグリッドに
-  const allIcons = ICON_CATEGORIES.flatMap(cat => cat.icons);
+  // 全アイコンを1つのグリッドに（メンテナンスはサブカテゴリーを展開）
+  const allIcons = ICON_CATEGORIES.flatMap(cat => cat.subcategories
+    ? cat.subcategories.flatMap(sub => sub.icons)
+    : cat.icons);
   const iconBtns = allIcons.map(ic => {
     const isSel = diaryState.icons.some(di => di.icon === ic.icon && di.label === ic.label);
     return `<button class="diary-icon-btn${isSel?' sel':''}" onclick="toggleDiaryIcon('${ic.icon}','${ic.label}')">
@@ -1637,6 +1832,14 @@ function renderKino() {
         </div>
         <span style="font-size:18px;color:var(--green2);">›</span>
       </div>
+      <div onclick="colorSettingsEditMode=false;switchView('colorsettings')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:var(--shadow);">
+        <span style="font-size:36px;">🎨</span>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:var(--text);">カテゴリー色設定</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">タイムラインの予定の色を編集</div>
+        </div>
+        <span style="font-size:18px;color:var(--green2);">›</span>
+      </div>
       <div style="background:var(--surface);border:1.5px dashed var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;opacity:0.45;">
         <span style="font-size:36px;">➕</span>
         <div>
@@ -1646,6 +1849,73 @@ function renderKino() {
       </div>
     </div>
   </div>`;
+}
+
+// ══════════════════════════════════════════
+// カテゴリー色設定 VIEW
+// ══════════════════════════════════════════
+let colorPaletteOpenKey = null;
+
+function renderColorSettings() {
+  const c = document.getElementById('viewContainer');
+  const usedColors = new Set(Object.values(categoryColors));
+
+  const rows = COLOR_GROUPS.map(g => {
+    const cur = categoryColors[g.key];
+    const locked = !!cur && !colorSettingsEditMode;
+    const swatchHtml = cur
+      ? `<div style="width:34px;height:34px;border-radius:8px;background:${cur};border:1px solid var(--border);"></div>`
+      : `<div style="width:34px;height:34px;border-radius:8px;background:var(--surface2);border:1.5px dashed var(--border);"></div>`;
+
+    let paletteHtml = '';
+    if (colorPaletteOpenKey === g.key) {
+      const swatches = CATEGORY_COLOR_PALETTE.map(col => {
+        const takenByOther = usedColors.has(col) && cur !== col;
+        return `<div onclick="${takenByOther ? '' : `pickCategoryColor('${g.key}','${col}')`}"
+          style="position:relative;width:26px;height:26px;border-radius:6px;background:${col};
+          border:${cur===col?'2px solid var(--green2)':'1px solid var(--border)'};
+          cursor:${takenByOther?'not-allowed':'pointer'};opacity:${takenByOther?'0.35':'1'};">
+          ${takenByOther ? `<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#a01010;font-weight:900;">×</span>` : ''}
+        </div>`;
+      }).join('');
+      paletteHtml = `<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:10px;padding:10px;background:var(--surface2);border-radius:10px;">${swatches}</div>`;
+    }
+
+    return `<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        ${swatchHtml}
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);">${g.shortLabel}</div>
+        </div>
+        <button class="small-btn" ${locked?'disabled style="opacity:.4;cursor:not-allowed;"':''}
+          onclick="colorPaletteOpenKey = (colorPaletteOpenKey==='${g.key}') ? null : '${g.key}'; renderColorSettings();">
+          ${cur ? '変更' : '選択'}
+        </button>
+      </div>
+      ${paletteHtml}
+    </div>`;
+  }).join('');
+
+  c.innerHTML = `<div style="padding:16px;max-width:620px;margin:0 auto 80px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <button class="small-btn" onclick="switchView('kino')">← 戻る</button>
+      <button class="small-btn ${colorSettingsEditMode?'':'amber'}" onclick="colorSettingsEditMode=!colorSettingsEditMode;colorPaletteOpenKey=null;renderColorSettings();">
+        ${colorSettingsEditMode ? '🔓 編集モード：ON' : '🔒 編集モード：OFF'}
+      </button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+      一度確定した色は「編集モード」をONにしないと変更できません。他のカテゴリーで使用中の色は選択できません（×表示）。
+    </div>
+    ${rows}
+  </div>`;
+}
+
+function pickCategoryColor(key, color) {
+  categoryColors[key] = color;
+  saveCategoryColors(categoryColors);
+  colorPaletteOpenKey = null;
+  showToast('色を設定しました ✓');
+  renderColorSettings();
 }
 
 // ══════════════════════════════════════════
@@ -2001,7 +2271,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">🗂️ タブ構成・使い方</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>📅 月：</b>月間カレンダー。各日の予定・シフトを表示。タップで日ビューへ遷移<br>
-        <b>📋 日：</b>選択日の詳細。予定・仕事・日記の確認と編集<br>
+        <b>📋 日：</b>0:00〜24:00のタイムライン表示。仕事・睡眠・勤務間時間・支度・予定を帯で表示し、重なりは自動分割。タップで編集<br>
         <b>⚙️ 機能：</b>お薬手帳など追加機能の一覧<br>
         <b>EDITH（本画面）：</b>アプリ仕様書・EDITHルール確認
       </div>
