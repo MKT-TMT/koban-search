@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<title>IRODORI MK-28</title>
+<title>IRODORI MK-29</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -224,11 +224,12 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .tl-gridline { position:absolute; left:0; right:0; border-top:1px solid #eef7ee; }
 .tl-band {
   position:absolute; border-radius:7px; box-sizing:border-box; overflow:hidden;
-  padding:4px 7px; margin:0 2px;
+  padding:4px 8px; margin:0 2px;
+  display:flex; flex-direction:column; justify-content:center;
 }
-.tl-band-cat  { font-size:11px; font-weight:800; line-height:1.25; }
-.tl-band-time { font-family:var(--mono); font-size:10px; font-weight:600; line-height:1.3; opacity:0.9; }
-.tl-band-sub  { font-size:9px; opacity:0.75; margin-top:1px; }
+.tl-band-cat  { font-size:13px; font-weight:800; line-height:1.28; }
+.tl-band-time { font-family:var(--mono); font-size:12px; font-weight:700; line-height:1.3; opacity:0.92; margin-top:2px; }
+.tl-band-sub  { font-size:10px; opacity:0.75; margin-top:2px; }
 .tl-now-line  { position:absolute; left:-4px; right:0; height:0; border-top:2px solid var(--red); z-index:5; }
 .tl-now-dot   { position:absolute; left:-6px; width:8px; height:8px; border-radius:50%; background:var(--red); z-index:6; }
 .tl-fab-row { display:flex; align-items:center; justify-content:space-between; padding:0 2px 8px; }
@@ -515,7 +516,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-28</div>
+    <div class="auth-logo">IRODORI MK-29</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -530,7 +531,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-28 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-29 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -710,13 +711,9 @@ const TT_NEW_SHIFT_TABLE = {
 "201交番":{"start":"12:43","end":"23:57"},"202交番":{"start":"11:43","end":"23:47"},"203交番":{"start":"13:40","end":"23:18"},"204交番":{"start":"12:50","end":"22:43"},"205交番":{"start":"10:40","end":"21:43"},"206交番":{"start":"07:04","end":"20:11"},"207交番":{"start":"07:16","end":"19:51"},"208交番":{"start":"06:11","end":"19:09"},"209交番":{"start":"05:44","end":"19:00"},"210交番":{"start":"05:37","end":"17:07"},"211交番":{"start":"11:33","end":"22:48"},"212交番":{"start":"09:44","end":"22:05"},"213交番":{"start":"09:50","end":"21:55"},"214交番":{"start":"08:36","end":"21:28"},"215交番":{"start":"06:39","end":"17:15"},"216交番":{"start":"07:33","end":"20:58"},"218交番":{"start":"05:51","end":"17:25"},"219交番":{"start":"05:44","end":"14:28"},"220交番":{"start":"05:41","end":"13:09"},"221交番":{"start":"08:00","end":"20:30"},"222交番":{"start":"06:43","end":"20:57"},"223交番":{"start":"08:40","end":"19:02"},"224交番":{"start":"05:46","end":"19:07"},"225交番":{"start":"05:31","end":"14:40"},"226交番":{"start":"06:23","end":"19:26"},"227交番":{"start":"06:19","end":"20:19"},"228交番":{"start":"05:58","end":"18:31"},"229交番":{"start":"05:50","end":"14:02"},"231交番":{"start":"11:51","end":"22:08"},"232交番":{"start":"11:56","end":"23:45"},"233交番":{"start":"13:50","end":"23:32"},"234交番":{"start":"13:01","end":"22:54"},"235交番":{"start":"10:03","end":"22:24"},"236交番":{"start":"08:09","end":"21:28"},"237交番":{"start":"06:37","end":"20:16"},"238交番":{"start":"06:54","end":"20:23"},"239交番":{"start":"06:50","end":"19:19"},"240交番":{"start":"05:50","end":"17:55"},"241交番":{"start":"11:01","end":"22:56"},"242交番":{"start":"09:43","end":"21:33"},"249交番":{"start":"05:43","end":"14:18"},
 "401交番":{"start":"12:43","end":"23:57"},"402交番":{"start":"11:43","end":"23:47"},"403交番":{"start":"13:40","end":"23:18"},"404交番":{"start":"12:50","end":"22:43"},"405交番":{"start":"10:40","end":"21:43"},"406交番":{"start":"07:04","end":"20:11"},"407交番":{"start":"07:16","end":"19:51"},"408交番":{"start":"06:11","end":"19:09"},"409交番":{"start":"05:44","end":"19:00"},"410交番":{"start":"05:37","end":"17:07"},"411交番":{"start":"11:33","end":"22:48"},"412交番":{"start":"09:44","end":"22:05"},"413交番":{"start":"09:50","end":"21:55"},"414交番":{"start":"08:36","end":"21:28"},"415交番":{"start":"06:39","end":"17:15"},"416交番":{"start":"07:33","end":"20:58"},"418交番":{"start":"05:51","end":"17:31"},"419交番":{"start":"05:44","end":"14:28"},"420交番":{"start":"05:41","end":"13:09"},"421交番":{"start":"06:38","end":"20:30"},"422交番":{"start":"06:43","end":"20:57"},"423交番":{"start":"08:46","end":"19:02"},"424交番":{"start":"05:46","end":"19:07"},"425交番":{"start":"05:31","end":"14:40"},"426交番":{"start":"06:23","end":"19:26"},"427交番":{"start":"06:19","end":"20:19"},"428交番":{"start":"05:58","end":"18:31"},"429交番":{"start":"05:50","end":"14:02"},"431交番":{"start":"11:51","end":"22:08"},"432交番":{"start":"11:56","end":"23:45"},"433交番":{"start":"13:50","end":"23:32"},"434交番":{"start":"13:01","end":"22:54"},"435交番":{"start":"10:03","end":"22:24"},"436交番":{"start":"08:09","end":"21:28"},"437交番":{"start":"06:37","end":"20:16"},"438交番":{"start":"06:54","end":"20:23"},"439交番":{"start":"06:50","end":"19:19"},"440交番":{"start":"05:50","end":"17:55"},"441交番":{"start":"11:01","end":"22:56"},"442交番":{"start":"09:43","end":"21:33"},"443交番":{"start":"08:09","end":"20:59"},"449交番":{"start":"05:43","end":"14:18"}
 };
-const TT_NEW_KOBAN_KEY = 'mkx_new_koban_v1';
+// TIME TABLE側は新旧切り替えを廃止し常に新テーブルを使用する仕様に変更済みのため、IRODORI側も合わせる
 function getTTEffectiveShiftTable(dateKey) {
-  try {
-    const cfg = JSON.parse(localStorage.getItem(TT_NEW_KOBAN_KEY) || 'null');
-    if (cfg && cfg.effectiveDate && dateKey >= cfg.effectiveDate) return TT_NEW_SHIFT_TABLE;
-  } catch(e) {}
-  return TT_SHIFT_TABLE;
+  return TT_NEW_SHIFT_TABLE;
 }
 
 function loadData() {
@@ -784,23 +781,52 @@ function getTTShiftInfo(dateKey) {
     return { label: rec.customLabel||'カスタム', start:rec.customStart, end:rec.customEnd, type:'work' };
   }
   if (rec.shift === 'compound') {
+    const tbl = getTTEffectiveShiftTable(dateKey);
+    // workItems（TIME TABLE側の新データ構造）があれば優先
+    const workItems = rec.workItems || [];
+    if (workItems.length > 0) {
+      const wiParts = [...workItems].sort((a,b) => (a.startTime||'99:99').localeCompare(b.startTime||'99:99'));
+      const wiLabel = wiParts.map(item => {
+        if (item.type === 'all') return item.code || '';
+        if (item.type === 'part') return (item.code || '') + '交番の一部';
+        return item.label || '';
+      }).join('＆');
+      const wiTimes = workItems.map(i => [i.startTime, i.endTime]).flat().filter(Boolean);
+      const wiStart = rec.multiWorkStart || (wiTimes.length ? wiTimes.reduce((a,b) => a < b ? a : b) : null);
+      const wiEnd   = rec.multiWorkEnd   || (wiTimes.length ? wiTimes.reduce((a,b) => a > b ? a : b) : null);
+      return { label: wiLabel || '複合業務', start: wiStart, end: wiEnd, type:'work' };
+    }
+    // 旧データ構造（compoundKobans / taskContents / compoundPartialData）
     const kobans = rec.compoundKobans || [];
     const tasks  = rec.taskContents  || [];
     const modes  = rec.compoundKobanModes || {};
-    const tbl = getTTEffectiveShiftTable(dateKey);
-    let allTimes = [];
+    const partialData = rec.compoundPartialData || {};
+    let allTimes = tasks.map(t => t.start).concat(tasks.map(t => t.end)).filter(Boolean);
+    const parts = [];
     kobans.forEach(n => {
+      let startTime = null;
       if (modes[n] === 'all') {
         const s = tbl[String(n).padStart(3,'0') + '交番'];
-        if (s) { allTimes.push(s.start); allTimes.push(s.end); }
+        if (s) { allTimes.push(s.start); allTimes.push(s.end); startTime = s.start; }
+      } else {
+        const pd = partialData[n] || {};
+        if (pd.start) allTimes.push(pd.start);
+        if (pd.end) allTimes.push(pd.end);
+        startTime = pd.start || null;
       }
+      const label = modes[n]==='all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`;
+      parts.push({ label, startTime });
     });
-    tasks.forEach(t => { if(t.start) allTimes.push(t.start); if(t.end) allTimes.push(t.end); });
+    tasks.forEach(t => parts.push({ label: t.name || '', startTime: t.start || null }));
+    parts.sort((a,b) => {
+      if (!a.startTime && !b.startTime) return 0;
+      if (!a.startTime) return 1;
+      if (!b.startTime) return -1;
+      return a.startTime.localeCompare(b.startTime);
+    });
     const start = rec.compoundManualStart || (allTimes.length ? allTimes.reduce((a,b) => a < b ? a : b) : null);
     const end   = rec.compoundManualEnd   || (allTimes.length ? allTimes.reduce((a,b) => a > b ? a : b) : null);
-    const kobanLabels = kobans.map(n => modes[n]==='all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`);
-    const taskLabels  = tasks.map(t => t.name);
-    const label = [...kobanLabels,...taskLabels].join('＆') || '複合業務';
+    const label = parts.length ? parts.map(p => p.label).join('＆') : (rec.compoundLabel || '複合業務');
     return { label, start, end, type:'work' };
   }
   // 通常交番：シフトテーブルから時間を取得
@@ -1109,6 +1135,11 @@ function fmtHM(min) {
   const h = Math.floor(min/60), m = min % 60;
   return `${h}:${String(m).padStart(2,'0')}`;
 }
+function fmtDurationHM(min) {
+  min = Math.max(0, Math.round(min));
+  const h = Math.floor(min/60), m = min % 60;
+  return m === 0 ? `${h}時間` : `${h}時間${m}分`;
+}
 
 const TL_PX_PER_MIN = 32/60; // 1時間=32px
 const TL_TOTAL_H = Math.round(1440 * TL_PX_PER_MIN);
@@ -1124,26 +1155,37 @@ function buildTimelineBands(dateKey) {
   const tomorrowInfo = getTTShiftInfo(fmtDate(tmrw));
 
   // 😴 睡眠：0:00〜起床（その日の起床に対応する前夜の就寝から続く分）
+  // ラベルにはTIME TABLE側の実際の就寝時刻（当日データのsleep）を表示する
   const wakeMin = ttLife ? parseHM(ttLife.wake) : null;
   if (wakeMin !== null) {
+    const sleepStr = ttLife && ttLife.sleep ? ttLife.sleep : null;
+    const sleepMin = sleepStr !== null ? parseHM(sleepStr) : null;
+    const sleepStartLabel = sleepStr !== null ? sleepStr : '0:00';
+    const sleepDurMin = sleepMin !== null ? ((wakeMin - sleepMin + 1440) % 1440) : wakeMin;
     bands.push({ type:'sleep', start:0, end:wakeMin, bg:'#DFF3AE', fg:'#3B6D11',
-      label:'😴 睡眠', timeLabel:`0:00〜${fmtHM(wakeMin)}` });
+      label:'😴 睡眠', timeLabel:`${sleepStartLabel}〜${fmtHM(wakeMin)}`, durLabel: fmtDurationHM(sleepDurMin) });
   }
 
-  // 🕐 勤務間時間：0:00〜当日の仕事開始
+  // 🕐 勤務間時間（朝）：前日の仕事終了〜当日の仕事開始
+  // 前日が仕事でない（終了時刻が無い）場合はこの帯自体を表示しない
   const isWork = ttInfo && ttInfo.type === 'work';
   const workStartMin = isWork ? parseHM(ttInfo.start) : null;
   const workEndMinRaw = isWork ? parseHM(ttInfo.end) : null;
-  if (workStartMin !== null) {
+  const yesterday = new Date(dObj); yesterday.setDate(yesterday.getDate()-1);
+  const yesterdayInfo = getTTShiftInfo(fmtDate(yesterday));
+  const prevWorkEndStr = (yesterdayInfo && yesterdayInfo.type === 'work' && yesterdayInfo.end) ? yesterdayInfo.end : null;
+  if (workStartMin !== null && prevWorkEndStr !== null) {
+    const prevWorkEndMin = parseHM(prevWorkEndStr);
+    const gapDurMin = prevWorkEndMin !== null ? ((workStartMin - prevWorkEndMin + 1440) % 1440) : workStartMin;
     bands.push({ type:'workgap', start:0, end:workStartMin, bg:'#FBDBDB', fg:'#A32D2D',
-      label:'🕐 勤務間', timeLabel:`0:00〜${fmtHM(workStartMin)}` });
+      label:'🕐 勤務間', timeLabel:`${prevWorkEndStr}〜${fmtHM(workStartMin)}`, durLabel: fmtDurationHM(gapDurMin) });
   }
   // 🕐 勤務間時間（夜）：当日の仕事終了〜24:00（翌日も仕事の場合のみ表示）
   let workEndMin = workEndMinRaw;
   if (workEndMin !== null && workStartMin !== null && workEndMin <= workStartMin) workEndMin += 0; // 日跨りは今日分のみ表示
   if (workEndMin !== null && workEndMin < 1440 && tomorrowInfo && tomorrowInfo.type === 'work') {
     bands.push({ type:'workgap', start:workEndMin, end:1440, bg:'#FBDBDB', fg:'#A32D2D',
-      label:'🕐 勤務間', timeLabel:`${fmtHM(workEndMin)}〜24:00` });
+      label:'🕐 勤務間', timeLabel:`${fmtHM(workEndMin)}〜24:00`, durLabel: fmtDurationHM(1440 - workEndMin) });
   }
 
   // 🌅 支度帯：起床〜会社到着
@@ -1160,11 +1202,12 @@ function buildTimelineBands(dateKey) {
       label: parts.join(' → '), timeLabel:'' });
   }
 
-  // 🚌 仕事
+  // 🚌 仕事：実際の交番・業務内容を表示（複合業務は＆でつないだ内容がそのまま入る）
   if (workStartMin !== null && workEndMinRaw !== null) {
     const endClamped = workEndMinRaw > workStartMin ? workEndMinRaw : 1440;
+    const workContent = (ttInfo && ttInfo.label) ? ttInfo.label : '仕事';
     bands.push({ type:'work', start:workStartMin, end:endClamped, bg:'#DCEBFB', fg:'#0C447C',
-      label:'🚌 仕事', timeLabel:`${fmtHM(workStartMin)}〜${fmtHM(endClamped)}` });
+      label:`🚌 ${workContent}`, timeLabel:`${fmtHM(workStartMin)}〜${fmtHM(endClamped)}` });
   }
 
   // プライベート予定（時刻設定ありのもののみ。未設定は別リストで表示）
@@ -1219,6 +1262,19 @@ function layoutBands(bands) {
   return laidOut;
 }
 
+// 帯の高さ・列数（幅）から、収まる範囲でできるだけ大きい文字サイズを決める
+function bandFontStyle(heightPx, colCount) {
+  const narrow = colCount > 1;
+  let cat, time;
+  if (heightPx >= 200)      { cat = 20; time = 18; }
+  else if (heightPx >= 120) { cat = 17; time = 16; }
+  else if (heightPx >= 70)  { cat = 15; time = 14; }
+  else if (heightPx >= 45)  { cat = 13; time = 13; }
+  else                      { cat = 12; time = 12; }
+  if (narrow) { cat = Math.max(11, cat - 2); time = Math.max(11, time - 2); }
+  return { cat, time, compact: heightPx < 45 };
+}
+
 function renderTimelineHtml(dateKey) {
   const laidOut = layoutBands(buildTimelineBands(dateKey));
 
@@ -1237,11 +1293,19 @@ function renderTimelineHtml(dateKey) {
     const isPrivate = b.type === 'private';
     const clickAttr = isPrivate ? ` onclick="startEdit('${b.dateKey}',${b.eventIdx})"` : '';
     const cursorCss = isPrivate ? 'cursor:pointer;' : '';
-    return `<div class="tl-band"${clickAttr} style="top:${top}px;height:${height}px;left:${left}%;width:${width}%;background:${b.bg};color:${b.fg};${cursorCss}">
-      <div class="tl-band-cat">${b.label}</div>
-      ${b.timeLabel ? `<div class="tl-band-time">${b.timeLabel}</div>` : ''}
-      ${b.subLabel ? `<div class="tl-band-sub">${b.subLabel}</div>` : ''}
-    </div>`;
+
+    const fs = bandFontStyle(height, b.colCount);
+    const timeAndDur = b.timeLabel ? (b.durLabel ? `${b.timeLabel}　${b.durLabel}` : b.timeLabel) : '';
+    let innerHtml;
+    if (fs.compact) {
+      const oneLine = [b.label, timeAndDur].filter(Boolean).join(' ');
+      innerHtml = `<div class="tl-band-cat" style="font-size:${fs.cat}px;white-space:nowrap;">${oneLine}</div>`;
+    } else {
+      innerHtml = `<div class="tl-band-cat" style="font-size:${fs.cat}px;">${b.label}</div>`
+        + (timeAndDur ? `<div class="tl-band-time" style="font-size:${fs.time}px;">${timeAndDur}</div>` : '')
+        + (b.subLabel ? `<div class="tl-band-sub">${b.subLabel}</div>` : '');
+    }
+    return `<div class="tl-band"${clickAttr} style="top:${top}px;height:${height}px;left:${left}%;width:${width}%;background:${b.bg};color:${b.fg};${cursorCss}">${innerHtml}</div>`;
   }).join('');
 
   let nowHtml = '';
