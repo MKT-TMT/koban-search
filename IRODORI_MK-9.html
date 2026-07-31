@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<title>IRODORI MK-29</title>
+<title>IRODORI MK-30</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -516,7 +516,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-29</div>
+    <div class="auth-logo">IRODORI MK-30</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -531,7 +531,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-29 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-30 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1140,6 +1140,10 @@ function fmtDurationHM(min) {
   const h = Math.floor(min/60), m = min % 60;
   return m === 0 ? `${h}時間` : `${h}時間${m}分`;
 }
+function fmtMonthDay(dateKey) {
+  const d = parseDate(dateKey);
+  return `${d.getMonth()+1}月${d.getDate()}日`;
+}
 
 const TL_PX_PER_MIN = 32/60; // 1時間=32px
 const TL_TOTAL_H = Math.round(1440 * TL_PX_PER_MIN);
@@ -1215,10 +1219,32 @@ function buildTimelineBands(dateKey) {
   const events = rec.events || [];
   events.forEach((e, idx) => {
     if (!e.timeStart) return;
-    const sMin = parseHM(e.timeStart);
-    if (sMin === null) return;
-    let eMin = e.timeEnd ? parseHM(e.timeEnd) : null;
-    if (eMin === null || eMin <= sMin) eMin = sMin + 30;
+    const sMinRaw = parseHM(e.timeStart);
+    if (sMinRaw === null) return;
+    const eMinRaw = e.timeEnd ? parseHM(e.timeEnd) : null;
+
+    const dStart = e.dateStart || dateKey;
+    const dEnd   = e.dateEnd   || dStart;
+    const isMultiDay  = dStart !== dEnd;
+    const isFirstDay  = dateKey === dStart;
+    const isLastDay   = dateKey === dEnd;
+
+    let sMin, eMin;
+    if (isMultiDay) {
+      // 複数日予定は時刻の大小に関係なく、初日=開始〜24:00／最終日=0:00〜終了／中日=終日 で分割する
+      if (isFirstDay)      { sMin = sMinRaw; eMin = 1440; }
+      else if (isLastDay)  { sMin = 0;       eMin = (eMinRaw !== null ? eMinRaw : 1440); }
+      else                 { sMin = 0;       eMin = 1440; }
+    } else {
+      sMin = sMinRaw;
+      eMin = (eMinRaw === null || eMinRaw <= sMinRaw) ? sMinRaw + 30 : eMinRaw;
+    }
+
+    // 複数日にわたる予定は、開始日・終了日を含めたラベルを全ての該当日に表示する
+    const timeLabel = isMultiDay
+      ? `${fmtMonthDay(dStart)}${e.timeStart}〜${fmtMonthDay(dEnd)}${eMinRaw !== null ? fmtHM(eMinRaw) : fmtHM(eMin)}`
+      : `${fmtHM(sMin)}〜${fmtHM(eMin)}`;
+
     const icList = e.icons || (e.icon ? [{icon:e.icon, label:e.label||''}] : []);
     const mainIcon = icList[0] ? icList[0].icon : '';
     const meta = getIconMeta(mainIcon);
@@ -1228,7 +1254,7 @@ function buildTimelineBands(dateKey) {
     bands.push({
       type:'private', start:sMin, end:eMin, bg, fg:'#2b3b28',
       label:`${renderIconDisp(mainIcon,12)} ${name}`,
-      timeLabel:`${e.timeStart}〜${fmtHM(eMin)}`,
+      timeLabel,
       subLabel: meta.subLabel || meta.categoryLabel,
       eventIdx: idx, dateKey
     });
