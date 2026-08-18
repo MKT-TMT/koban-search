@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MY ITEM MK-3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:      #eef8fc;
+  --surface: #ffffff;
+  --surface2:#e0f4fb;
+  --border:  #a9def0;
+  --border2: #29b6e8;
+  --blue:    #29b6e8;
+  --blue2:   #0f96c8;
+  --blue3:   #075a78;
+  --muted:   #5a93a8;
+  --mutedlite:#8bb8c8;
+  --text:    #0a2e3a;
+  --amber:   #f59e0b;
+  --amberbg: #fffbeb;
+  --amberbd: #fcd34d;
+  --ambertx: #92400e;
+  --red:     #e03535;
+  --shadow:  0 2px 10px rgba(41,182,232,.12);
+  --mono: 'DM Mono', monospace;
+  --sans: 'Noto Sans JP', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:30px; }
+
+/* ══ AUTH ══ */
+.auth-overlay {
+  position:fixed; inset:0; background:var(--bg); z-index:999;
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+}
+.auth-overlay.hidden { display:none; }
+.auth-box { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:32px 28px; width:min(320px,86vw); box-shadow:var(--shadow); text-align:center; }
+.auth-logo { font-family:var(--mono); font-size:20px; letter-spacing:3px; color:var(--blue2); font-weight:600; margin-bottom:4px; }
+.auth-sub { font-size:11px; color:var(--muted); margin-bottom:20px; letter-spacing:1px; }
+.auth-box input { width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--border); font-size:16px; text-align:center; font-family:var(--mono); letter-spacing:4px; outline:none; }
+.auth-box input:focus { border-color:var(--blue2); }
+.auth-remember { display:flex; align-items:center; justify-content:center; gap:6px; margin:14px 0; font-size:12px; color:var(--muted); }
+.auth-btn { width:100%; padding:12px; border-radius:10px; border:none; background:var(--blue); color:#fff; font-weight:700; font-size:14px; cursor:pointer; font-family:var(--sans); }
+.auth-btn:hover { background:var(--blue2); }
+.auth-error { color:var(--red); font-size:12px; margin-top:10px; min-height:14px; }
+
+/* ══ HEADER ══ */
+.header {
+  position:sticky; top:0; z-index:200;
+  background:rgba(255,255,255,0.94); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:0 14px; display:flex; align-items:center; justify-content:space-between;
+  height:54px; gap:10px; box-shadow:0 2px 12px rgba(41,182,232,.10);
+}
+.header-left { display:flex; align-items:center; gap:8px; }
+.back-btn { background:none; border:none; font-size:18px; color:var(--blue2); cursor:pointer; padding:2px 4px; }
+.logo { font-family:var(--mono); font-size:15px; letter-spacing:2px; color:var(--blue2); font-weight:600; }
+.sync-badge { display:flex; align-items:center; gap:5px; font-size:10px; color:var(--muted); flex-shrink:0; }
+.sync-dot { width:7px; height:7px; border-radius:50%; background:var(--blue); }
+
+.content { padding:12px 14px 90px; }
+
+/* ══ REMINDER ══ */
+.reminder-box {
+  background:var(--amberbg); border:1.5px solid var(--amberbd); border-radius:14px;
+  padding:10px 12px; margin-bottom:12px;
+}
+.reminder-title { font-size:11px; font-weight:700; color:var(--ambertx); margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+.reminder-row { display:flex; align-items:center; gap:6px; padding:4px 0; cursor:pointer; }
+.reminder-name { font-size:11px; color:var(--text); flex:1; }
+.reminder-days { font-size:10px; color:var(--ambertx); font-weight:600; }
+
+/* ══ SEARCH ══ */
+.search-input {
+  width:100%; height:36px; border-radius:10px; border:1.5px solid var(--border);
+  padding:0 12px; font-size:13px; font-family:var(--sans); outline:none; background:var(--surface);
+  margin-bottom:12px;
+}
+.search-input:focus { border-color:var(--blue2); }
+
+/* ══ CATEGORY TILES ══ */
+.section-label { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:8px; letter-spacing:0.4px; }
+.cat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.cat-tile {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:14px 12px;
+  display:flex; align-items:center; gap:10px; cursor:pointer; box-shadow:var(--shadow);
+}
+.cat-tile:hover { border-color:var(--blue2); }
+.cat-tile-icon { font-size:22px; color:var(--blue2); flex-shrink:0; }
+.cat-tile-name { font-size:12px; font-weight:600; color:var(--text); }
+.cat-tile-count { font-size:10px; color:var(--mutedlite); }
+.cat-tile-add {
+  border:1.5px dashed var(--border); background:var(--surface); color:var(--blue2);
+  justify-content:center; gap:6px; font-size:12px; font-weight:600;
+}
+
+/* ══ VIEW TOGGLE ══ */
+.view-toggle-row { display:flex; justify-content:flex-end; margin-bottom:8px; }
+.view-toggle { display:flex; gap:2px; background:var(--surface2); border-radius:10px; padding:3px; border:1px solid var(--border); }
+.view-btn { border:none; background:transparent; padding:5px 9px; border-radius:7px; cursor:pointer; font-size:12px; color:var(--muted); }
+.view-btn.active { background:var(--blue); color:#fff; }
+
+/* ══ CARD/LIST VIEW ══ */
+.card-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.item-card {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:14px; overflow:hidden;
+  cursor:pointer; box-shadow:var(--shadow);
+}
+.item-card-photo { width:100%; aspect-ratio:1; background:var(--surface2); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.item-card-photo img { width:100%; height:100%; object-fit:cover; }
+.item-card-body { padding:9px 11px 11px; }
+.item-card-name { font-size:13px; font-weight:700; color:var(--text); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.item-card-maker { font-size:10.5px; color:var(--muted); margin-top:2px; }
+
+.list-view { display:flex; flex-direction:column; gap:8px; }
+.item-row {
+  display:flex; align-items:center; gap:12px; background:var(--surface); border:1.5px solid var(--border);
+  border-radius:12px; padding:9px 12px; cursor:pointer; box-shadow:var(--shadow);
+}
+.item-row-photo { width:46px; height:46px; border-radius:9px; background:var(--surface2); flex-shrink:0; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:18px; opacity:.5; }
+.item-row-photo img { width:100%; height:100%; object-fit:cover; }
+.item-row-info { flex:1; min-width:0; }
+.item-row-name { font-size:14px; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.item-row-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+
+.empty-state { text-align:center; padding:50px 20px; color:var(--muted); }
+.empty-state-icon { font-size:36px; margin-bottom:8px; opacity:.5; }
+.empty-state-text { font-size:12px; }
+
+/* ══ FAB ══ */
+.fab {
+  position:fixed; right:18px; bottom:24px; width:56px; height:56px; border-radius:50%;
+  background:var(--blue); color:#fff; border:none; font-size:26px; cursor:pointer;
+  box-shadow:0 4px 16px rgba(41,182,232,.4); z-index:150; display:flex; align-items:center; justify-content:center;
+}
+.fab:hover { background:var(--blue2); }
+
+/* ══ MODAL ══ */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(10,46,58,.45); z-index:500; display:flex; align-items:flex-end; justify-content:center;
+}
+.modal-overlay.hidden { display:none; }
+.modal {
+  background:var(--surface); width:100%; max-width:520px; max-height:92vh; overflow-y:auto;
+  border-radius:20px 20px 0 0; padding:18px 18px 26px;
+}
+.modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.modal-title { font-size:16px; font-weight:700; }
+.modal-close { background:none; border:none; font-size:20px; color:var(--muted); cursor:pointer; padding:4px; }
+
+.form-group { margin-bottom:14px; }
+.form-label { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:5px; display:block; letter-spacing:0.4px; }
+.form-input, .form-select, .form-textarea {
+  width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid var(--border);
+  font-size:14px; font-family:var(--sans); outline:none; background:var(--surface);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--blue2); }
+.form-textarea { resize:vertical; min-height:50px; }
+
+.chip-row { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; }
+.chip {
+  flex-shrink:0; font-size:12px; font-weight:600; padding:6px 13px; border-radius:20px;
+  border:1.5px solid var(--border); background:var(--surface); color:var(--muted); cursor:pointer; white-space:nowrap;
+}
+.chip.active { background:var(--blue); border-color:var(--blue); color:#fff; }
+.chip.dashed { border-style:dashed; color:var(--blue2); }
+
+.photo-upload {
+  width:100%; aspect-ratio:16/9; border-radius:12px; border:1.5px dashed var(--border);
+  background:var(--surface2); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px;
+  cursor:pointer; overflow:hidden; color:var(--muted); font-size:12px;
+}
+.photo-upload img { width:100%; height:100%; object-fit:cover; }
+
+/* icon grid for category add */
+.icon-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+.icon-cell {
+  aspect-ratio:1; border-radius:10px; border:1.5px solid var(--border); background:var(--surface);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:var(--muted);
+}
+.icon-cell.selected { background:var(--blue); border-color:var(--blue); color:#fff; }
+
+/* field checklist */
+.field-check-row {
+  display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:0.5px solid var(--surface2); cursor:pointer;
+}
+.field-checkbox {
+  width:18px; height:18px; border-radius:5px; border:1.5px solid var(--border); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff;
+}
+.field-checkbox.checked { background:var(--blue); border-color:var(--blue); }
+.field-check-name { font-size:12px; color:var(--text); flex:1; }
+.field-value-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+.field-value-label { font-size:11px; color:var(--muted); width:84px; flex-shrink:0; }
+.field-value-input { flex:1; height:32px; border-radius:8px; border:1.5px solid var(--border); padding:0 8px; font-size:12px; outline:none; }
+
+.new-field-row { display:flex; gap:6px; margin-top:8px; }
+.new-field-row input { flex:1; padding:8px 10px; border-radius:8px; border:1.5px solid var(--border); font-size:12px; outline:none; }
+.type-btn-row { display:flex; gap:5px; margin-top:6px; }
+.type-btn { flex:1; padding:6px; border-radius:8px; border:1.5px solid var(--border); background:var(--surface); font-size:11px; color:var(--muted); cursor:pointer; text-align:center; }
+.type-btn.selected { background:var(--blue); border-color:var(--blue); color:#fff; }
+.add-small-btn { padding:8px 12px; border-radius:8px; border:none; background:var(--blue); color:#fff; font-size:12px; font-weight:700; cursor:pointer; }
+
+.info-box { background:var(--surface2); border-radius:12px; padding:10px 12px; font-size:11px; color:var(--muted); margin:12px 0; }
+.info-box-row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:0.5px solid var(--border); }
+.info-box-row:last-child { border-bottom:none; }
+.info-box-row span:last-child { color:var(--text); font-weight:600; }
+
+.detail-photo { width:100%; aspect-ratio:16/9; background:var(--surface2); border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:12px; }
+.detail-photo img { width:100%; height:100%; object-fit:cover; }
+.detail-cat-badge { display:inline-block; font-size:10px; font-weight:700; padding:3px 9px; border-radius:6px; background:var(--surface2); color:var(--blue2); margin-bottom:6px; }
+.detail-name { font-size:16px; font-weight:700; color:var(--text); margin-bottom:2px; }
+.detail-maker { font-size:12px; color:var(--muted); }
+.detail-memo { font-size:12px; color:var(--text); background:var(--surface2); border-radius:10px; padding:10px 12px; margin:12px 0; white-space:pre-wrap; }
+
+.two-btn-row { display:flex; gap:8px; margin-top:14px; }
+.btn-main { flex:1; height:40px; border-radius:10px; background:var(--blue); color:#fff; font-size:12px; font-weight:700; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; }
+.btn-sub { flex:1; height:40px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--blue2); font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; }
+
+.modal-actions { display:flex; gap:8px; margin-top:18px; }
+.btn-primary, .btn-danger, .btn-secondary {
+  flex:1; padding:12px; border-radius:10px; border:none; font-size:14px; font-weight:700; cursor:pointer; font-family:var(--sans);
+}
+.btn-primary { background:var(--blue); color:#fff; }
+.btn-primary:hover { background:var(--blue2); }
+.btn-danger { background:var(--red); color:#fff; flex:0 0 90px; }
+.btn-secondary { background:var(--surface2); color:var(--text); flex:0 0 90px; }
+
+/* maintenance timeline */
+.tl-wrap { position:relative; padding-left:18px; }
+.tl-line { position:absolute; left:5px; top:4px; bottom:4px; width:1.5px; background:var(--border); }
+.tl-item { position:relative; margin-bottom:14px; }
+.tl-dot { position:absolute; left:-18px; top:2px; width:9px; height:9px; border-radius:50%; background:var(--blue); border:2px solid var(--bg); }
+.tl-date { font-size:10px; color:var(--mutedlite); margin-bottom:3px; }
+.tl-card { background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:9px 11px; display:flex; align-items:center; gap:8px; }
+.tl-type { font-size:9px; font-weight:700; padding:2px 7px; border-radius:6px; background:var(--surface2); color:var(--blue2); flex-shrink:0; }
+.tl-memo { flex:1; font-size:11px; color:var(--text); }
+.tl-price { font-size:11px; font-weight:700; color:var(--blue2); }
+
+.hidden { display:none !important; }
+
+.toast {
+  position:fixed; bottom:96px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--blue3); color:#fff; padding:10px 20px; border-radius:24px; font-size:13px;
+  opacity:0; transition:all .25s; z-index:700; pointer-events:none; white-space:nowrap;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">MY ITEM</div>
+    <div class="auth-sub">持ち物管理</div>
+    <input type="password" id="authInput" inputmode="numeric" placeholder="パスワード" onkeydown="if(event.key==='Enter')checkAuth()">
+    <label class="auth-remember"><input type="checkbox" id="rememberMe" checked> 次回から自動ログイン</label>
+    <button class="auth-btn" onclick="checkAuth()">開く</button>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <button class="back-btn hidden" id="backBtn" onclick="goTop()">←</button>
+    <span class="logo" id="headerTitle">MY ITEM</span>
+  </div>
+  <div class="sync-badge"><span class="sync-dot" id="syncDot"></span><span id="syncText">同期中…</span></div>
+</div>
+
+<div class="content" id="content"></div>
+
+<button class="fab" onclick="openItemModal()">＋</button>
+
+<!-- CATEGORY ADD MODAL -->
+<div class="modal-overlay hidden" id="catModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">カテゴリーを追加</div>
+      <button class="modal-close" onclick="closeModal('catModalOverlay')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">カテゴリー名 *</label>
+      <input type="text" class="form-input" id="newCatName" placeholder="例：キャンプ用品">
+    </div>
+    <div class="form-group">
+      <label class="form-label">アイコンを選択（標準14種）</label>
+      <div class="icon-grid" id="catIconGrid"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveNewCategory()">追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ITEM ADD/EDIT MODAL -->
+<div class="modal-overlay hidden" id="itemModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="itemModalTitle">アイテムを追加</div>
+      <button class="modal-close" onclick="closeModal('itemModalOverlay')">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">カテゴリー</label>
+      <div class="chip-row" id="itemCatChips"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">写真</label>
+      <div class="photo-upload" id="photoPreview" onclick="document.getElementById('photoInput').click()">
+        <span>📷 タップして写真を選択</span>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoSelect(event)">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">名前 *</label>
+      <input type="text" class="form-input" id="itemName" placeholder="例：デジタル一眼カメラ">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">メーカー名</label>
+      <input type="text" class="form-input" id="itemMaker" placeholder="例：ソニー">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">メモ</label>
+      <textarea class="form-textarea" id="itemMemo" placeholder="自由にメモを記入"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">表示する項目を選択</label>
+      <div id="fieldChecklist"></div>
+      <div class="new-field-row">
+        <input type="text" id="newFieldName" placeholder="新しい項目名（例：保証期限）">
+        <button class="add-small-btn" onclick="addNewFieldDef()">追加</button>
+      </div>
+      <div class="type-btn-row" id="newFieldTypeRow">
+        <div class="type-btn selected" data-type="date" onclick="selectFieldType(this)">📅日付</div>
+        <div class="type-btn" data-type="number" onclick="selectFieldType(this)">💰金額</div>
+        <div class="type-btn" data-type="text" onclick="selectFieldType(this)">📝テキスト</div>
+      </div>
+    </div>
+
+    <div id="fieldValueInputs"></div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary hidden" id="itemCancelBtn" onclick="closeModal('itemModalOverlay')">キャンセル</button>
+      <button class="btn-danger hidden" id="itemDeleteBtn" onclick="deleteCurrentItem()">削除</button>
+      <button class="btn-primary" onclick="saveItem()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ITEM DETAIL MODAL -->
+<div class="modal-overlay hidden" id="detailModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">アイテム詳細</div>
+      <button class="modal-close" onclick="closeModal('detailModalOverlay')">✕</button>
+    </div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<!-- MAINTENANCE MODAL -->
+<div class="modal-overlay hidden" id="maintModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="maintModalTitle">メンテナンス履歴</div>
+      <button class="modal-close" onclick="closeModal('maintModalOverlay')">✕</button>
+    </div>
+    <div class="chip-row" id="maintTypeFilterRow" style="margin-bottom:14px;"></div>
+    <div id="maintTimeline"></div>
+    <div class="btn-sub" style="margin-top:12px;" onclick="openMaintAddModal()"><span>＋ 記録を追加</span></div>
+  </div>
+</div>
+
+<!-- MAINTENANCE ADD MODAL -->
+<div class="modal-overlay hidden" id="maintAddModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">記録を追加</div>
+      <button class="modal-close" onclick="closeModal('maintAddModalOverlay')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">種類</label>
+      <div class="chip-row" id="maintTypeChips"></div>
+      <div class="new-field-row">
+        <input type="text" id="newMaintType" placeholder="新しい種類（例：バッテリー交換）">
+        <button class="add-small-btn" onclick="addNewMaintType()">追加</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">実施日</label>
+      <input type="date" class="form-input" id="maintDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">金額（円）</label>
+      <input type="number" class="form-input" id="maintPrice" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">メモ（店名など）</label>
+      <input type="text" class="form-input" id="maintMemo" placeholder="例：整備工場〇〇">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveMaintRecord()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const STORAGE_KEY = 'myitem_data';
+let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+const STD_ICONS = [
+  ['家電','ti-device-tv'],['家具','ti-armchair'],['衣類','ti-shirt'],['本・メディア','ti-book'],
+  ['工具・日用品','ti-tool'],['趣味・娯楽','ti-device-gamepad-2'],['車','ti-car'],['釣り具','ti-fish'],
+  ['家','ti-home'],['キャンプ用品','ti-tent'],['ゴルフ用品','ti-golf'],['カメラ・写真機材','ti-camera'],
+  ['バッグ・アクセサリー','ti-briefcase'],['アプリ','ti-apps'],['その他','ti-package']
+];
+const ICON_LIST = ['ti-device-tv','ti-armchair','ti-shirt','ti-book','ti-tool','ti-device-gamepad-2','ti-car','ti-fish','ti-home','ti-tent','ti-golf','ti-camera','ti-briefcase','ti-apps','ti-package'];
+
+if (!appData.categories) {
+  appData.categories = STD_ICONS.map(([name,icon]) => ({ name, icon }));
+}
+if (!appData.items) appData.items = {};
+if (!appData.fieldDefs) appData.fieldDefs = { '保管場所':'text', '購入日':'date', '購入価格':'number' };
+if (!appData.maintenance) appData.maintenance = {};
+if (!appData.maintenanceTypes) appData.maintenanceTypes = ['車検','オイル交換','タイヤ交換','エレメント交換'];
+
+let currentScreen = 'top';
+let currentCategory = null;
+let currentView = localStorage.getItem('myitem_view') || 'card';
+let editingItemId = null;
+let currentPhotoData = null;
+let selectedItemCat = null;
+let checkedFields = {};
+let newFieldType = 'date';
+let firestoreSave = null;
+let detailItemId = null;
+let maintItemId = null;
+let maintTypeFilter = '';
+let selectedMaintType = null;
+
+function saveLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+  if (firestoreSave) firestoreSave(appData);
+}
+function escapeHtml(s) { return (s||'').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeAttr(s) { return escapeHtml(s).replace(/`/g,'&#96;'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function fmtDate(d) { return d ? d.replace(/-/g,'/') : ''; }
+function fmtPrice(p) { return p ? '¥' + Number(p).toLocaleString() : ''; }
+
+// ══════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════
+function goTop() {
+  currentScreen = 'top'; currentCategory = null;
+  document.getElementById('backBtn').classList.add('hidden');
+  document.getElementById('headerTitle').textContent = 'MY ITEM';
+  render();
+}
+function goCategory(catName) {
+  currentScreen = 'category'; currentCategory = catName;
+  document.getElementById('backBtn').classList.remove('hidden');
+  document.getElementById('headerTitle').textContent = catName;
+  render();
+}
+
+// ══════════════════════════════════════════
+// RENDER MAIN
+// ══════════════════════════════════════════
+function render() {
+  if (currentScreen === 'top') renderTop();
+  else renderCategoryScreen();
+}
+
+function computeUpcoming() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const results = [];
+  Object.entries(appData.items).forEach(([id, it]) => {
+    (it.fields || []).forEach(f => {
+      if (appData.fieldDefs[f.name] === 'date' && f.value) {
+        const d = new Date(f.value);
+        const diff = Math.round((d - today) / 86400000);
+        if (diff >= 0 && diff <= 60) results.push({ itemId:id, itemName:it.name, fieldName:f.name, diff, cat:it.category });
+      }
+    });
+  });
+  results.sort((a,b) => a.diff - b.diff);
+  return results.slice(0, 5);
+}
+
+function renderTop() {
+  const c = document.getElementById('content');
+  const search = '';
+  const upcoming = computeUpcoming();
+
+  let html = '';
+  if (upcoming.length > 0) {
+    html += `<div class="reminder-box"><div class="reminder-title"><i class="ti ti-bell" style="font-size:12px;"></i>近づいている予定</div>`;
+    html += upcoming.map(u => `
+      <div class="reminder-row" onclick="openDetailModal('${u.itemId}')">
+        <span style="font-size:11px;">📌</span>
+        <div class="reminder-name">${escapeHtml(u.itemName)}・${escapeHtml(u.fieldName)}</div>
+        <div class="reminder-days">あと${u.diff}日</div>
+      </div>`).join('');
+    html += `</div>`;
+  }
+
+  html += `<input type="text" class="search-input" id="topSearchInput" placeholder="🔍 名前・メモで検索" oninput="handleTopSearch()">`;
+  html += `<div id="topSearchResults"></div>`;
+  html += `<div id="topEmptyHint" class="empty-state"><div class="empty-state-icon"><i class="ti ti-search"></i></div><div class="empty-state-text">検索してアイテムを探すか<br>右下の＋から追加してください</div></div>`;
+
+  c.innerHTML = html;
+}
+
+function handleTopSearch() {
+  const q = document.getElementById('topSearchInput').value.trim().toLowerCase();
+  const resultsEl = document.getElementById('topSearchResults');
+  const hintEl = document.getElementById('topEmptyHint');
+  if (!q) { resultsEl.innerHTML = ''; hintEl.classList.remove('hidden'); return; }
+  hintEl.classList.add('hidden');
+  const items = Object.entries(appData.items).filter(([id,it]) => {
+    const hay = ((it.name||'') + ' ' + (it.memo||'')).toLowerCase();
+    return hay.includes(q);
+  });
+  resultsEl.innerHTML = renderItemsGrid(items, currentView);
+}
+
+function renderCategoryScreen() {
+  const c = document.getElementById('content');
+  let html = `<input type="text" class="search-input" id="catSearchInput" placeholder="🔍 名前・メモで検索" oninput="renderCategoryList()">`;
+  html += `<div class="view-toggle-row"><div class="view-toggle">
+    <button class="view-btn" id="viewCardBtn" onclick="setView('card')"><i class="ti ti-layout-grid"></i></button>
+    <button class="view-btn" id="viewListBtn" onclick="setView('list')"><i class="ti ti-list"></i></button>
+  </div></div>`;
+  html += `<div id="catListArea"></div>`;
+  c.innerHTML = html;
+  document.getElementById('viewCardBtn').classList.toggle('active', currentView==='card');
+  document.getElementById('viewListBtn').classList.toggle('active', currentView==='list');
+  renderCategoryList();
+}
+
+function renderCategoryList() {
+  const q = (document.getElementById('catSearchInput').value || '').trim().toLowerCase();
+  let items = Object.entries(appData.items).filter(([id,it]) => it.category === currentCategory);
+  if (q) items = items.filter(([id,it]) => ((it.name||'')+' '+(it.memo||'')).toLowerCase().includes(q));
+  items.sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+  document.getElementById('catListArea').innerHTML = renderItemsGrid(items, currentView);
+}
+
+function renderItemsGrid(items, view) {
+  if (items.length === 0) {
+    return `<div class="empty-state"><div class="empty-state-icon">📦</div><div class="empty-state-text">アイテムがありません</div></div>`;
+  }
+  if (view === 'card') {
+    return `<div class="card-grid">${items.map(([id,it]) => `
+      <div class="item-card" onclick="openDetailModal('${id}')">
+        <div class="item-card-photo">${it.photo ? `<img src="${it.photo}">` : `<i class="ti ti-package" style="font-size:26px;color:var(--mutedlite);"></i>`}</div>
+        <div class="item-card-body">
+          <div class="item-card-name">${escapeHtml(it.name)}</div>
+          <div class="item-card-maker">${escapeHtml(it.manufacturer||'')}</div>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+  return `<div class="list-view">${items.map(([id,it]) => `
+    <div class="item-row" onclick="openDetailModal('${id}')">
+      <div class="item-row-photo">${it.photo ? `<img src="${it.photo}">` : '📦'}</div>
+      <div class="item-row-info">
+        <div class="item-row-name">${escapeHtml(it.name)}</div>
+        <div class="item-row-meta">${escapeHtml(it.manufacturer||'')}</div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function setView(v) {
+  currentView = v;
+  localStorage.setItem('myitem_view', v);
+  document.getElementById('viewCardBtn').classList.toggle('active', v==='card');
+  document.getElementById('viewListBtn').classList.toggle('active', v==='list');
+  renderCategoryList();
+}
+
+// ══════════════════════════════════════════
+// CATEGORY ADD
+// ══════════════════════════════════════════
+let selectedNewCatIcon = ICON_LIST[0];
+function openCatModal() {
+  document.getElementById('newCatName').value = '';
+  selectedNewCatIcon = ICON_LIST[0];
+  const grid = document.getElementById('catIconGrid');
+  grid.innerHTML = ICON_LIST.map((ic,i) => `<div class="icon-cell ${i===0?'selected':''}" data-icon="${ic}" onclick="selectCatIcon(this,'${ic}')"><i class="ti ${ic}"></i></div>`).join('');
+  document.getElementById('catModalOverlay').classList.remove('hidden');
+}
+function selectCatIcon(el, icon) {
+  document.querySelectorAll('#catIconGrid .icon-cell').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedNewCatIcon = icon;
+}
+function saveNewCategory() {
+  const name = document.getElementById('newCatName').value.trim();
+  if (!name) { showToast('カテゴリー名を入力してください'); return; }
+  if (appData.categories.find(c => c.name === name)) { showToast('同じ名前のカテゴリーがあります'); return; }
+  appData.categories.push({ name, icon: selectedNewCatIcon });
+  saveLocal();
+  closeModal('catModalOverlay');
+  render();
+  showToast('カテゴリーを追加しました');
+}
+
+// ══════════════════════════════════════════
+// ITEM ADD/EDIT
+// ══════════════════════════════════════════
+function openItemModal(id) {
+  editingItemId = id || null;
+  currentPhotoData = null;
+  checkedFields = {};
+
+  selectedItemCat = (id && appData.items[id].category) || currentCategory || appData.categories[0].name;
+  renderItemCatChips();
+
+  const photoPreview = document.getElementById('photoPreview');
+
+  if (id) {
+    const it = appData.items[id];
+    document.getElementById('itemModalTitle').textContent = 'アイテムを編集';
+    document.getElementById('itemName').value = it.name || '';
+    document.getElementById('itemMaker').value = it.manufacturer || '';
+    document.getElementById('itemMemo').value = it.memo || '';
+    currentPhotoData = it.photo || null;
+    photoPreview.innerHTML = it.photo ? `<img src="${it.photo}">` : `<span>📷 タップして写真を選択</span>`;
+    (it.fields||[]).forEach(f => { checkedFields[f.name] = f.value; });
+    document.getElementById('itemDeleteBtn').classList.remove('hidden');
+    document.getElementById('itemCancelBtn').classList.add('hidden');
+  } else {
+    document.getElementById('itemModalTitle').textContent = 'アイテムを追加';
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemMaker').value = '';
+    document.getElementById('itemMemo').value = '';
+    photoPreview.innerHTML = `<span>📷 タップして写真を選択</span>`;
+    document.getElementById('itemDeleteBtn').classList.add('hidden');
+    document.getElementById('itemCancelBtn').classList.remove('hidden');
+  }
+  renderFieldChecklist();
+  document.getElementById('itemModalOverlay').classList.remove('hidden');
+}
+function renderItemCatChips() {
+  const catChips = document.getElementById('itemCatChips');
+  catChips.innerHTML = appData.categories.map(c => `<div class="chip ${c.name===selectedItemCat?'active':''}" onclick="selectItemCat(this,'${escapeAttr(c.name)}')">${escapeHtml(c.name)}</div>`).join('')
+    + `<div class="chip dashed" onclick="addTempCategory()"><i class="ti ti-plus" style="font-size:11px;"></i> 新規</div>`;
+}
+function selectItemCat(el, name) {
+  document.querySelectorAll('#itemCatChips .chip').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  selectedItemCat = name;
+}
+function addTempCategory() {
+  const name = prompt('新しいカテゴリー名を入力してください（仮追加・アイコンは次回のアプリ更新時に正式設定します）');
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if (!appData.categories.find(c => c.name === trimmed)) {
+    appData.categories.push({ name: trimmed, icon: 'ti-package', temporary: true });
+    saveLocal();
+  }
+  selectedItemCat = trimmed;
+  renderItemCatChips();
+  showToast('仮カテゴリーとして追加しました');
+}
+function handlePhotoSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      const maxW = 800;
+      const scale = Math.min(1, maxW / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      currentPhotoData = canvas.toDataURL('image/jpeg', 0.75);
+      document.getElementById('photoPreview').innerHTML = `<img src="${currentPhotoData}">`;
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderFieldChecklist() {
+  const el = document.getElementById('fieldChecklist');
+  const names = Object.keys(appData.fieldDefs);
+  el.innerHTML = names.map(name => {
+    const checked = checkedFields.hasOwnProperty(name);
+    return `<div class="field-check-row" onclick="toggleField('${escapeAttr(name)}')">
+      <div class="field-checkbox ${checked?'checked':''}">${checked?'<i class=\"ti ti-check\"></i>':''}</div>
+      <div class="field-check-name">${escapeHtml(name)}</div>
+    </div>`;
+  }).join('');
+  renderFieldValueInputs();
+}
+function toggleField(name) {
+  if (checkedFields.hasOwnProperty(name)) delete checkedFields[name];
+  else checkedFields[name] = '';
+  renderFieldChecklist();
+}
+function selectFieldType(el) {
+  document.querySelectorAll('#newFieldTypeRow .type-btn').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  newFieldType = el.dataset.type;
+}
+function addNewFieldDef() {
+  const input = document.getElementById('newFieldName');
+  const name = input.value.trim();
+  if (!name) return;
+  appData.fieldDefs[name] = newFieldType;
+  checkedFields[name] = '';
+  input.value = '';
+  saveLocal();
+  renderFieldChecklist();
+}
+function renderFieldValueInputs() {
+  const el = document.getElementById('fieldValueInputs');
+  const names = Object.keys(checkedFields);
+  if (names.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="form-group">` + names.map(name => {
+    const type = appData.fieldDefs[name] || 'text';
+    const val = checkedFields[name] || '';
+    const inputType = type === 'date' ? 'date' : (type === 'number' ? 'number' : 'text');
+    return `<div class="field-value-row">
+      <div class="field-value-label">${escapeHtml(name)}</div>
+      <input type="${inputType}" class="field-value-input" value="${escapeAttr(val)}" oninput="checkedFields['${escapeAttr(name)}']=this.value">
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function saveItem() {
+  const name = document.getElementById('itemName').value.trim();
+  if (!name) { showToast('名前を入力してください'); return; }
+  const id = editingItemId || 'item_' + Date.now();
+  const fields = Object.entries(checkedFields).map(([n,v]) => ({ name:n, value:v }));
+  appData.items[id] = {
+    name,
+    category: selectedItemCat,
+    manufacturer: document.getElementById('itemMaker').value.trim(),
+    memo: document.getElementById('itemMemo').value.trim(),
+    photo: currentPhotoData,
+    fields,
+    createdAt: appData.items[id] ? appData.items[id].createdAt : Date.now()
+  };
+  saveLocal();
+  closeModal('itemModalOverlay');
+  render();
+  showToast('保存しました');
+}
+function deleteCurrentItem() {
+  if (!editingItemId) return;
+  if (!confirm('このアイテムを削除しますか？')) return;
+  delete appData.items[editingItemId];
+  delete appData.maintenance[editingItemId];
+  saveLocal();
+  closeModal('itemModalOverlay');
+  render();
+  showToast('削除しました');
+}
+
+// ══════════════════════════════════════════
+// ITEM DETAIL
+// ══════════════════════════════════════════
+function openDetailModal(id) {
+  detailItemId = id;
+  const it = appData.items[id];
+  const cat = appData.categories.find(c => c.name === it.category) || { icon:'ti-package' };
+  let html = '';
+  html += `<div class="detail-photo">${it.photo ? `<img src="${it.photo}">` : `<i class="ti ${cat.icon}" style="font-size:32px;color:var(--mutedlite);"></i>`}</div>`;
+  html += `<span class="detail-cat-badge">${escapeHtml(it.category||'')}</span>`;
+  html += `<div class="detail-name">${escapeHtml(it.name)}</div>`;
+  if (it.manufacturer) html += `<div class="detail-maker">${escapeHtml(it.manufacturer)}</div>`;
+
+  if (it.fields && it.fields.length > 0) {
+    html += `<div class="info-box">` + it.fields.map(f => {
+      const type = appData.fieldDefs[f.name] || 'text';
+      let displayVal = f.value;
+      if (type === 'date') displayVal = fmtDate(f.value);
+      if (type === 'number') displayVal = fmtPrice(f.value);
+      return `<div class="info-box-row"><span>${escapeHtml(f.name)}</span><span>${escapeHtml(displayVal)}</span></div>`;
+    }).join('') + `</div>`;
+  }
+
+  if (it.memo) html += `<div class="detail-memo">${escapeHtml(it.memo)}</div>`;
+
+  html += `<div class="two-btn-row">
+    <div class="btn-main" onclick="openMaintModal('${id}')"><i class="ti ti-tools"></i>メンテナンス</div>
+    <div class="btn-sub" onclick="closeModal('detailModalOverlay');openItemModal('${id}')"><i class="ti ti-edit"></i>編集</div>
+  </div>`;
+
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('detailModalOverlay').classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════
+// MAINTENANCE
+// ══════════════════════════════════════════
+function openMaintModal(itemId) {
+  maintItemId = itemId;
+  maintTypeFilter = '';
+  const it = appData.items[itemId];
+  document.getElementById('maintModalTitle').textContent = escapeHtml(it.name) + '・メンテナンス履歴';
+  renderMaintTypeFilters();
+  renderMaintTimeline();
+  document.getElementById('maintModalOverlay').classList.remove('hidden');
+}
+function renderMaintTypeFilters() {
+  const records = appData.maintenance[maintItemId] || [];
+  const types = [...new Set(records.map(r => r.type))];
+  const el = document.getElementById('maintTypeFilterRow');
+  el.innerHTML = `<div class="chip ${maintTypeFilter===''?'active':''}" onclick="setMaintFilter('')">すべて</div>` +
+    types.map(t => `<div class="chip ${maintTypeFilter===t?'active':''}" onclick="setMaintFilter('${escapeAttr(t)}')">${escapeHtml(t)}</div>`).join('');
+}
+function setMaintFilter(t) { maintTypeFilter = t; renderMaintTypeFilters(); renderMaintTimeline(); }
+function renderMaintTimeline() {
+  let records = appData.maintenance[maintItemId] || [];
+  if (maintTypeFilter) records = records.filter(r => r.type === maintTypeFilter);
+  records = [...records].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const el = document.getElementById('maintTimeline');
+  if (records.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🛠️</div><div class="empty-state-text">記録がありません</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="tl-wrap"><div class="tl-line"></div>` + records.map(r => `
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">${fmtDate(r.date)}</div>
+      <div class="tl-card">
+        <span class="tl-type">${escapeHtml(r.type)}</span>
+        <div class="tl-memo">${escapeHtml(r.memo||'')}</div>
+        <div class="tl-price">${fmtPrice(r.price)}</div>
+      </div>
+    </div>`).join('') + `</div>`;
+}
+function openMaintAddModal() {
+  selectedMaintType = appData.maintenanceTypes[0] || null;
+  const chips = document.getElementById('maintTypeChips');
+  chips.innerHTML = appData.maintenanceTypes.map(t => `<div class="chip ${t===selectedMaintType?'active':''}" onclick="selectMaintType(this,'${escapeAttr(t)}')">${escapeHtml(t)}</div>`).join('');
+  document.getElementById('maintDate').value = '';
+  document.getElementById('maintPrice').value = '';
+  document.getElementById('maintMemo').value = '';
+  document.getElementById('maintAddModalOverlay').classList.remove('hidden');
+}
+function selectMaintType(el, t) {
+  document.querySelectorAll('#maintTypeChips .chip').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  selectedMaintType = t;
+}
+function addNewMaintType() {
+  const input = document.getElementById('newMaintType');
+  const t = input.value.trim();
+  if (!t) return;
+  if (!appData.maintenanceTypes.includes(t)) appData.maintenanceTypes.push(t);
+  saveLocal();
+  input.value = '';
+  const chips = document.getElementById('maintTypeChips');
+  chips.innerHTML = appData.maintenanceTypes.map(x => `<div class="chip ${x===t?'active':''}" onclick="selectMaintType(this,'${escapeAttr(x)}')">${escapeHtml(x)}</div>`).join('');
+  selectedMaintType = t;
+}
+function saveMaintRecord() {
+  if (!selectedMaintType) { showToast('種類を選んでください'); return; }
+  const date = document.getElementById('maintDate').value;
+  if (!date) { showToast('実施日を入力してください'); return; }
+  if (!appData.maintenance[maintItemId]) appData.maintenance[maintItemId] = [];
+  appData.maintenance[maintItemId].push({
+    type: selectedMaintType,
+    date,
+    price: document.getElementById('maintPrice').value,
+    memo: document.getElementById('maintMemo').value.trim()
+  });
+  saveLocal();
+  closeModal('maintAddModalOverlay');
+  renderMaintTypeFilters();
+  renderMaintTimeline();
+  showToast('記録を追加しました');
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+(function() {
+  const PASS = '5513';
+  const LOCAL_KEY   = 'myitem_auth_remember';
+  const SESSION_KEY = 'myitem_auth_session';
+  if (localStorage.getItem(LOCAL_KEY)==='ok' || sessionStorage.getItem(SESSION_KEY)==='ok') {
+    document.getElementById('authOverlay').classList.add('hidden');
+    return;
+  }
+  document.getElementById('authInput').focus();
+})();
+function checkAuth() {
+  const PASS = '5513';
+  const LOCAL_KEY   = 'myitem_auth_remember';
+  const SESSION_KEY = 'myitem_auth_session';
+  const val = document.getElementById('authInput').value;
+  if (val === PASS) {
+    if (document.getElementById('rememberMe').checked) localStorage.setItem(LOCAL_KEY, 'ok');
+    else sessionStorage.setItem(SESSION_KEY, 'ok');
+    document.getElementById('authOverlay').classList.add('hidden');
+  } else {
+    document.getElementById('authError').textContent = 'パスワードが違います';
+    document.getElementById('authInput').value = '';
+    document.getElementById('authInput').focus();
+  }
+}
+
+// ══════════════════════════════════════════
+// FIREBASE — MY ITEMデータ専用ドキュメント
+// (IRODORIと同じFirebaseプロジェクト内、別のデータ置き場)
+// ══════════════════════════════════════════
+(async function initFirebase() {
+  try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, doc, setDoc, onSnapshot, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCIqSyfHwHg5ygdyB5XA6KBsIDqiyLQLgU",
+      authDomain: "schedule-app-d1ba4.firebaseapp.com",
+      projectId: "schedule-app-d1ba4",
+      storageBucket: "schedule-app-d1ba4.firebasestorage.app",
+      messagingSenderId: "350863090121",
+      appId: "1:350863090121:web:b3283d3895cdb0670c4818"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    const docRef = doc(db, "schedules", "myitem_mkdata");
+
+    let isSavingLocally = false;
+    function setSyncStatus(status) {
+      const dot = document.getElementById('syncDot');
+      const txt = document.getElementById('syncText');
+      if (!dot || !txt) return;
+      if (status === 'ok')      { dot.style.background='#29b6e8'; txt.textContent='同期済み'; }
+      else if (status==='syncing') { dot.style.background='#e08a10'; txt.textContent='同期中…'; }
+      else                     { dot.style.background='#e03535'; txt.textContent='オフライン'; }
+    }
+
+    try {
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const cloudData = snap.data().appData || {};
+        Object.keys(cloudData).forEach(k => { appData[k] = cloudData[k]; });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } else if (Object.keys(appData.items).length > 0) {
+        await setDoc(docRef, { appData }, { merge: true });
+      }
+      setSyncStatus('ok');
+    } catch(e) {
+      console.warn('MY ITEM初回取得エラー:', e);
+      setSyncStatus('offline');
+    }
+
+    render();
+
+    onSnapshot(docRef, (snap) => {
+      if (isSavingLocally) return;
+      if (snap.exists()) {
+        const cloudData = snap.data().appData || {};
+        Object.keys(cloudData).forEach(k => { appData[k] = cloudData[k]; });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        render();
+      }
+    });
+
+    firestoreSave = async (d) => {
+      isSavingLocally = true;
+      try {
+        await setDoc(docRef, { appData: d }, { merge: true });
+        setSyncStatus('ok');
+      } catch(e) {
+        console.warn('MY ITEM保存エラー:', e);
+        setSyncStatus('offline');
+      } finally {
+        setTimeout(() => { isSavingLocally = false; }, 1000);
+      }
+    };
+
+  } catch(e) {
+    console.warn('Firebase初期化エラー:', e);
+  }
+})();
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
