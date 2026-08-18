@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MY ITEM MK-3</title>
+<title>MY ITEM MK-6</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -267,7 +267,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <div class="header">
   <div class="header-left">
     <button class="back-btn hidden" id="backBtn" onclick="goTop()">←</button>
-    <span class="logo" id="headerTitle">MY ITEM</span>
+    <span class="logo" id="headerTitle">MY ITEM</span><span style="font-size:9px;color:var(--muted);margin-left:4px;font-family:var(--mono);">MK-6</span>
   </div>
   <div class="sync-badge"><span class="sync-dot" id="syncDot"></span><span id="syncText">同期中…</span></div>
 </div>
@@ -326,6 +326,11 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
     <div class="form-group">
       <label class="form-label">メーカー名</label>
       <input type="text" class="form-input" id="itemMaker" placeholder="例：ソニー">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">呼び方（かな・カナ・漢字。検索と50音順表示に使われます）</label>
+      <input type="text" class="form-input" id="itemReading" placeholder="例：エクリプス">
     </div>
 
     <div class="form-group">
@@ -525,24 +530,51 @@ function renderTop() {
     html += `</div>`;
   }
 
-  html += `<input type="text" class="search-input" id="topSearchInput" placeholder="🔍 名前・メモで検索" oninput="handleTopSearch()">`;
+  html += `<input type="text" class="search-input" id="topSearchInput" placeholder="🔍 名前・メモ・カテゴリーで検索" oninput="handleTopSearch()">`;
+  html += `<div style="height:38px;border-radius:10px;background:var(--blue);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;cursor:pointer;" onclick="showAllItemsSorted()"><i class="ti ti-list"></i>アイテム一覧（50音順）</div>`;
   html += `<div id="topSearchResults"></div>`;
   html += `<div id="topEmptyHint" class="empty-state"><div class="empty-state-icon"><i class="ti ti-search"></i></div><div class="empty-state-text">検索してアイテムを探すか<br>右下の＋から追加してください</div></div>`;
 
   c.innerHTML = html;
 }
 
+function sortReadingKey(it) {
+  return (it.reading && it.reading.trim()) ? it.reading.trim() : (it.name || '');
+}
+function sortItemsByReading(items) {
+  const collator = new Intl.Collator('ja');
+  return [...items].sort((a, b) => collator.compare(sortReadingKey(a[1]), sortReadingKey(b[1])));
+}
+
 function handleTopSearch() {
-  const q = document.getElementById('topSearchInput').value.trim().toLowerCase();
+  const raw = document.getElementById('topSearchInput').value.trim();
+  const q = raw.toLowerCase();
   const resultsEl = document.getElementById('topSearchResults');
   const hintEl = document.getElementById('topEmptyHint');
   if (!q) { resultsEl.innerHTML = ''; hintEl.classList.remove('hidden'); return; }
   hintEl.classList.add('hidden');
-  const items = Object.entries(appData.items).filter(([id,it]) => {
-    const hay = ((it.name||'') + ' ' + (it.memo||'')).toLowerCase();
-    return hay.includes(q);
-  });
+
+  const exactCat = appData.categories.find(c => c.name === raw);
+  let items;
+  if (exactCat) {
+    items = Object.entries(appData.items).filter(([id,it]) => it.category === exactCat.name);
+    items = sortItemsByReading(items);
+  } else {
+    items = Object.entries(appData.items).filter(([id,it]) => {
+      const hay = ((it.name||'') + ' ' + (it.memo||'') + ' ' + (it.reading||'')).toLowerCase();
+      return hay.includes(q);
+    });
+    items.sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+  }
   resultsEl.innerHTML = renderItemsGrid(items, currentView);
+}
+
+function showAllItemsSorted() {
+  document.getElementById('topSearchInput').value = '';
+  document.getElementById('topEmptyHint').classList.add('hidden');
+  let items = Object.entries(appData.items);
+  items = sortItemsByReading(items);
+  document.getElementById('topSearchResults').innerHTML = renderItemsGrid(items, currentView);
 }
 
 function renderCategoryScreen() {
@@ -644,6 +676,7 @@ function openItemModal(id) {
     document.getElementById('itemModalTitle').textContent = 'アイテムを編集';
     document.getElementById('itemName').value = it.name || '';
     document.getElementById('itemMaker').value = it.manufacturer || '';
+    document.getElementById('itemReading').value = it.reading || '';
     document.getElementById('itemMemo').value = it.memo || '';
     currentPhotoData = it.photo || null;
     photoPreview.innerHTML = it.photo ? `<img src="${it.photo}">` : `<span>📷 タップして写真を選択</span>`;
@@ -654,6 +687,7 @@ function openItemModal(id) {
     document.getElementById('itemModalTitle').textContent = 'アイテムを追加';
     document.getElementById('itemName').value = '';
     document.getElementById('itemMaker').value = '';
+    document.getElementById('itemReading').value = '';
     document.getElementById('itemMemo').value = '';
     photoPreview.innerHTML = `<span>📷 タップして写真を選択</span>`;
     document.getElementById('itemDeleteBtn').classList.add('hidden');
@@ -762,6 +796,7 @@ function saveItem() {
     name,
     category: selectedItemCat,
     manufacturer: document.getElementById('itemMaker').value.trim(),
+    reading: document.getElementById('itemReading').value.trim(),
     memo: document.getElementById('itemMemo').value.trim(),
     photo: currentPhotoData,
     fields,
