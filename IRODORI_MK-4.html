@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRODORI MK-9</title>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<title>IRODORI MK-32</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -25,6 +26,9 @@
   --amberbg: #fffbeb;
   --amberbd: #fcd34d;
   --red:     #e03535;
+  --orange:  #f07d00;
+  --orangebg:#fff0d9;
+  --orangebd:#f5be6a;
   --shadow:  0 2px 10px rgba(46,207,122,.10);
   --mono: 'DM Mono', monospace;
   --sans: 'Noto Sans JP', sans-serif;
@@ -80,48 +84,54 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   padding:0 2px; margin-bottom:8px; margin-top:16px;
 }
 
-/* ══ 月表示（1日1行リスト） ══ */
-.month-list { padding:0 14px 80px; }
-.day-row {
-  display:flex; align-items:center; gap:10px;
-  padding:9px 12px; background:var(--surface);
-  border-radius:10px; margin-bottom:5px;
-  border:1.5px solid var(--border); cursor:pointer;
-  box-shadow:var(--shadow); transition:border-color .13s;
+/* ══ 月表示（7列グリッド） ══ */
+.month-grid { padding: 0 10px 80px; }
+.dow-row { display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px; }
+.dow-cell {
+  text-align:center; font-size:11px; font-weight:700;
+  padding:6px 0; color:var(--muted); letter-spacing:0.8px;
 }
-.day-row:hover { border-color:var(--green2); }
-.day-row.today { border-color:var(--green); background:var(--surface2); }
-.day-row.selected { border-color:var(--green2); background:#d4f5e5; }
-
-.date-col { min-width:44px; text-align:center; flex-shrink:0; }
-.date-col .dow { font-size:10px; font-weight:700; color:var(--muted); }
-.date-col .num { font-family:var(--mono); font-size:20px; font-weight:600; color:var(--text); line-height:1.1; }
-.day-row.sun .date-col .dow,
-.day-row.sun .date-col .num { color:var(--red); }
-.day-row.sat .date-col .dow,
-.day-row.sat .date-col .num { color:var(--work); }
-.day-row.today .date-col .num {
+.dow-cell.sat { color:var(--work); }
+.dow-cell.sun { color:var(--red); }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-cell {
+  background:var(--surface); border-radius:9px; padding:5px 4px 6px;
+  min-height:70px; cursor:pointer;
+  border:1.5px solid var(--border);
+  transition:border-color .13s, box-shadow .13s;
+  box-shadow:var(--shadow);
+}
+.cal-cell:hover { border-color:var(--green2); box-shadow:0 3px 14px rgba(46,207,122,.18); }
+.cal-cell.other-month { opacity:.38; box-shadow:none; }
+.cal-cell.today { border-color:var(--green); box-shadow:0 0 0 2px rgba(46,207,122,.22); }
+.cal-cell.selected { border-color:var(--green2); background:#e6faef; }
+.cal-cell.sun .cal-date { color:var(--red); }
+.cal-cell.sat .cal-date { color:var(--work); }
+.cal-date {
+  font-family:var(--mono); font-size:12px; font-weight:600;
+  margin-bottom:3px; color:var(--text);
+}
+.cal-cell.today .cal-date {
   background:var(--green); color:#fff;
-  border-radius:6px; padding:1px 5px; display:inline-block;
+  width:20px; height:20px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:3px; font-size:11px;
 }
-.day-row.today.sun .date-col .num,
-.day-row.today.sat .date-col .num { color:#fff; }
-
-/* 仕事バッジ */
-.work-pill {
-  background:var(--workbg); color:#007c91;
-  border:1px solid var(--workbd); border-radius:6px;
-  font-family:var(--mono); font-size:11px; font-weight:700;
-  padding:3px 7px; white-space:nowrap; flex-shrink:0; max-width:180px;
-  overflow:hidden; text-overflow:ellipsis;
+.cal-cell.today.sat .cal-date,
+.cal-cell.today.sun .cal-date { color:#fff; }
+.cal-shift {
+  font-size:11px; font-weight:700; letter-spacing:0.2px;
+  padding:2px 4px; border-radius:4px; display:block;
+  margin-bottom:2px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
-.work-pill.off   { background:#ffd9d9; color:#a01010; border-color:#f0b0b0; }
-.work-pill.paid  { background:#ffd9d9; color:#a01010; border-color:#f0b0b0; }
-.work-pill.none  { background:var(--surface2); color:var(--muted); border-color:var(--border); font-style:italic; font-size:11px; }
-
-/* プライベートアイコン列 */
-.priv-icons { display:flex; gap:4px; flex:1; flex-wrap:wrap; align-items:center; }
-.priv-icon  { font-size:18px; line-height:1; }
+.cal-shift.work    { background:#c8eef8; color:#007c91; }
+.cal-shift.off     { background:#ffd9d9; color:#a01010; }
+.cal-shift.paid    { background:#ffd9d9; color:#a01010; }
+.cal-shift.plan    { background:var(--orangebg); color:#a05000; }
+.cal-shift.task    { background:#d4f5e5; color:#0a5e2a; }
+.cal-shift.task2   { background:#fff3cc; color:#8a5c00; }
+.cal-irodori-icons { display:flex; flex-wrap:wrap; gap:1px; margin-top:2px; }
+.cal-irodori-icon  { font-size:11px; line-height:1; }
 
 /* ══ 日表示 ══ */
 .day-view { padding:0 14px 80px; max-width:620px; margin:0 auto; }
@@ -202,6 +212,42 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 }
 .diary-empty { text-align:center; padding:20px; font-size:13px; color:var(--muted); }
 
+/* ══ タイムライン（日ビュー） ══ */
+.tl-wrap {
+  background:var(--surface); border:1.5px solid var(--border);
+  border-radius:14px; margin-bottom:10px; padding:10px 12px 14px; box-shadow:var(--shadow);
+}
+.tl-body { position:relative; }
+.tl-hours { position:absolute; left:0; top:0; width:34px; }
+.tl-hour-label { position:absolute; font-family:var(--mono); font-size:10px; color:var(--muted); transform:translateY(-50%); }
+.tl-track { position:absolute; left:38px; right:0; top:0; border-left:1px solid var(--border); }
+.tl-gridline { position:absolute; left:0; right:0; border-top:1px solid #eef7ee; }
+.tl-band {
+  position:absolute; border-radius:7px; box-sizing:border-box; overflow:hidden;
+  padding:4px 8px; margin:0 2px;
+  display:flex; flex-direction:column; justify-content:center;
+}
+.tl-band-cat  { font-size:13px; font-weight:800; line-height:1.28; }
+.tl-band-time { font-family:var(--mono); font-size:12px; font-weight:700; line-height:1.3; opacity:0.92; margin-top:2px; }
+.tl-band-sub  { font-size:10px; opacity:0.75; margin-top:2px; }
+.tl-now-line  { position:absolute; left:-4px; right:0; height:0; border-top:2px solid var(--red); z-index:5; }
+.tl-now-dot   { position:absolute; left:-6px; width:8px; height:8px; border-radius:50%; background:var(--red); z-index:6; }
+.tl-fab-row { display:flex; align-items:center; justify-content:space-between; padding:0 2px 8px; }
+.tl-fab-add {
+  width:32px; height:32px; border-radius:50%; background:var(--green); border:none;
+  display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px;
+  cursor:pointer; box-shadow:0 2px 8px rgba(46,207,122,.35); font-weight:700;
+}
+.tl-unscheduled { margin-bottom:10px; }
+.tl-unscheduled-label { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:6px; padding:0 2px; }
+.tl-unscheduled-list { display:flex; flex-wrap:wrap; gap:8px; }
+.tl-unscheduled-chip {
+  display:flex; align-items:center; gap:6px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:20px; padding:6px 12px; cursor:pointer;
+}
+.tl-unscheduled-name { font-size:12px; font-weight:600; color:var(--text); }
+.tl-unscheduled-cat  { font-size:9px; color:var(--muted); }
+
 .small-btn {
   font-size:11px; font-weight:700; color:var(--green2);
   background:var(--surface); border:1.5px solid var(--green);
@@ -248,6 +294,8 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   margin-bottom:6px; padding-bottom:3px; border-bottom:1px solid var(--surface2);
 }
 .icon-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; }
+.cat-subsection { margin-bottom:10px; padding-left:2px; }
+.cat-subtitle { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:5px; }
 .icon-btn {
   display:flex; flex-direction:column; align-items:center; gap:3px;
   background:var(--surface2); border:1.5px solid var(--border);
@@ -257,7 +305,9 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .icon-btn.sel   { background:var(--green); border-color:var(--green2); }
 .icon-btn .ib-icon  { font-size:22px; line-height:1; }
 .icon-btn .ib-label { font-size:9px; color:var(--green3); font-weight:700; text-align:center; }
+.icon-btn .ib-kanji { font-size:18px; font-weight:900; color:var(--green3); line-height:1; }
 .icon-btn.sel .ib-label { color:#fff; }
+.icon-btn.sel .ib-kanji { color:#fff; }
 
 /* 詳細入力フォーム */
 .detail-box {
@@ -393,6 +443,69 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 }
 .fab:hover { opacity:.88; transform:scale(1.06); }
 
+/* ══ 月リスト表示 ══ */
+.month-list { padding: 0 10px 80px; }
+.ml-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 8px 10px; margin-bottom: 5px;
+  cursor: pointer; transition: border-color .13s;
+}
+.ml-row:hover { border-color: var(--green2); }
+.ml-row.ml-today { border-color: var(--green); background: #f0fff8; }
+.ml-row.ml-sun { background: #fff8f8; }
+.ml-row.ml-sat { background: #f0f8ff; }
+
+.ml-date { display: flex; flex-direction: column; align-items: center; min-width: 30px; padding-top: 2px; }
+.ml-date-num { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.ml-date-num-today {
+  font-family: var(--mono); font-size: 14px; font-weight: 700; color: #fff;
+  background: var(--green); width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
+}
+.ml-num--sun { color: var(--red); }
+.ml-num--sat { color: var(--work); }
+.ml-dow { font-size: 9px; font-weight: 700; color: var(--muted); }
+.ml-dow--sun { color: var(--red); }
+.ml-dow--sat { color: var(--work); }
+
+.ml-shift { min-width: 80px; display: flex; flex-direction: column; gap: 2px; padding-top: 2px; }
+.ml-shift-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px; display: inline-block; white-space: nowrap; }
+.ml-shift-badge.work { background: var(--workbg); color: #007c91; border: 1px solid var(--workbd); }
+.ml-shift-badge.off  { background: #ffd9d9; color: #a01010; border: 1px solid #ffb3b3; }
+.ml-shift-time { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+.ml-shift-empty { min-height: 20px; }
+
+.ml-icons { flex: 1; display: flex; flex-wrap: wrap; gap: 4px; padding-top: 3px; }
+.ml-chip {
+  display: flex; align-items: center; gap: 3px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 2px 7px;
+}
+.chip-icon { font-size: 13px; line-height: 1.4; }
+.chip-kanji { font-size: 12px; font-weight: 900; color: var(--green3); line-height: 1.4; }
+.ml-chip-label { font-size: 10px; color: var(--green3); font-weight: 700; }
+
+/* ══ 複数選択チップ行 ══ */
+.selected-chips-row {
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  background: #e6faef; border: 1.5px solid var(--green);
+  border-radius: 9px; padding: 7px 10px; margin-top: 10px; min-height: 40px;
+}
+.sel-chips-label { font-size: 10px; color: var(--muted); font-weight: 700; white-space: nowrap; }
+.sel-chip {
+  display: flex; align-items: center; gap: 3px;
+  background: var(--green); border-radius: 7px;
+  padding: 3px 8px; font-size: 11px; color: #fff; font-weight: 700;
+}
+.sel-empty { font-size: 11px; color: var(--muted); }
+
+/* 詳細入力の複数アイコン表示 */
+.detail-selected-multi {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 13px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+}
+
 /* ══ EMPTY STATE ══ */
 .empty-state { text-align:center; padding:32px 20px; color:var(--muted); font-size:14px; }
 .empty-icon  { font-size:40px; margin-bottom:10px; }
@@ -403,7 +516,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-9</div>
+    <div class="auth-logo">IRODORI MK-32</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -418,7 +531,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-9 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-32 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -426,18 +539,24 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   <div class="tab-bar">
     <button class="tab active" onclick="switchView('month')">📅 月</button>
     <button class="tab" onclick="switchView('day')">📋 日</button>
-    <button class="tab" onclick="switchView('input')">➕ 入力</button>
-    <button class="tab" onclick="switchView('diary')">📓 日記</button>
+    <button class="tab" onclick="switchView('kino')">⚙️ 機能</button>
+    <button class="tab" onclick="switchView('spec')">EDITH</button>
   </div>
 </div>
 
 <!-- NAV ROW -->
 <div class="nav-row">
   <div class="nav-title" id="navTitle"></div>
-  <div class="nav-btns">
-    <button class="nav-btn" onclick="navPrev()">‹</button>
-    <button class="nav-btn" onclick="goToday()" style="font-size:11px;font-family:var(--sans);font-weight:700;">今日</button>
-    <button class="nav-btn" onclick="navNext()">›</button>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <div id="calModeToggle" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px;">
+      <button id="calModeList" onclick="setCalMode('list')" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);">リスト</button>
+      <button id="calModeGrid" onclick="setCalMode('grid')" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;font-family:var(--sans);">グリッド</button>
+    </div>
+    <div class="nav-btns">
+      <button class="nav-btn" onclick="navPrev()">‹</button>
+      <button class="nav-btn" onclick="goToday()" style="font-size:11px;font-family:var(--sans);font-weight:700;">今日</button>
+      <button class="nav-btn" onclick="navNext()">›</button>
+    </div>
   </div>
 </div>
 
@@ -455,38 +574,130 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 // CONSTANTS — アイコン定義
 // ══════════════════════════════════════════
 const ICON_CATEGORIES = [
-  { label:'🍽️ 食事・カフェ', icons:[
-    {icon:'🍜',label:'外食'},{icon:'🍱',label:'和食'},{icon:'🥟',label:'中華'},
-    {icon:'🍽️',label:'ビュッフェ'},{icon:'☕',label:'カフェ'},{icon:'🍺',label:'飲み'},
+  { label:'🍽️ 食事・カフェ', key:'food', icons:[
+    {icon:'🌅',label:'モーニング'},{icon:'🥗',label:'ランチ'},{icon:'🍷',label:'ディナー'},
+    {icon:'🥐',label:'パン'},
+    {icon:'🍱',label:'和食'},{icon:'🥟',label:'中華'},
+    {icon:'🍽️',label:'ビュッフェ'},{icon:'☕',label:'カフェ'},{icon:'🍻',label:'飲み会'},
     {icon:'🍣',label:'寿司'},{icon:'🍕',label:'洋食'},{icon:'🍖',label:'焼肉'},
-    {icon:'🍛',label:'カレー'},
+    {icon:'🍛',label:'カレー'},{icon:'鰻',label:'うなぎ'},{icon:'鍋',label:'鍋料理'},
+    {icon:'🍰',label:'スイーツ'},
   ]},
-  { label:'🛍️ 買い物', icons:[
-    {icon:'🛒',label:'買い物'},{icon:'🥦',label:'食料品'},{icon:'🧴',label:'日用品'},
-    {icon:'👗',label:'服'},{icon:'📱',label:'家電'},{icon:'💊',label:'薬局'},
+  { label:'🛍️ 買い物', key:'shopping', icons:[
+    {icon:'🥦',label:'食料品'},{icon:'🧴',label:'日用品'},
+    {icon:'👗',label:'服'},{icon:'🖥️',label:'家電'},{icon:'KANJI:薬',label:'薬局'},
     {icon:'💼',label:'仕事用品'},
+    {icon:'📚',label:'本・文具'},{icon:'👞',label:'靴'},{icon:'👜',label:'鞄'},
+    {icon:'🪑',label:'家具'},{icon:'🖼️',label:'インテリアグッズ'},
   ]},
-  { label:'🎉 おでかけ・旅行', icons:[
+  { label:'🎉 おでかけ・旅行', key:'outing', icons:[
     {icon:'✈️',label:'旅行'},{icon:'🚗',label:'ドライブ'},{icon:'♨️',label:'温泉'},
     {icon:'🎡',label:'遊園地'},{icon:'🏞️',label:'観光'},{icon:'🏖️',label:'海'},
     {icon:'🏔️',label:'登山'},{icon:'🎆',label:'花火'},{icon:'⛺',label:'キャンプ'},
+    {icon:'🎬',label:'映画'},{icon:'🎤',label:'カラオケ'},{icon:'⛳',label:'ゴルフ'},
+    {icon:'🎣',label:'釣り'},{icon:'📌',label:'その他'},
   ]},
-  { label:'🌸 季節・イベント', icons:[
-    {icon:'🌸',label:'花見'},{icon:'🍁',label:'紅葉'},{icon:'⛄',label:'雪遊び'},
-    {icon:'🎃',label:'ハロウィン'},{icon:'🎄',label:'クリスマス'},{icon:'🎊',label:'お祝い'},
+  { label:'🔧 メンテナンス', key:'maintenance', subcategories:[
+    { label:'🧍 体のメンテナンス', key:'maintenance_body', icons:[
+      {icon:'🏥',label:'病院'},{icon:'👂',label:'耳鼻科'},{icon:'🦷',label:'歯医者'},
+      {icon:'🩺',label:'内科'},{icon:'😴',label:'睡眠'},{icon:'💇',label:'理容室'},
+      {icon:'👁️',label:'眼科'},{icon:'💉',label:'健康診断'},
+    ]},
+    { label:'🚗 車のメンテナンス', key:'maintenance_car', icons:[
+      {icon:'🚙',label:'車検'},{icon:'🛢️',label:'オイル交換'},{icon:'🔩',label:'エレメント交換'},
+      {icon:'🛞',label:'タイヤ交換'},{icon:'📋',label:'定期点検'},{icon:'🔧',label:'修理'},
+    ]},
+    { label:'🛠️ 道具のメンテナンス', key:'maintenance_tool', icons:[
+      {icon:'👟',label:'靴のインソール'},{icon:'🛏️',label:'枕のメンテ'},{icon:'👔',label:'クリーニング'},
+    ]},
   ]},
-  { label:'🎯 その他・行動', icons:[
-    {icon:'🏥',label:'病院'},{icon:'🎬',label:'映画'},{icon:'🎤',label:'カラオケ'},
-    {icon:'⛳',label:'ゴルフ'},{icon:'🔧',label:'DIY'},{icon:'💇',label:'散髪'},
+  { label:'🎊 冠婚葬祭', key:'ceremony', icons:[
+    {icon:'🙏',label:'法事'},{icon:'🪦',label:'お墓参り'},{icon:'⛩️',label:'初詣'},
+    {icon:'🎋',label:'お盆'},{icon:'🌾',label:'お彼岸'},{icon:'💒',label:'結婚式'},
+    {icon:'🖤',label:'葬儀'},{icon:'🕯️',label:'通夜'},
   ]},
 ];
 
+// カテゴリー・サブカテゴリーの一覧をフラット化（色設定・アイコン検索用）
+// colorGroup: 色設定の単位となるキー（メンテナンスはサブカテゴリー単位、他は大カテゴリー単位）
+const COLOR_GROUPS = [];
+ICON_CATEGORIES.forEach(cat => {
+  if (cat.subcategories) {
+    cat.subcategories.forEach(sub => {
+      COLOR_GROUPS.push({ key: sub.key, label: cat.label + '（' + sub.label.replace(/^[^\s]+\s*/, '') + '）', shortLabel: sub.label });
+    });
+  } else {
+    COLOR_GROUPS.push({ key: cat.key, label: cat.label, shortLabel: cat.label });
+  }
+});
+
+// アイコン文字列 → { categoryLabel, colorGroupKey } の逆引き
+const ICON_LOOKUP = {};
+ICON_CATEGORIES.forEach(cat => {
+  if (cat.subcategories) {
+    cat.subcategories.forEach(sub => {
+      sub.icons.forEach(ic => { ICON_LOOKUP[ic.icon] = { categoryLabel: cat.label, subLabel: sub.label, colorGroupKey: sub.key }; });
+    });
+  } else {
+    cat.icons.forEach(ic => { ICON_LOOKUP[ic.icon] = { categoryLabel: cat.label, subLabel: null, colorGroupKey: cat.key }; });
+  }
+});
+function getIconMeta(icon) {
+  return ICON_LOOKUP[icon] || { categoryLabel: '', subLabel: null, colorGroupKey: null };
+}
+
+// ══════════════════════════════════════════
+// カテゴリー色設定
+// ══════════════════════════════════════════
+const CATEGORY_COLOR_PALETTE = [
+  '#2846D6','#8EDC4B','#D628AB','#4BDCD5','#D69B28','#804BDC','#28D636','#DC4B6A',
+  '#2880D6','#BFDC4B','#C628D6','#4BDCA5','#D66128','#504BDC','#55D628','#DC4B9A',
+  '#28BAD6','#DCC94B','#8C28D6','#4BDC74','#D6282A','#4B76DC','#8FD628','#DC4BCB',
+  '#28D6B7','#DC984B','#5228D6','#52DC4B','#D62864','#4BA7DC',
+];
+const CATEGORY_COLOR_KEY = 'irodori_category_colors_v1';
+function loadCategoryColors() {
+  try { return JSON.parse(localStorage.getItem(CATEGORY_COLOR_KEY) || '{}'); } catch { return {}; }
+}
+function saveCategoryColors(d) {
+  localStorage.setItem(CATEGORY_COLOR_KEY, JSON.stringify(d));
+}
+let categoryColors = loadCategoryColors();
+function getCategoryColor(colorGroupKey) {
+  return categoryColors[colorGroupKey] || '#E7EFE4';
+}
+let colorSettingsEditMode = false;
+
 const DOW = ['日','月','火','水','木','金','土'];
+
+// 漢字アイコン判定（絵文字でない1〜3文字の漢字・ひらがな）
+function isKanjiIcon(icon) {
+  return icon && !icon.startsWith('KANJI:') && /^[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]{1,4}$/.test(icon);
+}
+function renderIconDisp(icon, size) {
+  if (!icon) return '';
+  const raw = icon.startsWith('KANJI:') ? icon.replace('KANJI:','') : icon;
+  if (isKanjiIcon(raw) || icon.startsWith('KANJI:')) {
+    return `<span style="font-size:${size||18}px;font-weight:900;color:inherit;line-height:1;">${raw}</span>`;
+  }
+  return raw;
+}
 
 // ══════════════════════════════════════════
 // STORAGE
 // ══════════════════════════════════════════
 const STORAGE_KEY = 'irodori_data_v1';
+const OKUSURI_KEY = 'irodori_okusuri_v1';
+
+function loadOkusuriData() {
+  try { return JSON.parse(localStorage.getItem(OKUSURI_KEY) || '[]'); } catch { return []; }
+}
+function saveOkusuriData(d) {
+  localStorage.setItem(OKUSURI_KEY, JSON.stringify(d));
+  showToast('保存しました ✓');
+}
+let okusuriData = loadOkusuriData();
+let okusuriSelected = null;
 const TT_STORAGE_KEY = 'mkx_data_v2'; // TIMETABLE側のデータキー
 
 // ── TIME TABLE共有：シフトテーブル（TIME TABLEと同一データ） ──
@@ -500,13 +711,9 @@ const TT_NEW_SHIFT_TABLE = {
 "201交番":{"start":"12:43","end":"23:57"},"202交番":{"start":"11:43","end":"23:47"},"203交番":{"start":"13:40","end":"23:18"},"204交番":{"start":"12:50","end":"22:43"},"205交番":{"start":"10:40","end":"21:43"},"206交番":{"start":"07:04","end":"20:11"},"207交番":{"start":"07:16","end":"19:51"},"208交番":{"start":"06:11","end":"19:09"},"209交番":{"start":"05:44","end":"19:00"},"210交番":{"start":"05:37","end":"17:07"},"211交番":{"start":"11:33","end":"22:48"},"212交番":{"start":"09:44","end":"22:05"},"213交番":{"start":"09:50","end":"21:55"},"214交番":{"start":"08:36","end":"21:28"},"215交番":{"start":"06:39","end":"17:15"},"216交番":{"start":"07:33","end":"20:58"},"218交番":{"start":"05:51","end":"17:25"},"219交番":{"start":"05:44","end":"14:28"},"220交番":{"start":"05:41","end":"13:09"},"221交番":{"start":"08:00","end":"20:30"},"222交番":{"start":"06:43","end":"20:57"},"223交番":{"start":"08:40","end":"19:02"},"224交番":{"start":"05:46","end":"19:07"},"225交番":{"start":"05:31","end":"14:40"},"226交番":{"start":"06:23","end":"19:26"},"227交番":{"start":"06:19","end":"20:19"},"228交番":{"start":"05:58","end":"18:31"},"229交番":{"start":"05:50","end":"14:02"},"231交番":{"start":"11:51","end":"22:08"},"232交番":{"start":"11:56","end":"23:45"},"233交番":{"start":"13:50","end":"23:32"},"234交番":{"start":"13:01","end":"22:54"},"235交番":{"start":"10:03","end":"22:24"},"236交番":{"start":"08:09","end":"21:28"},"237交番":{"start":"06:37","end":"20:16"},"238交番":{"start":"06:54","end":"20:23"},"239交番":{"start":"06:50","end":"19:19"},"240交番":{"start":"05:50","end":"17:55"},"241交番":{"start":"11:01","end":"22:56"},"242交番":{"start":"09:43","end":"21:33"},"249交番":{"start":"05:43","end":"14:18"},
 "401交番":{"start":"12:43","end":"23:57"},"402交番":{"start":"11:43","end":"23:47"},"403交番":{"start":"13:40","end":"23:18"},"404交番":{"start":"12:50","end":"22:43"},"405交番":{"start":"10:40","end":"21:43"},"406交番":{"start":"07:04","end":"20:11"},"407交番":{"start":"07:16","end":"19:51"},"408交番":{"start":"06:11","end":"19:09"},"409交番":{"start":"05:44","end":"19:00"},"410交番":{"start":"05:37","end":"17:07"},"411交番":{"start":"11:33","end":"22:48"},"412交番":{"start":"09:44","end":"22:05"},"413交番":{"start":"09:50","end":"21:55"},"414交番":{"start":"08:36","end":"21:28"},"415交番":{"start":"06:39","end":"17:15"},"416交番":{"start":"07:33","end":"20:58"},"418交番":{"start":"05:51","end":"17:31"},"419交番":{"start":"05:44","end":"14:28"},"420交番":{"start":"05:41","end":"13:09"},"421交番":{"start":"06:38","end":"20:30"},"422交番":{"start":"06:43","end":"20:57"},"423交番":{"start":"08:46","end":"19:02"},"424交番":{"start":"05:46","end":"19:07"},"425交番":{"start":"05:31","end":"14:40"},"426交番":{"start":"06:23","end":"19:26"},"427交番":{"start":"06:19","end":"20:19"},"428交番":{"start":"05:58","end":"18:31"},"429交番":{"start":"05:50","end":"14:02"},"431交番":{"start":"11:51","end":"22:08"},"432交番":{"start":"11:56","end":"23:45"},"433交番":{"start":"13:50","end":"23:32"},"434交番":{"start":"13:01","end":"22:54"},"435交番":{"start":"10:03","end":"22:24"},"436交番":{"start":"08:09","end":"21:28"},"437交番":{"start":"06:37","end":"20:16"},"438交番":{"start":"06:54","end":"20:23"},"439交番":{"start":"06:50","end":"19:19"},"440交番":{"start":"05:50","end":"17:55"},"441交番":{"start":"11:01","end":"22:56"},"442交番":{"start":"09:43","end":"21:33"},"443交番":{"start":"08:09","end":"20:59"},"449交番":{"start":"05:43","end":"14:18"}
 };
-const TT_NEW_KOBAN_KEY = 'mkx_new_koban_v1';
+// TIME TABLE側は新旧切り替えを廃止し常に新テーブルを使用する仕様に変更済みのため、IRODORI側も合わせる
 function getTTEffectiveShiftTable(dateKey) {
-  try {
-    const cfg = JSON.parse(localStorage.getItem(TT_NEW_KOBAN_KEY) || 'null');
-    if (cfg && cfg.effectiveDate && dateKey >= cfg.effectiveDate) return TT_NEW_SHIFT_TABLE;
-  } catch(e) {}
-  return TT_SHIFT_TABLE;
+  return TT_NEW_SHIFT_TABLE;
 }
 
 function loadData() {
@@ -532,17 +739,19 @@ let appData = loadData();
 // ══════════════════════════════════════════
 const today = new Date();
 let view = 'month';
+let calMode = 'grid'; // 'list' or 'grid'
 let cursor = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = fmtDate(today);
 let inputDate = fmtDate(today);
 let selectedIcon = null;
 let showPlaceHistory = false;
 
-// 入力フォーム状態
-let formState = { icon:null, label:'', place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
-let editMode = false;      // 編集モードフラグ
-let editDateKey = null;    // 編集対象の日付キー
-let editEventIdx = null;   // 編集対象のインデックス
+// 入力フォーム状態（複数アイコン対応）
+let formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+let inputStep = 'icons'; // 'icons' or 'detail'
+let editMode = false;
+let editDateKey = null;
+let editEventIdx = null;
 
 // 日記フォーム状態
 let diaryState = { icons:[], text:'' };
@@ -563,31 +772,61 @@ function getTTShiftInfo(dateKey) {
   const rec = ttData[dateKey];
   if (!rec || !rec.shift) return null;
 
-  const HOLIDAY_SHIFTS = {'501交番':'公休日','502交番':'振替休日','503交番':'有給休暇'};
+  const HOLIDAY_SHIFTS = {'501交番':'公休日','502交番':'振替休日','503交番':'有給休暇','504交番':'📅 休日予定'};
   if (HOLIDAY_SHIFTS[rec.shift]) {
-    return { label: HOLIDAY_SHIFTS[rec.shift], start:null, end:null, type: 'paid' };
+    const t = rec.shift === '503交番' ? 'paid' : rec.shift === '504交番' ? 'plan' : 'off';
+    return { label: HOLIDAY_SHIFTS[rec.shift], start:null, end:null, type: t };
   }
   if (rec.shift === 'custom') {
     return { label: rec.customLabel||'カスタム', start:rec.customStart, end:rec.customEnd, type:'work' };
   }
   if (rec.shift === 'compound') {
+    const tbl = getTTEffectiveShiftTable(dateKey);
+    // workItems（TIME TABLE側の新データ構造）があれば優先
+    const workItems = rec.workItems || [];
+    if (workItems.length > 0) {
+      const wiParts = [...workItems].sort((a,b) => (a.startTime||'99:99').localeCompare(b.startTime||'99:99'));
+      const wiLabel = wiParts.map(item => {
+        if (item.type === 'all') return item.code || '';
+        if (item.type === 'part') return (item.code || '') + '交番の一部';
+        return item.label || '';
+      }).join('＆');
+      const wiTimes = workItems.map(i => [i.startTime, i.endTime]).flat().filter(Boolean);
+      const wiStart = rec.multiWorkStart || (wiTimes.length ? wiTimes.reduce((a,b) => a < b ? a : b) : null);
+      const wiEnd   = rec.multiWorkEnd   || (wiTimes.length ? wiTimes.reduce((a,b) => a > b ? a : b) : null);
+      return { label: wiLabel || '複合業務', start: wiStart, end: wiEnd, type:'work' };
+    }
+    // 旧データ構造（compoundKobans / taskContents / compoundPartialData）
     const kobans = rec.compoundKobans || [];
     const tasks  = rec.taskContents  || [];
     const modes  = rec.compoundKobanModes || {};
-    const tbl = getTTEffectiveShiftTable(dateKey);
-    let allTimes = [];
+    const partialData = rec.compoundPartialData || {};
+    let allTimes = tasks.map(t => t.start).concat(tasks.map(t => t.end)).filter(Boolean);
+    const parts = [];
     kobans.forEach(n => {
+      let startTime = null;
       if (modes[n] === 'all') {
         const s = tbl[String(n).padStart(3,'0') + '交番'];
-        if (s) { allTimes.push(s.start); allTimes.push(s.end); }
+        if (s) { allTimes.push(s.start); allTimes.push(s.end); startTime = s.start; }
+      } else {
+        const pd = partialData[n] || {};
+        if (pd.start) allTimes.push(pd.start);
+        if (pd.end) allTimes.push(pd.end);
+        startTime = pd.start || null;
       }
+      const label = modes[n]==='all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`;
+      parts.push({ label, startTime });
     });
-    tasks.forEach(t => { if(t.start) allTimes.push(t.start); if(t.end) allTimes.push(t.end); });
+    tasks.forEach(t => parts.push({ label: t.name || '', startTime: t.start || null }));
+    parts.sort((a,b) => {
+      if (!a.startTime && !b.startTime) return 0;
+      if (!a.startTime) return 1;
+      if (!b.startTime) return -1;
+      return a.startTime.localeCompare(b.startTime);
+    });
     const start = rec.compoundManualStart || (allTimes.length ? allTimes.reduce((a,b) => a < b ? a : b) : null);
     const end   = rec.compoundManualEnd   || (allTimes.length ? allTimes.reduce((a,b) => a > b ? a : b) : null);
-    const kobanLabels = kobans.map(n => modes[n]==='all' ? `${String(n).padStart(3,'0')}交番` : `${String(n).padStart(3,'0')}交番の一部`);
-    const taskLabels  = tasks.map(t => t.name);
-    const label = [...kobanLabels,...taskLabels].join('＆') || '複合業務';
+    const label = parts.length ? parts.map(p => p.label).join('＆') : (rec.compoundLabel || '複合業務');
     return { label, start, end, type:'work' };
   }
   // 通常交番：シフトテーブルから時間を取得
@@ -611,17 +850,23 @@ function getTTLife(dateKey) {
 // VIEW SWITCHING
 // ══════════════════════════════════════════
 function switchView(v) {
+  if (v !== 'input') {
+    formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+    inputStep = 'icons';
+  }
   view = v;
   document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['month','day','input','diary'][i] === v);
+    t.classList.toggle('active', ['month','day','kino','spec'][i] === v);
   });
   const fab = document.getElementById('fab');
-  fab.style.display = (v === 'input' || v === 'diary') ? 'none' : 'flex';
+  fab.style.display = (v === 'kino' || v === 'spec' || v === 'okusuri' || v === 'okusuri_input' || v === 'okusuri_detail' || v === 'okusuri_qr' || v === 'colorsettings' || v === 'eventDetail') ? 'none' : 'flex';
   render();
 }
 
 function onFab() {
   inputDate = selectedDate;
+  formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+  inputStep = 'icons';
   switchView('input');
 }
 
@@ -641,32 +886,74 @@ function goToday() {
   render();
 }
 
+function setCalMode(mode) {
+  calMode = mode;
+  const toggle = document.getElementById('calModeToggle');
+  if (toggle) {
+    document.getElementById('calModeList').style.background = mode === 'list' ? 'var(--green)' : 'transparent';
+    document.getElementById('calModeList').style.color      = mode === 'list' ? '#fff' : 'var(--muted)';
+    document.getElementById('calModeGrid').style.background = mode === 'grid' ? 'var(--green)' : 'transparent';
+    document.getElementById('calModeGrid').style.color      = mode === 'grid' ? '#fff' : 'var(--muted)';
+  }
+  renderMonth();
+}
+
 function updateNavTitle() {
   const el = document.getElementById('navTitle');
+  const toggle = document.getElementById('calModeToggle');
   if (view === 'month') {
     el.textContent = `${cursor.getFullYear()}年${cursor.getMonth()+1}月`;
-  } else if (view === 'day') {
-    const d = parseDate(selectedDate);
-    el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
-  } else if (view === 'input') {
-    el.textContent = '予定を入力';
+    if (toggle) toggle.style.display = 'flex';
   } else {
-    el.textContent = '日記';
+    if (toggle) toggle.style.display = 'none';
+    if (view === 'day') {
+      const d = parseDate(selectedDate);
+      el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
+    } else if (view === 'kino') {
+      el.textContent = '機能';
+    } else if (view === 'okusuri') {
+      el.textContent = 'お薬手帳';
+    } else if (view === 'okusuri_input') {
+      el.textContent = 'お薬を登録';
+    } else if (view === 'okusuri_detail') {
+      el.textContent = '処方履歴';
+    } else if (view === 'okusuri_qr') {
+      el.textContent = 'QR読み取り';
+    } else if (view === 'eventDetail') {
+      el.textContent = '予定の詳細';
+    } else if (view === 'spec') {
+      el.textContent = 'EDITH';
+    } else {
+      el.textContent = '';
+    }
   }
 }
 
 function render() {
   updateNavTitle();
-  if (view === 'month')     renderMonth();
-  else if (view === 'day')  renderDay();
-  else if (view === 'input') renderInput();
-  else                       renderDiary();
+  if (view === 'month')      renderMonth();
+  else if (view === 'day')   renderDay();
+  else if (view === 'input')         renderInput();
+  else if (view === 'kino')          renderKino();
+  else if (view === 'okusuri')       renderOkusuri();
+  else if (view === 'okusuri_qr')    renderOkusuriQr();
+  else if (view === 'okusuri_input') renderOkusuriInput();
+  else if (view === 'okusuri_detail')renderOkusuriDetail();
+  else if (view === 'colorsettings') renderColorSettings();
+  else if (view === 'eventDetail')   renderEventDetail();
+  else if (view === 'spec')          renderSpec();
+  else                               renderDay();
 }
 
 // ══════════════════════════════════════════
-// MONTH VIEW
+// MONTH VIEW（リスト／グリッド切り替え）
 // ══════════════════════════════════════════
 function renderMonth() {
+  if (calMode === 'grid') renderMonthGrid();
+  else renderMonthList();
+}
+
+function renderMonthList() {
   const c = document.getElementById('viewContainer');
   const year = cursor.getFullYear(), month = cursor.getMonth();
   const daysInMonth = new Date(year, month+1, 0).getDate();
@@ -674,53 +961,152 @@ function renderMonth() {
 
   let html = '<div class="month-list">';
   for (let d = 1; d <= daysInMonth; d++) {
-    const dt  = new Date(year, month, d);
-    const key = fmtDate(dt);
-    const dow = dt.getDay();
-    const isToday = key === todayKey;
-    const isSel   = key === selectedDate;
+    const dateKey = fmtDate(new Date(year, month, d));
+    const dow = new Date(year, month, d).getDay();
+    const dowLabel = ['日','月','火','水','木','金','土'][dow];
+    const isToday = dateKey === todayKey;
+    const isSun = dow === 0, isSat = dow === 6;
+    const ttInfo = getTTShiftInfo(dateKey);
+    const rec = appData[dateKey] || {};
+    const events = rec.events || [];
 
-    let rowCls = 'day-row';
-    if (dow === 0) rowCls += ' sun';
-    if (dow === 6) rowCls += ' sat';
-    if (isToday)   rowCls += ' today';
-    if (isSel && !isToday) rowCls += ' selected';
+    let rowCls = 'ml-row';
+    if (isToday) rowCls += ' ml-today';
+    if (isSun)   rowCls += ' ml-sun';
+    if (isSat)   rowCls += ' ml-sat';
 
-    // TIMETABLE連携
-    const ttInfo = getTTShiftInfo(key);
-    let workPillHtml = '';
+    const dateCls = isSun ? 'ml-date ml-date--sun' : isSat ? 'ml-date ml-date--sat' : 'ml-date';
+    const numCls  = isToday ? 'ml-date-num-today' : (isSun ? 'ml-date-num ml-num--sun' : isSat ? 'ml-date-num ml-num--sat' : 'ml-date-num');
+    const dowCls  = isSun ? 'ml-dow ml-dow--sun' : isSat ? 'ml-dow ml-dow--sat' : 'ml-dow';
+    const dateInner = `<div class="${numCls}">${d}</div><div class="${dowCls}">${dowLabel}</div>`;
+
+    let shiftHtml = '<div class="ml-shift-empty"></div>';
     if (ttInfo) {
-      if (ttInfo.type === 'off' || ttInfo.type === 'paid') {
-        const cls = ttInfo.type === 'paid' ? 'work-pill paid' : 'work-pill off';
-        workPillHtml = `<span class="${cls}">${ttInfo.label}</span>`;
+      if (ttInfo.type === 'plan') {
+        shiftHtml = `<div class="ml-shift-badge" style="background:var(--orangebg);color:#a05000;border:1px solid var(--orangebd);">${ttInfo.label}</div>`;
+      } else if (ttInfo.type === 'paid' || ttInfo.type === 'off') {
+        shiftHtml = `<div class="ml-shift-badge off">${ttInfo.label}</div>`;
       } else {
-        let timeStr = ttInfo.label;
-        if (ttInfo.start && ttInfo.end) {
-          timeStr = `${ttInfo.label} ${ttInfo.start}–${ttInfo.end}`;
-        } else if (ttInfo.start) {
-          timeStr = `${ttInfo.label} ${ttInfo.start}〜`;
+        const ttRec = loadTTData()[dateKey] || {};
+        let shiftLabel = '';
+        if (ttRec.shift === 'compound') {
+          const kobans = ttRec.compoundKobans || [];
+          const modes  = ttRec.compoundKobanModes || {};
+          shiftLabel = kobans.map(n => modes[n]==='all'
+            ? String(n).padStart(3,'0')
+            : String(n).padStart(3,'0')+'一部').join('＆') || '複合';
+        } else {
+          shiftLabel = ttInfo.label.replace('交番','').trim().padStart(3,'0');
         }
-        workPillHtml = `<span class="work-pill">${timeStr}</span>`;
+        const timeStr = (ttInfo.start && ttInfo.end) ? `${ttInfo.start}〜${ttInfo.end}` : '';
+        shiftHtml = `<div class="ml-shift-badge work">${shiftLabel}</div>${timeStr ? `<div class="ml-shift-time">${timeStr}</div>` : ''}`;
       }
-    } else {
-      workPillHtml = `<span class="work-pill none">—</span>`;
     }
 
-    // プライベートアイコン
-    const rec = appData[key] || {};
-    const events = rec.events || [];
-    const iconHtml = events.map(e => `<span class="priv-icon">${e.icon}</span>`).join('');
+    let iconsHtml = '';
+    if (events.length > 0) {
+      iconsHtml = events.map(e => {
+        const icList = e.icons || (e.icon ? [{icon:e.icon, label:e.label||''}] : []);
+        const iconDisp = icList.map(ic => {
+          const raw = ic.icon.startsWith('KANJI:') ? ic.icon.replace('KANJI:','') : ic.icon;
+          return isKanjiIcon(raw) || ic.icon.startsWith('KANJI:')
+            ? `<span class="chip-kanji">${raw}</span>`
+            : `<span class="chip-icon">${ic.icon}</span>`;
+        }).join('');
+        const labelDisp = icList.map(ic => ic.label).join('・');
+        return `<div class="ml-chip">${iconDisp}<span class="ml-chip-label">${labelDisp}</span></div>`;
+      }).join('');
+    }
 
-    html += `<div class="${rowCls}" onclick="selectDate('${key}')">
-      <div class="date-col">
-        <div class="dow">${DOW[dow]}</div>
-        <div class="num">${d}</div>
-      </div>
-      ${workPillHtml}
-      <div class="priv-icons">${iconHtml}</div>
+    html += `<div class="${rowCls}" onclick="selectDate('${dateKey}')">
+      <div class="${dateCls}">${dateInner}</div>
+      <div class="ml-shift">${shiftHtml}</div>
+      <div class="ml-icons">${iconsHtml}</div>
     </div>`;
   }
   html += '</div>';
+  c.innerHTML = html;
+}
+
+function renderMonthGrid() {
+  const c = document.getElementById('viewContainer');
+  const year = cursor.getFullYear(), month = cursor.getMonth();
+  const todayKey = fmtDate(today);
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
+
+  let html = '<div class="month-grid"><div class="dow-row">';
+  ['日','月','火','水','木','金','土'].forEach((d,i) => {
+    const cls = i===0?'dow-cell sun':i===6?'dow-cell sat':'dow-cell';
+    html += `<div class="${cls}">${d}</div>`;
+  });
+  html += '</div><div class="cal-grid">';
+
+  // 前月の空白
+  for (let i = 0; i < firstDow; i++) {
+    const d = prevDays - firstDow + 1 + i;
+    html += `<div class="cal-cell other-month"><div class="cal-date">${d}</div></div>`;
+  }
+
+  // 当月
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateKey = fmtDate(new Date(year, month, d));
+    const dow = new Date(year, month, d).getDay();
+    const isToday = dateKey === todayKey;
+    const isSun = dow === 0, isSat = dow === 6;
+    const ttInfo = getTTShiftInfo(dateKey);
+    const rec = appData[dateKey] || {};
+    const events = rec.events || [];
+
+    let cellCls = 'cal-cell';
+    if (isSun) cellCls += ' sun';
+    if (isSat) cellCls += ' sat';
+    if (isToday) cellCls += ' today';
+
+    let shiftChip = '';
+    if (ttInfo) {
+      const cls = ttInfo.type === 'work' ? 'work' : (ttInfo.type === 'paid' || ttInfo.type === 'off') ? 'off' : 'plan';
+      const ttRec = loadTTData()[dateKey] || {};
+      let lbl = ttInfo.label;
+      if (ttInfo.type === 'work') {
+        if (ttRec.shift === 'compound') {
+          const kobans = ttRec.compoundKobans || [];
+          lbl = kobans.map(n => String(n).padStart(3,'0')).join('＆') || '複合';
+        } else {
+          lbl = ttInfo.label.replace('交番','').trim().padStart(3,'0');
+        }
+      }
+      shiftChip = `<span class="cal-shift ${cls}">${lbl}</span>`;
+    }
+
+    let iconHtml = '';
+    if (events.length > 0) {
+      iconHtml = '<div class="cal-irodori-icons">';
+      events.forEach(e => {
+        const icList = e.icons || (e.icon ? [{icon:e.icon}] : []);
+        icList.forEach(ic => {
+          const raw = ic.icon.startsWith('KANJI:') ? ic.icon.replace('KANJI:','') : ic.icon;
+          iconHtml += `<span class="cal-irodori-icon">${isKanjiIcon(raw)||ic.icon.startsWith('KANJI:') ? raw : ic.icon}</span>`;
+        });
+      });
+      iconHtml += '</div>';
+    }
+
+    html += `<div class="${cellCls}" onclick="selectDate('${dateKey}')">
+      <div class="cal-date">${d}</div>
+      ${shiftChip}${iconHtml}
+    </div>`;
+  }
+
+  // 翌月の空白
+  const total = firstDow + daysInMonth;
+  const remain = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= remain; i++) {
+    html += `<div class="cal-cell other-month"><div class="cal-date">${i}</div></div>`;
+  }
+
+  html += '</div></div>';
   c.innerHTML = html;
 }
 
@@ -732,6 +1118,240 @@ function selectDate(key) {
 // ══════════════════════════════════════════
 // DAY VIEW
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// タイムライン構築ユーティリティ
+// ══════════════════════════════════════════
+function getTTCalc(dateKey) {
+  const ttData = loadTTData();
+  const rec = ttData[dateKey];
+  if (!rec || !rec.calc) return null;
+  return rec.calc;
+}
+function parseHM(s) {
+  if (!s || typeof s !== 'string' || s.indexOf(':') === -1) return null;
+  const parts = s.split(':').map(Number);
+  if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+  return parts[0]*60 + parts[1];
+}
+function fmtHM(min) {
+  min = ((Math.round(min) % 1440) + 1440) % 1440;
+  const h = Math.floor(min/60), m = min % 60;
+  return `${h}:${String(m).padStart(2,'0')}`;
+}
+function fmtDurationHM(min) {
+  min = Math.max(0, Math.round(min));
+  const h = Math.floor(min/60), m = min % 60;
+  return m === 0 ? `${h}時間` : `${h}時間${m}分`;
+}
+function fmtMonthDay(dateKey) {
+  const d = parseDate(dateKey);
+  return `${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+const TL_PX_PER_MIN = 32/60; // 1時間=32px
+const TL_TOTAL_H = Math.round(1440 * TL_PX_PER_MIN);
+
+function buildTimelineBands(dateKey) {
+  const bands = [];
+  const ttInfo = getTTShiftInfo(dateKey);
+  const ttLife = getTTLife(dateKey);
+  const ttCalc = getTTCalc(dateKey);
+
+  const dObj = parseDate(dateKey);
+  const tmrw = new Date(dObj); tmrw.setDate(tmrw.getDate()+1);
+  const tomorrowInfo = getTTShiftInfo(fmtDate(tmrw));
+
+  // 😴 睡眠：0:00〜起床（その日の起床に対応する前夜の就寝から続く分）
+  // ラベルにはTIME TABLE側の実際の就寝時刻（当日データのsleep）を表示する
+  const wakeMin = ttLife ? parseHM(ttLife.wake) : null;
+  if (wakeMin !== null) {
+    const sleepStr = ttLife && ttLife.sleep ? ttLife.sleep : null;
+    const sleepMin = sleepStr !== null ? parseHM(sleepStr) : null;
+    const sleepStartLabel = sleepStr !== null ? sleepStr : '0:00';
+    const sleepDurMin = sleepMin !== null ? ((wakeMin - sleepMin + 1440) % 1440) : wakeMin;
+    bands.push({ type:'sleep', start:0, end:wakeMin, bg:'#DFF3AE', fg:'#3B6D11',
+      label:'😴 睡眠', timeLabel:`${sleepStartLabel}〜${fmtHM(wakeMin)}`, durLabel: fmtDurationHM(sleepDurMin) });
+  }
+
+  // 🕐 勤務間時間（朝）：前日の仕事終了〜当日の仕事開始
+  // 前日が仕事でない（終了時刻が無い）場合はこの帯自体を表示しない
+  const isWork = ttInfo && ttInfo.type === 'work';
+  const workStartMin = isWork ? parseHM(ttInfo.start) : null;
+  const workEndMinRaw = isWork ? parseHM(ttInfo.end) : null;
+  const yesterday = new Date(dObj); yesterday.setDate(yesterday.getDate()-1);
+  const yesterdayInfo = getTTShiftInfo(fmtDate(yesterday));
+  const prevWorkEndStr = (yesterdayInfo && yesterdayInfo.type === 'work' && yesterdayInfo.end) ? yesterdayInfo.end : null;
+  if (workStartMin !== null && prevWorkEndStr !== null) {
+    const prevWorkEndMin = parseHM(prevWorkEndStr);
+    const gapDurMin = prevWorkEndMin !== null ? ((workStartMin - prevWorkEndMin + 1440) % 1440) : workStartMin;
+    bands.push({ type:'workgap', start:0, end:workStartMin, bg:'#FBDBDB', fg:'#A32D2D',
+      label:'🕐 勤務間', timeLabel:`${prevWorkEndStr}〜${fmtHM(workStartMin)}`, durLabel: fmtDurationHM(gapDurMin) });
+  }
+  // 🕐 勤務間時間（夜）：当日の仕事終了〜24:00（翌日も仕事の場合のみ表示）
+  let workEndMin = workEndMinRaw;
+  if (workEndMin !== null && workStartMin !== null && workEndMin <= workStartMin) workEndMin += 0; // 日跨りは今日分のみ表示
+  if (workEndMin !== null && workEndMin < 1440 && tomorrowInfo && tomorrowInfo.type === 'work') {
+    bands.push({ type:'workgap', start:workEndMin, end:1440, bg:'#FBDBDB', fg:'#A32D2D',
+      label:'🕐 勤務間', timeLabel:`${fmtHM(workEndMin)}〜24:00`, durLabel: fmtDurationHM(1440 - workEndMin) });
+  }
+
+  // 🌅 支度帯：起床〜会社到着
+  if (wakeMin !== null) {
+    let arriveMin = ttCalc && ttCalc.arriveTime ? parseHM(ttCalc.arriveTime) : null;
+    if (arriveMin === null && ttLife) arriveMin = parseHM(ttLife.commute);
+    if (arriveMin === null && ttLife) arriveMin = parseHM(ttLife.ready);
+    if (arriveMin === null) arriveMin = wakeMin + 60;
+    const parts = [`🌅${fmtHM(wakeMin)}起床`];
+    if (ttLife && ttLife.ready)   parts.push(`🚿${ttLife.ready}準備`);
+    if (ttLife && ttLife.commute) parts.push(`🚃${ttLife.commute}出社`);
+    if (ttCalc && ttCalc.arriveTime) parts.push(`🏢${ttCalc.arriveTime}到着`);
+    bands.push({ type:'prep', start:wakeMin, end:Math.max(arriveMin, wakeMin+40), bg:'#FCEFB8', fg:'#854F0B',
+      label: parts.join(' → '), timeLabel:'' });
+  }
+
+  // 🚌 仕事：実際の交番・業務内容を表示（複合業務は＆でつないだ内容がそのまま入る）
+  if (workStartMin !== null && workEndMinRaw !== null) {
+    const endClamped = workEndMinRaw > workStartMin ? workEndMinRaw : 1440;
+    const workContent = (ttInfo && ttInfo.label) ? ttInfo.label : '仕事';
+    bands.push({ type:'work', start:workStartMin, end:endClamped, bg:'#DCEBFB', fg:'#0C447C',
+      label:`🚌 ${workContent}`, timeLabel:`${fmtHM(workStartMin)}〜${fmtHM(endClamped)}` });
+  }
+
+  // プライベート予定（時刻設定ありのもののみ。未設定は別リストで表示）
+  const rec = appData[dateKey] || {};
+  const events = rec.events || [];
+  events.forEach((e, idx) => {
+    if (!e.timeStart) return;
+    const sMinRaw = parseHM(e.timeStart);
+    if (sMinRaw === null) return;
+    const eMinRaw = e.timeEnd ? parseHM(e.timeEnd) : null;
+
+    const dStart = e.dateStart || dateKey;
+    const dEnd   = e.dateEnd   || dStart;
+    const isMultiDay  = dStart !== dEnd;
+    const isFirstDay  = dateKey === dStart;
+    const isLastDay   = dateKey === dEnd;
+
+    let sMin, eMin;
+    if (isMultiDay) {
+      // 複数日予定は時刻の大小に関係なく、初日=開始〜24:00／最終日=0:00〜終了／中日=終日 で分割する
+      if (isFirstDay)      { sMin = sMinRaw; eMin = 1440; }
+      else if (isLastDay)  { sMin = 0;       eMin = (eMinRaw !== null ? eMinRaw : 1440); }
+      else                 { sMin = 0;       eMin = 1440; }
+    } else {
+      sMin = sMinRaw;
+      eMin = (eMinRaw === null || eMinRaw <= sMinRaw) ? sMinRaw + 30 : eMinRaw;
+    }
+
+    // 複数日にわたる予定は、開始日・終了日を含めたラベルを全ての該当日に表示する
+    const timeLabel = isMultiDay
+      ? `${fmtMonthDay(dStart)}${e.timeStart}〜${fmtMonthDay(dEnd)}${eMinRaw !== null ? fmtHM(eMinRaw) : fmtHM(eMin)}`
+      : `${fmtHM(sMin)}〜${fmtHM(eMin)}`;
+
+    const icList = e.icons || (e.icon ? [{icon:e.icon, label:e.label||''}] : []);
+    const mainIcon = icList[0] ? icList[0].icon : '';
+    const meta = getIconMeta(mainIcon);
+    const bg = getCategoryColor(meta.colorGroupKey);
+    const labelDisp = icList.map(ic => ic.label).join('・');
+    const name = e.place || labelDisp;
+    bands.push({
+      type:'private', start:sMin, end:eMin, bg, fg:'#2b3b28',
+      label:`${renderIconDisp(mainIcon,12)} ${name}`,
+      timeLabel,
+      subLabel: meta.subLabel || meta.categoryLabel,
+      eventIdx: idx, dateKey
+    });
+  });
+
+  return bands;
+}
+
+// 重なりのある帯をグループ化し、各帯を自身の実時間全体で均等分割する
+function layoutBands(bands) {
+  const sorted = bands.slice().sort((a,b) => a.start - b.start || a.end - b.end);
+  const clusters = [];
+  let cur = [], curMaxEnd = -1;
+  sorted.forEach(b => {
+    if (cur.length === 0 || b.start < curMaxEnd) {
+      cur.push(b);
+      curMaxEnd = Math.max(curMaxEnd, b.end);
+    } else {
+      clusters.push(cur);
+      cur = [b];
+      curMaxEnd = b.end;
+    }
+  });
+  if (cur.length) clusters.push(cur);
+
+  const laidOut = [];
+  clusters.forEach(cluster => {
+    const n = cluster.length;
+    cluster.forEach((b, colIdx) => laidOut.push({ ...b, colIdx, colCount: n }));
+  });
+  return laidOut;
+}
+
+// 帯の高さ・列数（幅）から、収まる範囲でできるだけ大きい文字サイズを決める
+function bandFontStyle(heightPx, colCount) {
+  const narrow = colCount > 1;
+  let cat, time;
+  if (heightPx >= 200)      { cat = 20; time = 18; }
+  else if (heightPx >= 120) { cat = 17; time = 16; }
+  else if (heightPx >= 70)  { cat = 15; time = 14; }
+  else if (heightPx >= 45)  { cat = 13; time = 13; }
+  else                      { cat = 12; time = 12; }
+  if (narrow) { cat = Math.max(11, cat - 2); time = Math.max(11, time - 2); }
+  return { cat, time, compact: heightPx < 45 };
+}
+
+function renderTimelineHtml(dateKey) {
+  const laidOut = layoutBands(buildTimelineBands(dateKey));
+
+  let hourLabelsHtml = '';
+  let gridlinesHtml = '';
+  for (let h = 0; h <= 24; h += 1) {
+    hourLabelsHtml += `<div class="tl-hour-label" style="top:${h*60*TL_PX_PER_MIN}px;">${h}:00</div>`;
+    gridlinesHtml  += `<div class="tl-gridline" style="top:${h*60*TL_PX_PER_MIN}px;"></div>`;
+  }
+
+  const bandsHtml = laidOut.map(b => {
+    const top = b.start * TL_PX_PER_MIN;
+    const height = Math.max((b.end - b.start) * TL_PX_PER_MIN, 16);
+    const width = 100 / b.colCount;
+    const left = b.colIdx * width;
+    const isPrivate = b.type === 'private';
+    const clickAttr = isPrivate ? ` onclick="showEventDetail('${b.dateKey}',${b.eventIdx})"` : '';
+    const cursorCss = isPrivate ? 'cursor:pointer;' : '';
+
+    const fs = bandFontStyle(height, b.colCount);
+    const timeAndDur = b.timeLabel ? (b.durLabel ? `${b.timeLabel}　${b.durLabel}` : b.timeLabel) : '';
+    let innerHtml;
+    if (fs.compact) {
+      const oneLine = [b.label, timeAndDur].filter(Boolean).join(' ');
+      innerHtml = `<div class="tl-band-cat" style="font-size:${fs.cat}px;white-space:nowrap;">${oneLine}</div>`;
+    } else {
+      innerHtml = `<div class="tl-band-cat" style="font-size:${fs.cat}px;">${b.label}</div>`
+        + (timeAndDur ? `<div class="tl-band-time" style="font-size:${fs.time}px;">${timeAndDur}</div>` : '')
+        + (b.subLabel ? `<div class="tl-band-sub">${b.subLabel}</div>` : '');
+    }
+    return `<div class="tl-band"${clickAttr} style="top:${top}px;height:${height}px;left:${left}%;width:${width}%;background:${b.bg};color:${b.fg};${cursorCss}">${innerHtml}</div>`;
+  }).join('');
+
+  let nowHtml = '';
+  if (dateKey === fmtDate(today)) {
+    const now = new Date();
+    const top = (now.getHours()*60 + now.getMinutes()) * TL_PX_PER_MIN;
+    nowHtml = `<div class="tl-now-line" style="top:${top}px;"></div><div class="tl-now-dot" style="top:${top-4}px;"></div>`;
+  }
+
+  return `<div class="tl-wrap">
+    <div class="tl-body" style="height:${TL_TOTAL_H}px;">
+      <div class="tl-hours" style="height:${TL_TOTAL_H}px;">${hourLabelsHtml}</div>
+      <div class="tl-track" style="height:${TL_TOTAL_H}px;">${gridlinesHtml}${bandsHtml}${nowHtml}</div>
+    </div>
+  </div>`;
+}
+
 function renderDay() {
   const c = document.getElementById('viewContainer');
   const key = selectedDate;
@@ -739,95 +1359,31 @@ function renderDay() {
   const events = rec.events || [];
   const diary  = rec.diary  || null;
 
-  // TIMETABLE連携データ
-  const ttInfo = getTTShiftInfo(key);
-  const ttLife = getTTLife(key);
+  const timelineHtml = renderTimelineHtml(key);
 
-  // 仕事カード
-  let workCardHtml = '';
-  if (ttInfo) {
-    const ttData = loadTTData();
-    const ttRec  = ttData[key] || {};
-    let shiftDisplay = ttInfo.label;
-    let timeDisplay  = '';
-    if (ttInfo.start && ttInfo.end) {
-      timeDisplay = `${ttInfo.start} – ${ttInfo.end}`;
-    }
-    let lifeHtml = '';
-    if (ttLife) {
-      const chips = [];
-      if (ttLife.sleep) chips.push(`🌙 就寝 ${ttLife.sleep}`);
-      if (ttLife.wake)  chips.push(`☀️ 起床 ${ttLife.wake}`);
-      if (ttLife.sleep && ttLife.wake) {
-        // 睡眠時間計算
-        const s = ttLife.sleep.split(':').map(Number);
-        const w = ttLife.wake.split(':').map(Number);
-        let sm = s[0]*60+s[1], wm = w[0]*60+w[1];
-        if (wm < sm) wm += 1440;
-        const diff = wm - sm;
-        const h = Math.floor(diff/60), m = diff%60;
-        chips.push(`😴 睡眠 ${h}h${m?m+'m':''}`);
-      }
-      lifeHtml = chips.map(c => `<span class="life-chip">${c}</span>`).join('');
-    }
-    workCardHtml = `
-    <div class="work-day-card">
-      <div class="work-day-head">💼 仕事 — TIMETABLE連携</div>
-      <div class="work-day-body">
-        <div class="work-main">
-          <span class="work-badge-lg">${shiftDisplay}</span>
-          ${timeDisplay ? `<span class="work-time-lg">${timeDisplay}</span>` : ''}
+  // 時刻未設定の予定（タイムラインとは別リストで、日記カードの上に表示）
+  const unscheduled = events.map((e,i)=>({e,i})).filter(({e}) => !e.timeStart);
+  let unschedHtml = '';
+  if (unscheduled.length > 0) {
+    const chips = unscheduled.map(({e,i}) => {
+      const icList = e.icons || (e.icon ? [{icon:e.icon, label:e.label||''}] : []);
+      const mainIcon = icList[0] ? icList[0].icon : '';
+      const meta = getIconMeta(mainIcon);
+      const labelDisp = icList.map(ic => ic.label).join('・');
+      const name = e.place || labelDisp;
+      const catName = meta.subLabel || meta.categoryLabel;
+      return `<div class="tl-unscheduled-chip" onclick="startEdit('${key}',${i})">
+        <span>${renderIconDisp(mainIcon,16)}</span>
+        <div>
+          <div class="tl-unscheduled-name">${name}</div>
+          ${catName ? `<div class="tl-unscheduled-cat">${catName}</div>` : ''}
         </div>
-        ${lifeHtml ? `<div class="life-chips">${lifeHtml}</div>` : ''}
-      </div>
-    </div>`;
-  }
-
-  // プライベート予定カード
-  let privHtml = '';
-  if (events.length > 0) {
-    privHtml = events.map((e,i) => {
-      // 日跨り表示の組み立て
-      let timeHtml = '';
-      if (e.isMultiDay) {
-        // 開始日の表示
-        const isStartDay = key === e.dateStart;
-        const isEndDay   = key === e.dateEnd;
-        if (isStartDay && isEndDay) {
-          timeHtml = e.timeStart ? `${e.timeStart} – ${e.timeEnd||''}` : '';
-        } else if (isStartDay) {
-          timeHtml = e.timeStart ? `IN ${e.timeStart}` : '開始';
-        } else if (isEndDay) {
-          timeHtml = e.timeEnd ? `OUT ${e.timeEnd}` : '終了';
-        } else {
-          timeHtml = '滞在中';
-        }
-      } else {
-        timeHtml = e.timeStart ? `${e.timeStart}${e.timeEnd?' – '+e.timeEnd:''}` : '';
-      }
-
-      // 日跨りバッジ
-      let multiDayBadge = '';
-      if (e.isMultiDay) {
-        const d1 = new Date(e.dateStart);
-        const d2 = new Date(e.dateEnd);
-        const nights = Math.round((d2-d1)/(1000*60*60*24));
-        multiDayBadge = `<span style="font-size:10px;font-weight:700;background:#e8faf2;color:var(--green2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;margin-left:4px;">${nights}泊</span>`;
-      }
-
-      return `<div class="priv-item">
-        <div class="priv-item-icon">${e.icon}</div>
-        <div class="priv-item-info">
-          <div class="priv-item-name">${e.place || e.label}${multiDayBadge}</div>
-          ${e.memo ? `<div class="priv-item-memo">${e.memo}</div>` : ''}
-        </div>
-        ${timeHtml ? `<div class="priv-item-time">${timeHtml}</div>` : ''}
-        <button class="priv-item-edit" onclick="startEdit('${key}',${i})" title="編集">✏️</button>
-        <button class="priv-item-del" onclick="deleteEvent('${key}',${i})">✕</button>
       </div>`;
     }).join('');
-  } else {
-    privHtml = `<div class="empty-state"><div class="empty-icon">📅</div>予定がありません<br><span style="font-size:12px;">＋ボタンから追加できます</span></div>`;
+    unschedHtml = `<div class="tl-unscheduled">
+      <div class="tl-unscheduled-label">時刻未設定</div>
+      <div class="tl-unscheduled-list">${chips}</div>
+    </div>`;
   }
 
   // 日記カード
@@ -844,123 +1400,177 @@ function renderDay() {
   }
 
   c.innerHTML = `<div class="day-view">
-    ${workCardHtml}
-
-    <div class="day-card">
-      <div class="day-card-head">
-        <span class="day-card-title">📅 プライベート</span>
-        <button class="small-btn" onclick="inputDate='${key}';switchView('input')">＋ 追加</button>
-      </div>
-      <div class="day-card-body">${privHtml}</div>
-    </div>
-
+    ${timelineHtml}
+    ${unschedHtml}
     <div class="diary-day-card">
       <div class="diary-day-head">
         <span>📓 今日の記録</span>
-        <button class="small-btn amber" onclick="inputDate='${key}';switchView('diary')">✏️ 編集</button>
       </div>
       <div class="diary-day-body">${diaryHtml}</div>
     </div>
   </div>`;
+
+  // 現在時刻付近まで自動スクロール
+  if (key === fmtDate(today)) {
+    requestAnimationFrame(() => {
+      const nowLine = c.querySelector('.tl-now-line');
+      if (nowLine) nowLine.scrollIntoView({ block:'center', behavior:'instant' });
+    });
+  }
 }
 
 // ══════════════════════════════════════════
-// INPUT VIEW
+// INPUT VIEW（複数アイコン選択対応）
 // ══════════════════════════════════════════
 function renderInput() {
   const c = document.getElementById('viewContainer');
   const fs = formState;
 
-  // アイコンカテゴリHTML
+  // アイコンボタンHTML生成
+  function iconBtnHtml(ic) {
+    const isSel = fs.icons.some(s => s.icon === ic.icon && s.label === ic.label);
+    const raw = ic.icon.startsWith('KANJI:') ? ic.icon.replace('KANJI:','') : ic.icon;
+    const isKanji = ic.icon.startsWith('KANJI:') || isKanjiIcon(raw);
+    const iconDisp = isKanji
+      ? `<span class="ib-kanji">${raw}</span>`
+      : `<span class="ib-icon">${ic.icon}</span>`;
+    return `<button class="icon-btn${isSel?' sel':''}" onclick="toggleIcon('${ic.icon}','${ic.label.replace(/'/g,"\\'")}')">
+      ${iconDisp}
+      <span class="ib-label">${ic.label}</span>
+    </button>`;
+  }
+
+  // カテゴリHTML（メンテナンスはサブカテゴリー単位で表示）
   let catHtml = '';
   ICON_CATEGORIES.forEach(cat => {
-    const iconsHtml = cat.icons.map(ic => {
-      const isSel = fs.icon === ic.icon && fs.label === ic.label;
-      return `<button class="icon-btn${isSel?' sel':''}" onclick="selectIcon('${ic.icon}','${ic.label}')">
-        <span class="ib-icon">${ic.icon}</span>
-        <span class="ib-label">${ic.label}</span>
-      </button>`;
-    }).join('');
-    catHtml += `<div class="cat-section">
-      <div class="cat-title">${cat.label}</div>
-      <div class="icon-grid">${iconsHtml}</div>
-    </div>`;
+    if (cat.subcategories) {
+      let subHtml = cat.subcategories.map(sub => `
+        <div class="cat-subsection">
+          <div class="cat-subtitle">${sub.label}</div>
+          <div class="icon-grid">${sub.icons.map(iconBtnHtml).join('')}</div>
+        </div>`).join('');
+      catHtml += `<div class="cat-section">
+        <div class="cat-title">${cat.label}</div>
+        ${subHtml}
+      </div>`;
+    } else {
+      catHtml += `<div class="cat-section">
+        <div class="cat-title">${cat.label}</div>
+        <div class="icon-grid">${cat.icons.map(iconBtnHtml).join('')}</div>
+      </div>`;
+    }
   });
 
-  // 詳細入力フォーム（アイコン選択後に展開）
-  let detailHtml = '';
-  if (fs.icon) {
-    // 場所履歴
-    const placeHistory = getPlaceHistory();
-    const filteredHistory = placeHistory.filter(p => !fs.place || p.includes(fs.place)).slice(0,5);
-    const histHtml = (fs.place && filteredHistory.length > 0)
-      ? `<div class="place-history">${filteredHistory.map(p =>
-          `<div class="place-hist-item" onclick="selectPlace('${p}')">
-            <span style="font-size:12px;color:var(--muted);">🕐</span>${p}
-          </div>`).join('')}</div>` : '';
+  // 選択中チップ
+  const chipsHtml = fs.icons.length > 0
+    ? fs.icons.map(ic => {
+        return `<div class="sel-chip">${renderIconDisp(ic.icon,13)}<span>${ic.label}</span></div>`;
+      }).join('')
+    : `<span class="sel-empty">アイコンをタップして選択</span>`;
 
-    detailHtml = `
-    <div class="detail-box">
-      <div class="detail-selected">
-        <span class="detail-icon-big">${fs.icon}</span>
-        <span class="detail-icon-name">${fs.label}</span>
-      </div>
-      <div class="field-group">
-        <div class="field-label">📍 場所（任意）</div>
-        <div class="place-wrap">
-          <input class="place-inp" type="text" placeholder="例：ホテル名・店名" value="${fs.place}"
-            id="placeInp"
-            oninput="formState.place=this.value;updatePlaceHistory()"
-            onblur="formState.place=this.value">
-          <div id="placeHistoryWrap"></div>
+  // ステップ：アイコン選択
+  if (inputStep === 'icons') {
+    c.innerHTML = `<div class="input-view">
+      <div class="inp-card">
+        <div class="inp-card-head">🎯 何をしますか？（複数選択可）</div>
+        <div class="inp-card-body">
+          <div class="icon-scroll">${catHtml}</div>
+          <div class="selected-chips-row">
+            <span class="sel-chips-label">選択中 →</span>
+            ${chipsHtml}
+          </div>
+          <button class="reg-btn" style="margin-top:8px;${fs.icons.length===0?'opacity:.5;cursor:not-allowed;':''}" onclick="goToDetail()">次へ → 詳細を入力</button>
+          ${editMode ? `<button onclick="cancelEdit()" style="width:100%;margin-top:8px;padding:11px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--sans);">キャンセル</button>` : ''}
         </div>
       </div>
-      <div class="field-group">
-        <div class="field-label">📅 開始日時</div>
-        <div class="time-row">
-          <input type="date" class="time-inp" style="font-size:13px;" value="${fs.dateStart||inputDate}" onchange="formState.dateStart=this.value">
-          <input type="time" class="time-inp" value="${fs.timeStart}" onchange="formState.timeStart=this.value">
-        </div>
-      </div>
-      <div class="field-group">
-        <div class="field-label">📅 終了日時（日跨り・宿泊対応）</div>
-        <div class="time-row">
-          <input type="date" class="time-inp" style="font-size:13px;" value="${fs.dateEnd||inputDate}" onchange="formState.dateEnd=this.value">
-          <input type="time" class="time-inp" value="${fs.timeEnd}" onchange="formState.timeEnd=this.value">
-        </div>
-      </div>
-      <div class="field-group">
-        <div class="field-label">📝 メモ（任意）</div>
-        <textarea class="memo-inp" placeholder="例：チェックイン 15:00〜チェックアウト 10:00" onchange="formState.memo=this.value">${fs.memo}</textarea>
-      </div>
-      <button class="reg-btn" onclick="registerEvent()">${editMode ? '✏️ 更新する' : '登録する'}</button>
-      ${editMode ? `<button onclick="cancelEdit()" style="width:100%;margin-top:8px;padding:11px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--sans);">キャンセル</button>` : ''}
     </div>`;
+    return;
   }
+
+  // ステップ：詳細入力
+  // アイコンごとの場所履歴を合算
+  const allIconKeys = fs.icons.map(ic => ic.icon);
+  const placeHistory = getPlaceHistoryForIcons(allIconKeys);
+  const filteredHistory = placeHistory.filter(p => !fs.place || p.toLowerCase().includes(fs.place.toLowerCase())).slice(0,6);
+  const histHtml = filteredHistory.length > 0
+    ? `<div class="place-history">${filteredHistory.map(p =>
+        `<div class="place-hist-item" onclick="selectPlace('${p.replace(/'/g,"\\'")}')">
+          <span style="font-size:12px;color:var(--muted);">🕐</span>${p}
+        </div>`).join('')}</div>` : '';
+
+  const selIconsDisp = fs.icons.map(ic => renderIconDisp(ic.icon, 20)).join(' ');
 
   c.innerHTML = `<div class="input-view">
     <div class="inp-card">
-      <div class="inp-card-head">📝 何をしますか？（アイコンを選択）</div>
+      <div class="inp-card-head">✏️ 詳細を入力</div>
       <div class="inp-card-body">
-        <div class="icon-scroll">${catHtml}</div>
-        ${detailHtml}
+        <div class="detail-selected-multi">
+          <span style="font-size:22px;">${selIconsDisp}</span>
+          <span class="detail-icon-name">${fs.icons.map(ic=>ic.label).join('・')}</span>
+          <button class="small-btn" onclick="inputStep='icons';renderInput()" style="margin-left:auto;">← 戻る</button>
+        </div>
+        <div class="detail-box">
+          <div class="field-group">
+            <div class="field-label">📍 場所・店名（任意）</div>
+            <div class="place-wrap">
+              <input class="place-inp" type="text" placeholder="例：コメダ珈琲 〇〇店" value="${fs.place}"
+                id="placeInp"
+                oninput="formState.place=this.value;updatePlaceHistory()"
+                onblur="formState.place=this.value">
+              <div id="placeHistoryWrap">${histHtml}</div>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">🕐 時間（任意）</div>
+            <div class="time-row">
+              <input type="time" class="time-inp" value="${fs.timeStart}" onchange="formState.timeStart=this.value">
+              <span class="time-sep">〜</span>
+              <input type="time" class="time-inp" value="${fs.timeEnd}" onchange="formState.timeEnd=this.value">
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">📅 日付（日跨り対応）</div>
+            <div class="time-row">
+              <input type="date" class="time-inp" style="font-size:13px;" value="${fs.dateStart||inputDate}" onchange="formState.dateStart=this.value">
+              <span class="time-sep">〜</span>
+              <input type="date" class="time-inp" style="font-size:13px;" value="${fs.dateEnd||inputDate}" onchange="formState.dateEnd=this.value">
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">✍️ メモ（任意）</div>
+            <textarea class="memo-inp" placeholder="メモを入力…" onchange="formState.memo=this.value">${fs.memo}</textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            ${editMode ? `<button onclick="if(confirm('この予定を削除しますか？')){deleteEvent('${editDateKey}',${editEventIdx});switchView('day');}" style="flex:1;padding:11px;background:var(--surface);border:1.5px solid var(--red);border-radius:10px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--sans);">🗑 削除</button>` : ''}
+            <button class="reg-btn" style="flex:2;margin-top:0;" onclick="registerEvent()">${editMode ? '✏️ 更新する' : '✅ 登録する'}</button>
+          </div>
+          ${editMode ? `<button onclick="cancelEdit()" style="width:100%;margin-top:8px;padding:11px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--sans);">キャンセル</button>` : ''}
+        </div>
       </div>
     </div>
   </div>`;
 }
 
-function selectIcon(icon, label) {
-  formState.icon  = icon;
-  formState.label = label;
+function toggleIcon(icon, label) {
+  const idx = formState.icons.findIndex(s => s.icon === icon && s.label === label);
+  if (idx === -1) { formState.icons.push({ icon, label }); }
+  else            { formState.icons.splice(idx, 1); }
+  renderInput();
+}
+
+function goToDetail() {
+  if (formState.icons.length === 0) { showToast('⚠️ アイコンを選択してください'); return; }
+  inputStep = 'detail';
   renderInput();
 }
 
 function updatePlaceHistory() {
   const val = formState.place;
-  const history = getPlaceHistory().filter(p => !val || p.includes(val)).slice(0,5);
+  const allIconKeys = formState.icons.map(ic => ic.icon);
+  const history = getPlaceHistoryForIcons(allIconKeys).filter(p => !val || p.toLowerCase().includes(val.toLowerCase())).slice(0,6);
   const wrap = document.getElementById('placeHistoryWrap');
   if (!wrap) return;
-  if (history.length === 0 || !val) { wrap.innerHTML = ''; return; }
+  if (history.length === 0) { wrap.innerHTML = ''; return; }
   wrap.innerHTML = `<div class="place-history">${history.map(p =>
     `<div class="place-hist-item" onclick="selectPlace('${p.replace(/'/g,"\\'")}')">
       <span style="font-size:12px;color:var(--muted);">🕐</span>${p}
@@ -978,31 +1588,136 @@ function selectPlace(place) {
 function getPlaceHistory() {
   try { return JSON.parse(localStorage.getItem('irodori_places') || '[]'); } catch { return []; }
 }
-function savePlaceHistory(place) {
+
+// アイコンごとの場所履歴を取得（複数アイコンの場合は合算・重複排除）
+function getPlaceHistoryForIcons(iconKeys) {
+  try {
+    const all = JSON.parse(localStorage.getItem('irodori_places_by_icon') || '{}');
+    // 全アイコンの履歴を合算して重複排除
+    const merged = [];
+    const seen = new Set();
+    iconKeys.forEach(key => {
+      (all[key] || []).forEach(p => {
+        if (!seen.has(p)) { seen.add(p); merged.push(p); }
+      });
+    });
+    // アイコン別履歴がない場合は共通履歴にフォールバック
+    if (merged.length === 0) return getPlaceHistory();
+    return merged;
+  } catch { return getPlaceHistory(); }
+}
+
+function savePlaceHistory(place, iconKeys) {
   if (!place) return;
+  // 共通履歴
   let hist = getPlaceHistory();
-  hist = [place, ...hist.filter(p => p !== place)].slice(0, 20);
+  hist = [place, ...hist.filter(p => p !== place)].slice(0, 30);
   localStorage.setItem('irodori_places', JSON.stringify(hist));
+  // アイコン別履歴
+  try {
+    const all = JSON.parse(localStorage.getItem('irodori_places_by_icon') || '{}');
+    (iconKeys || []).forEach(key => {
+      let ih = all[key] || [];
+      ih = [place, ...ih.filter(p => p !== place)].slice(0, 20);
+      all[key] = ih;
+    });
+    localStorage.setItem('irodori_places_by_icon', JSON.stringify(all));
+  } catch {}
 }
 
 function cancelEdit() {
-  formState    = { icon:null, label:'', place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+  formState    = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+  inputStep    = 'icons';
   editMode     = false;
   editDateKey  = null;
   editEventIdx = null;
   switchView('day');
 }
 
+let detailDateKey = null;
+let detailEventIdx = null;
+
+function showEventDetail(dateKey, idx) {
+  const ev = appData[dateKey]?.events?.[idx];
+  if (!ev) return;
+  detailDateKey  = dateKey;
+  detailEventIdx = idx;
+  switchView('eventDetail');
+}
+
+function renderEventDetail() {
+  const c = document.getElementById('viewContainer');
+  const ev = appData[detailDateKey]?.events?.[detailEventIdx];
+  if (!ev) { switchView('day'); return; }
+
+  const icons = ev.icons ? ev.icons : (ev.icon ? [{ icon: ev.icon, label: ev.label || '' }] : []);
+  const mainIcon = icons[0] ? icons[0].icon : '';
+  const label = icons.map(ic => ic.label).filter(Boolean).join('・');
+  const meta = getIconMeta(mainIcon);
+  const catName = meta.subLabel || meta.categoryLabel || '';
+
+  const dStart = ev.dateStart ? parseDate(ev.dateStart) : null;
+  const dEnd   = ev.dateEnd   ? parseDate(ev.dateEnd)   : null;
+  let dateLine = dStart ? `${dStart.getFullYear()}年${dStart.getMonth()+1}月${dStart.getDate()}日（${DOW[dStart.getDay()]}）` : '';
+  if (dEnd && ev.dateEnd !== ev.dateStart) {
+    dateLine += ` 〜 ${dEnd.getFullYear()}年${dEnd.getMonth()+1}月${dEnd.getDate()}日（${DOW[dEnd.getDay()]}）`;
+  }
+  let timeLine = '';
+  if (ev.timeStart) timeLine = ev.timeEnd ? `${ev.timeStart}〜${ev.timeEnd}` : ev.timeStart;
+
+  const rows = [];
+  if (ev.place)  rows.push(['📍','場所', ev.place]);
+  if (dateLine)  rows.push(['📅','日付', dateLine]);
+  if (timeLine)  rows.push(['⏰','時間', timeLine]);
+  if (ev.memo)   rows.push(['📝','メモ', ev.memo]);
+
+  const rowsHtml = rows.map(([icon,label,val]) => `
+    <div style="display:flex;gap:10px;font-size:13px;align-items:flex-start;padding:8px 0;">
+      <span style="width:20px;text-align:center;">${icon}</span>
+      <span style="color:var(--muted);width:56px;flex-shrink:0;">${label}</span>
+      <span style="color:var(--text);white-space:pre-wrap;">${val}</span>
+    </div>`).join('');
+
+  c.innerHTML = `<div class="day-view">
+    <div class="day-card">
+      <div class="day-card-head">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">${renderIconDisp(mainIcon,22)}</span>
+          <div>
+            <div class="day-card-title">${label || catName || '予定'}</div>
+            ${catName ? `<div style="font-size:11px;color:var(--muted);">${catName}</div>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="day-card-body">
+        <div style="border-top:0.5px solid var(--border);">${rowsHtml}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button onclick="deleteEventFromDetail()" style="flex:1;height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);">削除</button>
+      <button onclick="startEdit(detailDateKey, detailEventIdx)" style="flex:1;height:40px;border-radius:10px;border:none;background:var(--green);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);">✏️ 編集</button>
+    </div>
+  </div>`;
+}
+
+function deleteEventFromDetail() {
+  if (!confirm('この予定を削除しますか？')) return;
+  deleteEvent(detailDateKey, detailEventIdx);
+  switchView('day');
+}
+
 function startEdit(dateKey, idx) {
   const ev = appData[dateKey]?.events?.[idx];
   if (!ev) return;
-  // フォームに既存データをセット
   editMode     = true;
   editDateKey  = dateKey;
   editEventIdx = idx;
+  // 旧データ（icon単体）と新データ（icons配列）の両方に対応
+  const icons = ev.icons
+    ? ev.icons
+    : (ev.icon ? [{ icon: ev.icon, label: ev.label || '' }] : []);
   formState = {
-    icon:      ev.icon,
-    label:     ev.label,
+    icons,
     place:     ev.place     || '',
     dateStart: ev.dateStart || dateKey,
     dateEnd:   ev.dateEnd   || ev.dateStart || dateKey,
@@ -1010,6 +1725,7 @@ function startEdit(dateKey, idx) {
     timeEnd:   ev.timeEnd   || '',
     memo:      ev.memo      || '',
   };
+  inputStep = 'icons';
   inputDate = dateKey;
   switchView('input');
 }
@@ -1017,9 +1733,9 @@ function startEdit(dateKey, idx) {
 
 function registerEvent() {
   const fs = formState;
-  if (!fs.icon) { showToast('⚠️ アイコンを選択してください'); return; }
+  if (!fs.icons || fs.icons.length === 0) { showToast('⚠️ アイコンを選択してください'); return; }
 
-  const dateStart = fs.dateStart || inputDate;
+  const dateStart = fs.dateStart || inputDate || selectedDate;
   const dateEnd   = fs.dateEnd   || dateStart;
 
   // 編集モードの場合は先に古いデータを全日から削除
@@ -1033,7 +1749,7 @@ function registerEvent() {
         const key = fmtDate(cur);
         if (appData[key]?.events) {
           appData[key].events = appData[key].events.filter(e =>
-            !(e.dateStart === oldEv.dateStart && e.icon === oldEv.icon && e.place === oldEv.place)
+            !(e.dateStart === oldEv.dateStart && (e.icon === oldEv.icon || JSON.stringify(e.icons) === JSON.stringify(oldEv.icons)) && e.place === oldEv.place)
           );
         }
         cur.setDate(cur.getDate() + 1);
@@ -1041,8 +1757,14 @@ function registerEvent() {
     }
   }
 
+  // 代表アイコン（後方互換のため先頭を保持）
+  const primaryIcon  = fs.icons[0]?.icon  || '';
+  const primaryLabel = fs.icons[0]?.label || '';
+
   const eventData = {
-    icon: fs.icon, label: fs.label,
+    icons: fs.icons,
+    icon:  primaryIcon,
+    label: primaryLabel,
     place: fs.place,
     dateStart, dateEnd,
     timeStart: fs.timeStart,
@@ -1051,7 +1773,6 @@ function registerEvent() {
     isMultiDay: dateStart !== dateEnd,
   };
 
-  // 開始日〜終了日の全日にイベントを登録
   const start = new Date(dateStart);
   const end   = new Date(dateEnd);
   let cur = new Date(start);
@@ -1060,16 +1781,17 @@ function registerEvent() {
     if (!appData[key]) appData[key] = {};
     if (!appData[key].events) appData[key].events = [];
     appData[key].events = appData[key].events.filter(e =>
-      !(e.dateStart === dateStart && e.icon === fs.icon && e.place === fs.place)
+      !(e.dateStart === dateStart && (e.icon === primaryIcon || JSON.stringify(e.icons) === JSON.stringify(fs.icons)) && e.place === fs.place)
     );
     appData[key].events.push(eventData);
     cur.setDate(cur.getDate() + 1);
   }
 
-  if (fs.place) savePlaceHistory(fs.place);
+  if (fs.place) savePlaceHistory(fs.place, fs.icons.map(ic => ic.icon));
 
   const wasEditing = editMode;
-  formState    = { icon:null, label:'', place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+  formState    = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+  inputStep    = 'icons';
   editMode     = false;
   editDateKey  = null;
   editEventIdx = null;
@@ -1109,13 +1831,15 @@ function deleteEvent(dateKey, idx) {
 // ══════════════════════════════════════════
 function renderDiary() {
   const c = document.getElementById('viewContainer');
-  const key = inputDate;
+  const key = selectedDate;
   const rec = appData[key] || {};
   const diary = rec.diary || { icons:[], text:'' };
   diaryState = { icons:[...(diary.icons||[])], text: diary.text||'' };
 
-  // 全アイコンを1つのグリッドに
-  const allIcons = ICON_CATEGORIES.flatMap(cat => cat.icons);
+  // 全アイコンを1つのグリッドに（メンテナンスはサブカテゴリーを展開）
+  const allIcons = ICON_CATEGORIES.flatMap(cat => cat.subcategories
+    ? cat.subcategories.flatMap(sub => sub.icons)
+    : cat.icons);
   const iconBtns = allIcons.map(ic => {
     const isSel = diaryState.icons.some(di => di.icon === ic.icon && di.label === ic.label);
     return `<button class="diary-icon-btn${isSel?' sel':''}" onclick="toggleDiaryIcon('${ic.icon}','${ic.label}')">
@@ -1127,7 +1851,7 @@ function renderDiary() {
   c.innerHTML = `<div class="input-view">
     <div class="date-sel-row" style="padding:10px 0 4px;">
       <span class="date-sel-label" style="font-size:13px;color:var(--muted);font-weight:600;">対象日</span>
-      <input type="date" value="${inputDate}" class="date-inp" onchange="inputDate=this.value;renderDiary()">
+      <input type="date" value="${key}" class="date-inp" onchange="selectedDate=this.value;renderDiary()">
     </div>
 
     <div class="inp-card" style="border-color:var(--amberbd);">
@@ -1168,6 +1892,576 @@ function saveDiary(dateKey) {
 }
 
 // ══════════════════════════════════════════
+// QR SCAN VIEW
+// ══════════════════════════════════════════
+function renderOkusuriQr() {
+  const c = document.getElementById('viewContainer');
+  c.innerHTML = `
+  <div style="padding:0 14px 80px;max-width:620px;margin:0 auto;">
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-top:10px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:var(--surface2);padding:11px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--text);">📷 QRコード読み取り</div>
+      <div style="padding:14px 16px;">
+        <div style="background:#000;border-radius:10px;overflow:hidden;margin-bottom:12px;position:relative;min-height:260px;display:flex;align-items:center;justify-content:center;">
+          <video id="qrVideo" style="width:100%;display:block;" playsinline autoplay></video>
+          <div id="qrOverlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+            <div style="width:180px;height:180px;border:3px solid var(--green);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);"></div>
+          </div>
+        </div>
+        <div id="qrStatus" style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px;">カメラを起動中...</div>
+        <button onclick="stopQrScan();switchView('okusuri')" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:11px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--sans);">← キャンセル</button>
+      </div>
+    </div>
+  </div>`;
+  startQrScan();
+}
+
+let qrStream = null;
+let qrAnimFrame = null;
+
+async function startQrScan() {
+  try {
+    qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const video = document.getElementById('qrVideo');
+    if (!video) return;
+    video.srcObject = qrStream;
+    await video.play();
+    document.getElementById('qrStatus').textContent = 'QRコードをかざしてください';
+    scanQrFrame(video);
+  } catch(e) {
+    const el = document.getElementById('qrStatus');
+    if (el) el.textContent = 'カメラへのアクセスが許可されていません';
+  }
+}
+
+function scanQrFrame(video) {
+  if (!document.getElementById('qrVideo')) { stopQrScan(); return; }
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  try {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    if (window.jsQR) {
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      if (code) {
+        stopQrScan();
+        parseJahisQr(code.data);
+        return;
+      }
+    }
+  } catch(e) {}
+  qrAnimFrame = requestAnimationFrame(() => scanQrFrame(video));
+}
+
+function stopQrScan() {
+  if (qrStream) { qrStream.getTracks().forEach(t => t.stop()); qrStream = null; }
+  if (qrAnimFrame) { cancelAnimationFrame(qrAnimFrame); qrAnimFrame = null; }
+}
+
+function parseJahisQr(data) {
+  try {
+    const lines = data.split(/\r?\n/);
+    let drugName = '', hospital = '', date = fmtDate(new Date()), days = '', total = '';
+    lines.forEach(line => {
+      const parts = line.split(',');
+      const no = parts[0];
+      if (no === '101' && parts[4]) hospital = parts[4];
+      if (no === '201' && parts[2]) date = parts[2].replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+      if (no === '281') { if(parts[2]) drugName = parts[2]; if(parts[7]) total = parts[7]; if(parts[8]) days = parts[8]; }
+    });
+    editMode = false;
+    okusuriSelected = null;
+    okusuriForm = { name: drugName, date, hospital, total, days, timings:[{ time:'', meal:'', amount:1, unit:'錠' }], memo:'', status:'active' };
+    showToast('QR読み取り完了 ✓');
+    switchView('okusuri_input');
+  } catch(e) {
+    showToast('QRの読み取りに失敗しました');
+    switchView('okusuri');
+  }
+}
+
+// ══════════════════════════════════════════
+// KINO VIEW（機能一覧）
+// ══════════════════════════════════════════
+function renderKino() {
+  const c = document.getElementById('viewContainer');
+  c.innerHTML = `
+  <div style="padding:16px;max-width:620px;margin:0 auto;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div onclick="switchView('okusuri')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:var(--shadow);">
+        <span style="font-size:36px;">💊</span>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:var(--text);">お薬手帳</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">処方履歴・服薬記録の管理</div>
+        </div>
+        <span style="font-size:18px;color:var(--green2);">›</span>
+      </div>
+      <div onclick="colorSettingsEditMode=false;switchView('colorsettings')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:var(--shadow);">
+        <span style="font-size:36px;">🎨</span>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:var(--text);">カテゴリー色設定</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">タイムラインの予定の色を編集</div>
+        </div>
+        <span style="font-size:18px;color:var(--green2);">›</span>
+      </div>
+      <div style="background:var(--surface);border:1.5px dashed var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;opacity:0.45;">
+        <span style="font-size:36px;">➕</span>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);">追加予定の機能</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Coming soon...</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// カテゴリー色設定 VIEW
+// ══════════════════════════════════════════
+let colorPaletteOpenKey = null;
+
+function renderColorSettings() {
+  const c = document.getElementById('viewContainer');
+  const usedColors = new Set(Object.values(categoryColors));
+
+  const rows = COLOR_GROUPS.map(g => {
+    const cur = categoryColors[g.key];
+    const locked = !!cur && !colorSettingsEditMode;
+    const swatchHtml = cur
+      ? `<div style="width:34px;height:34px;border-radius:8px;background:${cur};border:1px solid var(--border);"></div>`
+      : `<div style="width:34px;height:34px;border-radius:8px;background:var(--surface2);border:1.5px dashed var(--border);"></div>`;
+
+    let paletteHtml = '';
+    if (colorPaletteOpenKey === g.key) {
+      const swatches = CATEGORY_COLOR_PALETTE.map(col => {
+        const takenByOther = usedColors.has(col) && cur !== col;
+        return `<div onclick="${takenByOther ? '' : `pickCategoryColor('${g.key}','${col}')`}"
+          style="position:relative;width:26px;height:26px;border-radius:6px;background:${col};
+          border:${cur===col?'2px solid var(--green2)':'1px solid var(--border)'};
+          cursor:${takenByOther?'not-allowed':'pointer'};opacity:${takenByOther?'0.35':'1'};">
+          ${takenByOther ? `<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#a01010;font-weight:900;">×</span>` : ''}
+        </div>`;
+      }).join('');
+      paletteHtml = `<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:10px;padding:10px;background:var(--surface2);border-radius:10px;">${swatches}</div>`;
+    }
+
+    return `<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        ${swatchHtml}
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);">${g.shortLabel}</div>
+        </div>
+        <button class="small-btn" ${locked?'disabled style="opacity:.4;cursor:not-allowed;"':''}
+          onclick="colorPaletteOpenKey = (colorPaletteOpenKey==='${g.key}') ? null : '${g.key}'; renderColorSettings();">
+          ${cur ? '変更' : '選択'}
+        </button>
+      </div>
+      ${paletteHtml}
+    </div>`;
+  }).join('');
+
+  c.innerHTML = `<div style="padding:16px;max-width:620px;margin:0 auto 80px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <button class="small-btn" onclick="switchView('kino')">← 戻る</button>
+      <button class="small-btn ${colorSettingsEditMode?'':'amber'}" onclick="colorSettingsEditMode=!colorSettingsEditMode;colorPaletteOpenKey=null;renderColorSettings();">
+        ${colorSettingsEditMode ? '🔓 編集モード：ON' : '🔒 編集モード：OFF'}
+      </button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+      一度確定した色は「編集モード」をONにしないと変更できません。他のカテゴリーで使用中の色は選択できません（×表示）。
+    </div>
+    ${rows}
+  </div>`;
+}
+
+function pickCategoryColor(key, color) {
+  categoryColors[key] = color;
+  saveCategoryColors(categoryColors);
+  colorPaletteOpenKey = null;
+  showToast('色を設定しました ✓');
+  renderColorSettings();
+}
+
+// ══════════════════════════════════════════
+// OKUSURI VIEW（お薬手帳一覧）
+// ══════════════════════════════════════════
+function renderOkusuri() {
+  okusuriData = loadOkusuriData();
+  const c = document.getElementById('viewContainer');
+  const rows = okusuriData.map((drug, i) => {
+    const statusMap = { active:'服用中', continuous:'継続処方', done:'終了' };
+    const statusBg  = { active:'#d4f5e5', continuous:'#fff0d9', done:'#ebebeb' };
+    const statusCol = { active:'#0a5e2a', continuous:'#a05000', done:'#555' };
+    const st = drug.status || 'active';
+    const lastDose = drug.history && drug.history.length > 0 ? drug.history[drug.history.length-1].date : '';
+    const yoho = (drug.timings||[]).map(t=>`${t.time||''}${t.meal||''}・${t.amount||1}${t.unit||'錠'}`).join(' / ');
+    return `
+    <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="flex:1;" onclick="okusuriSelected=${i};switchView('okusuri_detail')">
+          <div style="font-size:14px;font-weight:700;color:var(--text);">${drug.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${yoho}</div>
+          <div style="font-size:11px;color:var(--muted);">処方：${lastDose} / ${drug.hospital||''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+          <span style="font-size:10px;background:${statusBg[st]};color:${statusCol[st]};border-radius:4px;padding:2px 7px;font-weight:700;">${statusMap[st]||'服用中'}</span>
+          <div style="display:flex;gap:5px;">
+            <button onclick="okusuriSelected=${i};editMode=true;switchView('okusuri_input')" style="font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--text);">✏️ 編集</button>
+            <span onclick="okusuriSelected=${i};switchView('okusuri_detail')" style="font-size:16px;color:var(--green2);cursor:pointer;">›</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  c.innerHTML = `
+  <div style="padding:0 0 80px;">
+    <div style="padding:10px 14px;display:flex;gap:8px;">
+      <button onclick="switchView('okusuri_qr')" style="flex:1;background:var(--green);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">📷 QRコード読み取り</button>
+      <button onclick="editMode=false;okusuriSelected=null;initOkusuriForm();switchView('okusuri_input')" style="flex:1;background:var(--surface);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">✏️ 手入力</button>
+    </div>
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin:0 14px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text);">処方履歴</div>
+      ${okusuriData.length === 0
+        ? `<div style="text-align:center;padding:30px;font-size:13px;color:var(--muted);">まだ登録されていません</div>`
+        : rows}
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// OKUSURI INPUT VIEW（お薬登録・編集）
+// ══════════════════════════════════════════
+editMode = false;
+let okusuriForm = { name:'', date:'', hospital:'', total:'', days:'', timings:[], memo:'', status:'active' };
+
+function initOkusuriForm() {
+  if (editMode && okusuriSelected !== null) {
+    const d = okusuriData[okusuriSelected];
+    okusuriForm = JSON.parse(JSON.stringify(d));
+  } else {
+    okusuriForm = { name:'', date:fmtDate(new Date()), hospital:'', total:'', days:'', timings:[{ time:'', meal:'', amount:1, unit:'錠' }], memo:'', status:'active' };
+  }
+}
+
+function renderOkusuriInput() {
+  if (!okusuriForm.timings || okusuriForm.name === undefined) initOkusuriForm();
+  const c = document.getElementById('viewContainer');
+
+  const timingRows = okusuriForm.timings.map((t, ti) => {
+    const times = ['朝','昼','夕','寝前'];
+    const meals = ['食前','食後','食間'];
+    const units = ['錠','袋','滴'];
+    const unitBtns = units.map(un => `<button onclick="setOkusuriTiming(${ti},'unit','${un}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.unit===un?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.unit===un?'var(--surface2)':'var(--surface)'};color:${t.unit===un?'var(--green2)':'var(--muted)'};font-weight:${t.unit===un?'700':'400'};cursor:pointer;font-family:var(--sans);">${un}</button>`).join('');
+
+    if (t.unit === '滴') {
+      const summary = `1日${t.amount||1}滴`;
+      return `
+      <div style="border-left:3px solid var(--green);padding-left:10px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:11px;font-weight:700;color:var(--green2);">点眼液</span>
+          ${okusuriForm.timings.length > 1 ? `<button onclick="removeTiming(${ti})" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">✕ 削除</button>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <span style="font-size:13px;color:var(--green2);font-weight:500;">1日</span>
+          <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--green);border-radius:8px;padding:3px 12px;">
+            <button onclick="changeAmount(${ti},-1)" style="font-size:14px;color:var(--green2);background:none;border:none;cursor:pointer;font-family:var(--sans);">－</button>
+            <span style="font-size:16px;font-weight:700;color:var(--text);min-width:20px;text-align:center;">${t.amount||1}</span>
+            <button onclick="changeAmount(${ti},1)" style="font-size:14px;color:var(--green2);background:none;border:none;cursor:pointer;font-family:var(--sans);">＋</button>
+          </div>
+          <span style="font-size:13px;color:var(--green2);font-weight:500;">滴</span>
+          <div style="background:var(--surface2);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--green2);font-weight:700;">→ ${summary}</div>
+        </div>
+        <div style="display:flex;gap:5px;">${unitBtns}</div>
+      </div>`;
+    }
+
+    const timeBtns = times.map(tm => `<button onclick="setOkusuriTiming(${ti},'time','${tm}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.time===tm?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.time===tm?'var(--surface2)':'var(--surface)'};color:${t.time===tm?'var(--green2)':'var(--muted)'};font-weight:${t.time===tm?'700':'400'};cursor:pointer;font-family:var(--sans);">${tm}</button>`).join('');
+    const mealBtns = meals.map(ml => `<button onclick="setOkusuriTiming(${ti},'meal','${ml}')" style="font-size:12px;padding:5px 9px;border-radius:7px;border:${t.meal===ml?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${t.meal===ml?'var(--surface2)':'var(--surface)'};color:${t.meal===ml?'var(--green2)':'var(--muted)'};font-weight:${t.meal===ml?'700':'400'};cursor:pointer;font-family:var(--sans);">${ml}</button>`).join('');
+    const summary = (t.time||'') + (t.meal ? '・'+t.meal : '') + '・' + (t.amount||1) + (t.unit||'錠');
+    return `
+    <div style="border-left:3px solid var(--green);padding-left:10px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--green2);margin-bottom:6px;">${ti+1}回目</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">${timeBtns}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">${mealBtns}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);">服用量</span>
+        <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--green);border-radius:8px;padding:3px 10px;">
+          <button onclick="changeAmount(${ti},-1)" style="font-size:14px;color:var(--green2);background:none;border:none;cursor:pointer;font-family:var(--sans);">－</button>
+          <span style="font-size:13px;font-weight:700;color:var(--text);min-width:18px;text-align:center;">${t.amount||1}</span>
+          <button onclick="changeAmount(${ti},1)" style="font-size:14px;color:var(--green2);background:none;border:none;cursor:pointer;font-family:var(--sans);">＋</button>
+        </div>
+        <div style="display:flex;gap:5px;">${unitBtns}</div>
+        ${okusuriForm.timings.length > 1 ? `<button onclick="removeTiming(${ti})" style="margin-left:auto;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">✕ 削除</button>` : ''}
+      </div>
+      <div style="margin-top:6px;background:var(--surface2);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--green2);font-weight:700;display:inline-block;">→ ${summary}</div>
+    </div>`;
+  }).join('');
+
+  const statusOpts = [['active','服用中'],['continuous','継続処方'],['done','終了']];
+  const statusBtns = statusOpts.map(([val,lbl]) => `<button onclick="okusuriForm.status='${val}';renderOkusuriInput()" style="font-size:12px;padding:5px 12px;border-radius:7px;border:${okusuriForm.status===val?'1.5px solid var(--green2)':'1px solid var(--border)'};background:${okusuriForm.status===val?'var(--surface2)':'var(--surface)'};color:${okusuriForm.status===val?'var(--green2)':'var(--muted)'};font-weight:${okusuriForm.status===val?'700':'400'};cursor:pointer;font-family:var(--sans);">${lbl}</button>`).join('');
+
+  c.innerHTML = `
+  <div style="padding:0 14px 80px;max-width:620px;margin:0 auto;">
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-top:10px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:var(--surface2);padding:11px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--text);">💊 ${editMode?'お薬を編集':'お薬を登録する'}</div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+
+        <div class="field-group">
+          <div class="field-label">薬の名前</div>
+          <input class="place-inp" value="${okusuriForm.name||''}" placeholder="例）ロキソプロフェン錠 60mg" oninput="okusuriForm.name=this.value">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="field-group">
+            <div class="field-label">処方日</div>
+            <input type="date" class="date-inp" value="${okusuriForm.date||fmtDate(new Date())}" oninput="okusuriForm.date=this.value">
+          </div>
+          <div class="field-group">
+            <div class="field-label">病院・薬局名</div>
+            <input class="place-inp" value="${okusuriForm.hospital||''}" placeholder="例）△△病院" oninput="okusuriForm.hospital=this.value">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="field-group">
+            <div class="field-label">処方量</div>
+            <input class="place-inp" type="number" value="${okusuriForm.total||''}" placeholder="例）30" oninput="okusuriForm.total=this.value">
+          </div>
+          <div class="field-group">
+            <div class="field-label">日数</div>
+            <input class="place-inp" type="number" value="${okusuriForm.days||''}" placeholder="例）30" oninput="okusuriForm.days=this.value">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div class="field-label" style="margin-bottom:0;">用法（服用タイミング）</div>
+            <span style="font-size:12px;background:var(--surface2);border:1.5px solid var(--green);border-radius:7px;padding:3px 10px;color:var(--green2);font-weight:700;">1日${okusuriForm.timings.length}回</span>
+          </div>
+          ${timingRows}
+          <button onclick="addTiming()" style="width:100%;border:1.5px dashed var(--green);border-radius:8px;padding:8px;font-size:12px;color:var(--green2);font-weight:700;background:var(--surface);cursor:pointer;font-family:var(--sans);">＋ 服用タイミングを追加</button>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">ステータス</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">${statusBtns}</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">備考・服用条件（任意）</div>
+          <textarea class="memo-inp" placeholder="痛い時に服用。1日2回まで。など…" oninput="okusuriForm.memo=this.value">${okusuriForm.memo||''}</textarea>
+        </div>
+
+        <button onclick="saveOkusuriEntry()" class="reg-btn">💊 保存する</button>
+        ${editMode ? `<button onclick="deleteOkusuri()" style="width:100%;background:none;border:1.5px solid var(--red);border-radius:10px;padding:11px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;font-family:var(--sans);margin-top:4px;">🗑️ この記録を削除</button>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function setOkusuriTiming(ti, key, val) {
+  okusuriForm.timings[ti][key] = val;
+  renderOkusuriInput();
+}
+function changeAmount(ti, delta) {
+  okusuriForm.timings[ti].amount = Math.max(1, (okusuriForm.timings[ti].amount||1) + delta);
+  renderOkusuriInput();
+}
+function addTiming() {
+  okusuriForm.timings.push({ time:'', meal:'', amount:1, unit:'錠' });
+  renderOkusuriInput();
+}
+function removeTiming(ti) {
+  okusuriForm.timings.splice(ti, 1);
+  renderOkusuriInput();
+}
+function saveOkusuriEntry() {
+  if (!okusuriForm.name) { showToast('薬の名前を入力してください'); return; }
+  okusuriData = loadOkusuriData();
+  const entry = { ...okusuriForm, history: [] };
+  if (editMode && okusuriSelected !== null) {
+    entry.history = okusuriData[okusuriSelected].history || [];
+  }
+  const histEntry = { date: okusuriForm.date, hospital: okusuriForm.hospital, total: okusuriForm.total, days: okusuriForm.days };
+  if (!editMode) {
+    entry.history = [histEntry];
+    okusuriData.push(entry);
+  } else {
+    const existing = entry.history.find(h => h.date === okusuriForm.date);
+    if (!existing) entry.history.push(histEntry);
+    okusuriData[okusuriSelected] = entry;
+  }
+  saveOkusuriData(okusuriData);
+  editMode = false;
+  okusuriSelected = null;
+  okusuriForm = {};
+  switchView('okusuri');
+}
+function deleteOkusuri() {
+  if (!confirm('この記録を削除しますか？')) return;
+  okusuriData = loadOkusuriData();
+  okusuriData.splice(okusuriSelected, 1);
+  saveOkusuriData(okusuriData);
+  editMode = false;
+  okusuriSelected = null;
+  switchView('okusuri');
+}
+
+// ══════════════════════════════════════════
+// OKUSURI DETAIL VIEW（薬の処方履歴詳細）
+// ══════════════════════════════════════════
+function renderOkusuriDetail() {
+  okusuriData = loadOkusuriData();
+  if (okusuriSelected === null) { switchView('okusuri'); return; }
+  const drug = okusuriData[okusuriSelected];
+  const c = document.getElementById('viewContainer');
+  const history = drug.history || [];
+  const totalCount = history.length;
+  const totalUnits = history.reduce((s, h) => s + (parseInt(h.total)||0), 0);
+  const avgDays = history.length > 0 ? Math.round(history.reduce((s,h)=>s+(parseInt(h.days)||0),0)/history.length) : 0;
+  const yoho = (drug.timings||[]).map(t=>`${t.time||''}${t.meal?'・'+t.meal:''}・${t.amount||1}${t.unit||'錠'}`).join(' / ');
+  const statusMap = { active:'服用中', continuous:'継続処方', done:'終了' };
+  const statusBg  = { active:'#d4f5e5', continuous:'#fff0d9', done:'#ebebeb' };
+  const statusCol = { active:'#0a5e2a', continuous:'#a05000', done:'#555' };
+  const st = drug.status || 'active';
+
+  const histRows = [...history].reverse().map(h => `
+    <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">${h.date}　${h.hospital||''}</div>
+          <div style="font-size:11px;color:var(--muted);">${h.total||''}${drug.timings?.[0]?.unit||'錠'} / ${h.days||''}日分</div>
+        </div>
+        <span style="font-size:10px;background:${statusBg[st]};color:${statusCol[st]};border-radius:4px;padding:2px 7px;font-weight:700;">${statusMap[st]}</span>
+      </div>
+    </div>`).join('');
+
+  c.innerHTML = `
+  <div style="padding:0 14px 80px;max-width:620px;margin:0 auto;">
+    <div style="background:#e0f7fa;border:1.5px solid var(--workbd);border-radius:14px;margin-top:10px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:#d4f2fa;padding:12px 16px;border-bottom:1px solid var(--workbd);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#007c91;">${drug.name}</div>
+            <div style="font-size:11px;color:#007c91;margin-top:3px;">${yoho}</div>
+            ${drug.memo ? `<div style="font-size:11px;color:#007c91;margin-top:2px;">📝 ${drug.memo}</div>` : ''}
+          </div>
+          <button onclick="okusuriSelected=${okusuriSelected};editMode=true;switchView('okusuri_input')" style="font-size:11px;background:#fff;border:1px solid var(--workbd);border-radius:7px;padding:4px 10px;cursor:pointer;color:#007c91;font-family:var(--sans);">✏️ 編集</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <div style="background:#fff;border-radius:8px;padding:6px 10px;text-align:center;flex:1;border:1px solid var(--workbd);">
+            <div style="font-size:20px;font-weight:700;color:#007c91;">${totalCount}</div>
+            <div style="font-size:9px;color:#007c91;">処方回数</div>
+          </div>
+          <div style="background:#fff;border-radius:8px;padding:6px 10px;text-align:center;flex:1;border:1px solid var(--workbd);">
+            <div style="font-size:20px;font-weight:700;color:#007c91;">${totalUnits}</div>
+            <div style="font-size:9px;color:#007c91;">累計${drug.timings?.[0]?.unit||'錠'}数</div>
+          </div>
+          <div style="background:#fff;border-radius:8px;padding:6px 10px;text-align:center;flex:1;border:1px solid var(--workbd);">
+            <div style="font-size:20px;font-weight:700;color:#007c91;">${avgDays}</div>
+            <div style="font-size:9px;color:#007c91;">平均日数</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface);">
+        <div style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);">処方履歴</div>
+        ${history.length === 0
+          ? `<div style="text-align:center;padding:20px;font-size:13px;color:var(--muted);">履歴がありません</div>`
+          : histRows}
+      </div>
+    </div>
+    <button onclick="switchView('okusuri')" style="width:100%;margin-top:10px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:11px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--sans);">← 一覧に戻る</button>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// SPEC VIEW（仕様書）
+// ══════════════════════════════════════════
+function renderSpec() {
+  const c = document.getElementById('viewContainer');
+  c.innerHTML = `
+  <div style="padding:16px;max-width:680px;margin:0 auto;font-family:var(--sans);">
+
+    <!-- EDITHヘッダー -->
+    <div style="background:linear-gradient(135deg,#0a2e14,#1a6e3c);border-radius:12px;padding:18px;margin-bottom:14px;text-align:center;border:1px solid #2ecf7a;">
+      <div style="font-size:24px;font-weight:900;color:#2ecf7a;letter-spacing:5px;margin-bottom:4px;">E D I T H</div>
+      <div style="font-size:10px;color:#8ee0b8;letter-spacing:1px;">Even Dead I'm The Hero — IRODORI AI Assistant</div>
+    </div>
+
+    <!-- アプリ基本情報 -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>アプリ名：</b>IRODORI<br>
+        <b>現バージョン：</b>MK-24<br>
+        <b>用途：</b>プライベート手帳（予定・日記・生活記録）<br>
+        <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
+        <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
+        <b>GitHub：</b>MKT-TMT/koban-search<br>
+        <b>固定ファイル名：</b>IRODORI_MK-9.html（上書き更新）<br>
+        <b>Firebase：</b>schedule-app-d1ba4 / schedules/irodori_mkdata<br>
+        <b>バージョン管理：</b>アップデートのたびにMK番号を必ず+1する
+      </div>
+    </div>
+
+    <!-- EDITHルール -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">🤖 EDITHルール（AI向け）</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;">
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🔢</span><span>アップデートのたびにMK番号を必ず+1する。同じ番号を再利用しない</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🖼️</span><span>修正・新機能はイメージ図を先に見せてから実装する。イメージ図OKの後も、必ずまことさんから「実装してください」の指示があるまで実装に進まない</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🔍</span><span>アップデートの際は実装前にプログラムの確認を行い不具合が無いか見直す様に進める</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する。勝手に先へ進まない</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：IRODORI_MK-24.html）。アップロード時はIRODORI_MK-9.htmlに改名して上書き</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;">
+          <span style="flex-shrink:0;">👤</span><span>ユーザー名はまことさん。AIの名前はEDITH（イディス）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- タブ構成 -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">🗂️ タブ構成・使い方</div>
+      <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>📅 月：</b>月間カレンダー。各日の予定・シフトを表示。タップで日ビューへ遷移<br>
+        <b>📋 日：</b>0:00〜24:00のタイムライン表示。仕事・睡眠・勤務間時間・支度・予定を帯で表示し、重なりは自動分割。タップで編集<br>
+        <b>⚙️ 機能：</b>お薬手帳など追加機能の一覧<br>
+        <b>EDITH（本画面）：</b>アプリ仕様書・EDITHルール確認
+      </div>
+    </div>
+
+    <!-- 今後の予定機能 -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--amberbd);">
+      <div style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:10px;letter-spacing:0.5px;">🔮 今後追加予定の機能</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.8;">
+        <b>💊 お薬手帳機能</b>
+        <div style="padding-left:12px;color:var(--muted);line-height:2;margin-top:4px;">
+          ・調剤明細書QRコード読み取り＋手入力による服薬記録<br>
+          ・処方履歴一覧（薬名・処方日・病院名・ステータス）<br>
+          ・薬ごとの処方履歴詳細（処方回数・累計錠数・日数）<br>
+          ・次回受診日リマインダー<br>
+          ・飲み合わせメモ<br>
+          ・カレンダーとの連携
+        </div>
+      </div>
+    </div>
+
+  </div>`;
+}
+
+// ══════════════════════════════════════════
 // TOAST
 // ══════════════════════════════════════════
 function showToast(msg) {
@@ -1181,7 +2475,7 @@ function showToast(msg) {
 // AUTH
 // ══════════════════════════════════════════
 (function() {
-  const PASS = 'irodori2026';
+  const PASS = '5513';
   const LOCAL_KEY   = 'irodori_auth_remember';
   const SESSION_KEY = 'irodori_auth_session';
   if (localStorage.getItem(LOCAL_KEY)==='ok' || sessionStorage.getItem(SESSION_KEY)==='ok') {
@@ -1192,7 +2486,7 @@ function showToast(msg) {
 })();
 
 function checkAuth() {
-  const PASS = 'irodori2026';
+  const PASS = '5513';
   const LOCAL_KEY   = 'irodori_auth_remember';
   const SESSION_KEY = 'irodori_auth_session';
   const val = document.getElementById('authInput').value;
