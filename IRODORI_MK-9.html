@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<title>IRODORI MK-30</title>
+<title>IRODORI MK-32</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -516,7 +516,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-30</div>
+    <div class="auth-logo">IRODORI MK-32</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -531,7 +531,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-30 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-32 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -549,8 +549,8 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   <div class="nav-title" id="navTitle"></div>
   <div style="display:flex;align-items:center;gap:6px;">
     <div id="calModeToggle" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px;">
-      <button id="calModeList" onclick="setCalMode('list')" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;font-family:var(--sans);">リスト</button>
-      <button id="calModeGrid" onclick="setCalMode('grid')" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);">グリッド</button>
+      <button id="calModeList" onclick="setCalMode('list')" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);">リスト</button>
+      <button id="calModeGrid" onclick="setCalMode('grid')" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;font-family:var(--sans);">グリッド</button>
     </div>
     <div class="nav-btns">
       <button class="nav-btn" onclick="navPrev()">‹</button>
@@ -739,7 +739,7 @@ let appData = loadData();
 // ══════════════════════════════════════════
 const today = new Date();
 let view = 'month';
-let calMode = 'list'; // 'list' or 'grid'
+let calMode = 'grid'; // 'list' or 'grid'
 let cursor = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = fmtDate(today);
 let inputDate = fmtDate(today);
@@ -859,7 +859,7 @@ function switchView(v) {
     t.classList.toggle('active', ['month','day','kino','spec'][i] === v);
   });
   const fab = document.getElementById('fab');
-  fab.style.display = (v === 'kino' || v === 'spec' || v === 'okusuri' || v === 'okusuri_input' || v === 'okusuri_detail' || v === 'okusuri_qr' || v === 'colorsettings') ? 'none' : 'flex';
+  fab.style.display = (v === 'kino' || v === 'spec' || v === 'okusuri' || v === 'okusuri_input' || v === 'okusuri_detail' || v === 'okusuri_qr' || v === 'colorsettings' || v === 'eventDetail') ? 'none' : 'flex';
   render();
 }
 
@@ -919,6 +919,8 @@ function updateNavTitle() {
       el.textContent = '処方履歴';
     } else if (view === 'okusuri_qr') {
       el.textContent = 'QR読み取り';
+    } else if (view === 'eventDetail') {
+      el.textContent = '予定の詳細';
     } else if (view === 'spec') {
       el.textContent = 'EDITH';
     } else {
@@ -938,6 +940,7 @@ function render() {
   else if (view === 'okusuri_input') renderOkusuriInput();
   else if (view === 'okusuri_detail')renderOkusuriDetail();
   else if (view === 'colorsettings') renderColorSettings();
+  else if (view === 'eventDetail')   renderEventDetail();
   else if (view === 'spec')          renderSpec();
   else                               renderDay();
 }
@@ -1317,7 +1320,7 @@ function renderTimelineHtml(dateKey) {
     const width = 100 / b.colCount;
     const left = b.colIdx * width;
     const isPrivate = b.type === 'private';
-    const clickAttr = isPrivate ? ` onclick="startEdit('${b.dateKey}',${b.eventIdx})"` : '';
+    const clickAttr = isPrivate ? ` onclick="showEventDetail('${b.dateKey}',${b.eventIdx})"` : '';
     const cursorCss = isPrivate ? 'cursor:pointer;' : '';
 
     const fs = bandFontStyle(height, b.colCount);
@@ -1628,6 +1631,78 @@ function cancelEdit() {
   editMode     = false;
   editDateKey  = null;
   editEventIdx = null;
+  switchView('day');
+}
+
+let detailDateKey = null;
+let detailEventIdx = null;
+
+function showEventDetail(dateKey, idx) {
+  const ev = appData[dateKey]?.events?.[idx];
+  if (!ev) return;
+  detailDateKey  = dateKey;
+  detailEventIdx = idx;
+  switchView('eventDetail');
+}
+
+function renderEventDetail() {
+  const c = document.getElementById('viewContainer');
+  const ev = appData[detailDateKey]?.events?.[detailEventIdx];
+  if (!ev) { switchView('day'); return; }
+
+  const icons = ev.icons ? ev.icons : (ev.icon ? [{ icon: ev.icon, label: ev.label || '' }] : []);
+  const mainIcon = icons[0] ? icons[0].icon : '';
+  const label = icons.map(ic => ic.label).filter(Boolean).join('・');
+  const meta = getIconMeta(mainIcon);
+  const catName = meta.subLabel || meta.categoryLabel || '';
+
+  const dStart = ev.dateStart ? parseDate(ev.dateStart) : null;
+  const dEnd   = ev.dateEnd   ? parseDate(ev.dateEnd)   : null;
+  let dateLine = dStart ? `${dStart.getFullYear()}年${dStart.getMonth()+1}月${dStart.getDate()}日（${DOW[dStart.getDay()]}）` : '';
+  if (dEnd && ev.dateEnd !== ev.dateStart) {
+    dateLine += ` 〜 ${dEnd.getFullYear()}年${dEnd.getMonth()+1}月${dEnd.getDate()}日（${DOW[dEnd.getDay()]}）`;
+  }
+  let timeLine = '';
+  if (ev.timeStart) timeLine = ev.timeEnd ? `${ev.timeStart}〜${ev.timeEnd}` : ev.timeStart;
+
+  const rows = [];
+  if (ev.place)  rows.push(['📍','場所', ev.place]);
+  if (dateLine)  rows.push(['📅','日付', dateLine]);
+  if (timeLine)  rows.push(['⏰','時間', timeLine]);
+  if (ev.memo)   rows.push(['📝','メモ', ev.memo]);
+
+  const rowsHtml = rows.map(([icon,label,val]) => `
+    <div style="display:flex;gap:10px;font-size:13px;align-items:flex-start;padding:8px 0;">
+      <span style="width:20px;text-align:center;">${icon}</span>
+      <span style="color:var(--muted);width:56px;flex-shrink:0;">${label}</span>
+      <span style="color:var(--text);white-space:pre-wrap;">${val}</span>
+    </div>`).join('');
+
+  c.innerHTML = `<div class="day-view">
+    <div class="day-card">
+      <div class="day-card-head">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">${renderIconDisp(mainIcon,22)}</span>
+          <div>
+            <div class="day-card-title">${label || catName || '予定'}</div>
+            ${catName ? `<div style="font-size:11px;color:var(--muted);">${catName}</div>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="day-card-body">
+        <div style="border-top:0.5px solid var(--border);">${rowsHtml}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button onclick="deleteEventFromDetail()" style="flex:1;height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);">削除</button>
+      <button onclick="startEdit(detailDateKey, detailEventIdx)" style="flex:1;height:40px;border-radius:10px;border:none;background:var(--green);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);">✏️ 編集</button>
+    </div>
+  </div>`;
+}
+
+function deleteEventFromDetail() {
+  if (!confirm('この予定を削除しますか？')) return;
+  deleteEvent(detailDateKey, detailEventIdx);
   switchView('day');
 }
 
@@ -2400,7 +2475,7 @@ function showToast(msg) {
 // AUTH
 // ══════════════════════════════════════════
 (function() {
-  const PASS = 'elimako15';
+  const PASS = '5513';
   const LOCAL_KEY   = 'irodori_auth_remember';
   const SESSION_KEY = 'irodori_auth_session';
   if (localStorage.getItem(LOCAL_KEY)==='ok' || sessionStorage.getItem(SESSION_KEY)==='ok') {
@@ -2411,7 +2486,7 @@ function showToast(msg) {
 })();
 
 function checkAuth() {
-  const PASS = 'elimako15';
+  const PASS = '5513';
   const LOCAL_KEY   = 'irodori_auth_remember';
   const SESSION_KEY = 'irodori_auth_session';
   const val = document.getElementById('authInput').value;
