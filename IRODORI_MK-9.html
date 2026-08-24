@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<title>IRODORI MK-32</title>
+<title>IRODORI MK-33</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -147,6 +147,24 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 }
 .day-card-title { font-size:14px; font-weight:700; color:var(--text); }
 .day-card-body  { padding:13px 16px; }
+
+/* ══ 本日の予定（起動時トップ画面） ══ */
+.today-list { padding-top:6px; }
+.today-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; margin-bottom:10px; padding:12px 14px;
+  display:flex; align-items:center; gap:12px; cursor:pointer;
+  box-shadow:var(--shadow); transition:box-shadow .15s, transform .15s;
+}
+.today-card:active { transform:scale(0.98); }
+.today-card-time {
+  font-family:var(--mono); font-size:13px; font-weight:700; color:var(--green3);
+  min-width:44px; flex-shrink:0; white-space:pre-line; line-height:1.3;
+}
+.today-card-main { display:flex; align-items:center; gap:10px; }
+.today-card-icon { font-size:20px; }
+.today-card-title { font-size:14px; font-weight:700; color:var(--text); }
+.today-card-sub { font-size:11px; color:var(--muted); margin-top:2px; }
 
 /* 仕事カード（水色） */
 .work-day-card {
@@ -516,7 +534,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-32</div>
+    <div class="auth-logo">IRODORI MK-33</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -531,7 +549,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-32 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-33 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -738,7 +756,8 @@ let appData = loadData();
 // STATE
 // ══════════════════════════════════════════
 const today = new Date();
-let view = 'month';
+const todayKeyInit = fmtDate(today);
+let view = (appData[todayKeyInit]?.events?.length > 0) ? 'today' : 'month';
 let calMode = 'grid'; // 'list' or 'grid'
 let cursor = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = fmtDate(today);
@@ -921,6 +940,9 @@ function updateNavTitle() {
       el.textContent = 'QR読み取り';
     } else if (view === 'eventDetail') {
       el.textContent = '予定の詳細';
+    } else if (view === 'today') {
+      const d = today;
+      el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）の予定`;
     } else if (view === 'spec') {
       el.textContent = 'EDITH';
     } else {
@@ -933,6 +955,7 @@ function render() {
   updateNavTitle();
   if (view === 'month')      renderMonth();
   else if (view === 'day')   renderDay();
+  else if (view === 'today') renderToday();
   else if (view === 'input')         renderInput();
   else if (view === 'kino')          renderKino();
   else if (view === 'okusuri')       renderOkusuri();
@@ -1420,6 +1443,48 @@ function renderDay() {
 }
 
 // ══════════════════════════════════════════
+// TODAY VIEW（起動時：当日に予定がある場合のトップ画面）
+// ══════════════════════════════════════════
+function renderToday() {
+  const c = document.getElementById('viewContainer');
+  const key = fmtDate(today);
+  const rec = appData[key] || {};
+  const events = (rec.events || []).map((e,i) => ({ e, i }));
+
+  // 時刻あり→時刻順、時刻なし→末尾
+  events.sort((a,b) => {
+    const at = a.e.timeStart ? parseHM(a.e.timeStart) : 9999;
+    const bt = b.e.timeStart ? parseHM(b.e.timeStart) : 9999;
+    return at - bt;
+  });
+
+  const cardsHtml = events.map(({e,i}) => {
+    const icList = e.icons || (e.icon ? [{icon:e.icon, label:e.label||''}] : []);
+    const mainIcon = icList[0] ? icList[0].icon : '';
+    const meta = getIconMeta(mainIcon);
+    const bg = getCategoryColor(meta.colorGroupKey);
+    const labelDisp = icList.map(ic => ic.label).join('・');
+    const name = e.place || labelDisp || meta.subLabel || meta.categoryLabel || '予定';
+    const timeLabel = e.timeStart ? (e.timeEnd ? `${e.timeStart}〜${e.timeEnd}` : e.timeStart) : '時刻未設定';
+    const catName = meta.subLabel || meta.categoryLabel || '';
+    return `<div class="today-card" onclick="showEventDetail('${key}',${i})" style="border-left:4px solid ${bg};">
+      <div class="today-card-time">${timeLabel}</div>
+      <div class="today-card-main">
+        <span class="today-card-icon">${renderIconDisp(mainIcon,20)}</span>
+        <div>
+          <div class="today-card-title">${name}</div>
+          ${e.place && labelDisp ? `<div class="today-card-sub">${labelDisp}</div>` : (catName ? `<div class="today-card-sub">${catName}</div>` : '')}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  c.innerHTML = `<div class="day-view">
+    <div class="today-list">${cardsHtml}</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
 // INPUT VIEW（複数アイコン選択対応）
 // ══════════════════════════════════════════
 function renderInput() {
@@ -1636,12 +1701,14 @@ function cancelEdit() {
 
 let detailDateKey = null;
 let detailEventIdx = null;
+let detailFromView = 'day';
 
 function showEventDetail(dateKey, idx) {
   const ev = appData[dateKey]?.events?.[idx];
   if (!ev) return;
   detailDateKey  = dateKey;
   detailEventIdx = idx;
+  detailFromView = (view === 'today') ? 'today' : 'day';
   switchView('eventDetail');
 }
 
@@ -1703,7 +1770,7 @@ function renderEventDetail() {
 function deleteEventFromDetail() {
   if (!confirm('この予定を削除しますか？')) return;
   deleteEvent(detailDateKey, detailEventIdx);
-  switchView('day');
+  switchView(detailFromView);
 }
 
 function startEdit(dateKey, idx) {
@@ -1799,7 +1866,7 @@ function registerEvent() {
   saveData(appData);
   selectedDate = dateStart;
   showToast(wasEditing ? '更新しました ✓' : '登録しました ✓');
-  switchView('day');
+  switchView(wasEditing ? detailFromView : 'day');
 }
 
 function deleteEvent(dateKey, idx) {
@@ -2395,7 +2462,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>IRODORI<br>
-        <b>現バージョン：</b>MK-24<br>
+        <b>現バージョン：</b>MK-33<br>
         <b>用途：</b>プライベート手帳（予定・日記・生活記録）<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -2603,6 +2670,40 @@ function checkAuth() {
   } catch(e) {
     console.warn('Firebase初期化エラー:', e);
   }
+})();
+
+// ══════════════════════════════════════════
+// 左右フリックで前後の月／日へ移動
+// ══════════════════════════════════════════
+(function initSwipeNav() {
+  const el = document.getElementById('viewContainer');
+  const SWIPE_MIN_DX = 55;   // 反応する最小移動量(px)
+  const SWIPE_MAX_DY = 60;   // これ以上縦に動いたら無効（スクロールと誤認しない）
+  const SWIPE_MAX_MS = 600;  // これより長い操作は無効
+  let sx = 0, sy = 0, st = 0, tracking = false;
+
+  el.addEventListener('touchstart', (ev) => {
+    if (view !== 'month' && view !== 'day') { tracking = false; return; }
+    if (ev.touches.length !== 1) { tracking = false; return; }
+    sx = ev.touches[0].clientX;
+    sy = ev.touches[0].clientY;
+    st = Date.now();
+    tracking = true;
+  }, { passive: true });
+
+  el.addEventListener('touchend', (ev) => {
+    if (!tracking) return;
+    tracking = false;
+    const t = ev.changedTouches[0];
+    const dx = t.clientX - sx;
+    const dy = t.clientY - sy;
+    const dt = Date.now() - st;
+    if (dt > SWIPE_MAX_MS) return;
+    if (Math.abs(dy) > SWIPE_MAX_DY) return;
+    if (Math.abs(dx) < SWIPE_MIN_DX) return;
+    if (dx < 0) navNext();  // 左へフリック → 次へ
+    else        navPrev();  // 右へフリック → 前へ
+  }, { passive: true });
 })();
 
 // ══════════════════════════════════════════
