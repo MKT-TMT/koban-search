@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<title>IRODORI MK-33</title>
+<title>IRODORI MK-34</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -534,7 +534,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-33</div>
+    <div class="auth-logo">IRODORI MK-34</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -549,7 +549,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-33 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-34 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1847,9 +1847,6 @@ function registerEvent() {
     const key = fmtDate(cur);
     if (!appData[key]) appData[key] = {};
     if (!appData[key].events) appData[key].events = [];
-    appData[key].events = appData[key].events.filter(e =>
-      !(e.dateStart === dateStart && (e.icon === primaryIcon || JSON.stringify(e.icons) === JSON.stringify(fs.icons)) && e.place === fs.place)
-    );
     appData[key].events.push(eventData);
     cur.setDate(cur.getDate() + 1);
   }
@@ -2462,7 +2459,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>IRODORI<br>
-        <b>現バージョン：</b>MK-33<br>
+        <b>現バージョン：</b>MK-34<br>
         <b>用途：</b>プライベート手帳（予定・日記・生活記録）<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
