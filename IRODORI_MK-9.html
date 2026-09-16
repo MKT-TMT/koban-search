@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<title>IRODORI MK-35</title>
+<title>IRODORI MK-36</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -534,7 +534,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-35</div>
+    <div class="auth-logo">IRODORI MK-36</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -549,7 +549,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-35 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-36 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -766,7 +766,7 @@ let selectedIcon = null;
 let showPlaceHistory = false;
 
 // 入力フォーム状態（複数アイコン対応）
-let formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+let formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'', urls:[] };
 let inputStep = 'icons'; // 'icons' or 'detail'
 let editMode = false;
 let editDateKey = null;
@@ -870,7 +870,7 @@ function getTTLife(dateKey) {
 // ══════════════════════════════════════════
 function switchView(v) {
   if (v !== 'input') {
-    formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+    formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'', urls:[] };
     inputStep = 'icons';
   }
   view = v;
@@ -884,7 +884,7 @@ function switchView(v) {
 
 function onFab() {
   inputDate = selectedDate;
-  formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+  formState = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'', urls:[] };
   inputStep = 'icons';
   switchView('input');
 }
@@ -1602,6 +1602,11 @@ function renderInput() {
             </div>
           </div>
           <div class="field-group">
+            <div class="field-label">🔗 URL（任意・複数可）</div>
+            <div id="urlListWrap">${renderUrlInputs(fs.urls)}</div>
+            <button type="button" onclick="addUrlField()" style="width:100%;margin-top:4px;padding:8px;background:transparent;border:1px dashed var(--border2);border-radius:8px;font-size:12px;font-weight:600;color:var(--green2);cursor:pointer;font-family:var(--sans);">＋ URLを追加</button>
+          </div>
+          <div class="field-group">
             <div class="field-label">✍️ メモ（任意）</div>
             <textarea class="memo-inp" placeholder="メモを入力…" onchange="formState.memo=this.value">${fs.memo}</textarea>
           </div>
@@ -1614,6 +1619,33 @@ function renderInput() {
       </div>
     </div>
   </div>`;
+}
+
+function renderUrlInputs(urls) {
+  const list = (urls && urls.length > 0) ? urls : [''];
+  return list.map((u, i) => `
+    <div style="display:flex;gap:6px;margin-bottom:6px;">
+      <input type="url" class="place-inp" style="flex:1;" placeholder="例：https://..." value="${(u||'').replace(/"/g,'&quot;')}"
+        oninput="updateUrlField(${i}, this.value)">
+      <button type="button" onclick="removeUrlField(${i})" style="width:34px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-size:14px;">✕</button>
+    </div>`).join('');
+}
+
+function addUrlField() {
+  if (!formState.urls) formState.urls = [];
+  formState.urls.push('');
+  document.getElementById('urlListWrap').innerHTML = renderUrlInputs(formState.urls);
+}
+
+function removeUrlField(i) {
+  if (!formState.urls) formState.urls = [];
+  formState.urls.splice(i, 1);
+  document.getElementById('urlListWrap').innerHTML = renderUrlInputs(formState.urls);
+}
+
+function updateUrlField(i, val) {
+  if (!formState.urls) formState.urls = [];
+  formState.urls[i] = val;
 }
 
 function toggleIcon(icon, label) {
@@ -1691,7 +1723,7 @@ function savePlaceHistory(place, iconKeys) {
 }
 
 function cancelEdit() {
-  formState    = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+  formState    = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'', urls:[] };
   inputStep    = 'icons';
   editMode     = false;
   editDateKey  = null;
@@ -1745,6 +1777,14 @@ function renderEventDetail() {
       <span style="color:var(--text);white-space:pre-wrap;">${val}</span>
     </div>`).join('');
 
+  const urlList = ev.urls || [];
+  const urlRowsHtml = urlList.map((u, i) => `
+    <div style="display:flex;gap:10px;font-size:13px;align-items:flex-start;padding:8px 0;">
+      <span style="width:20px;text-align:center;">${i===0?'🔗':''}</span>
+      <span style="color:var(--muted);width:56px;flex-shrink:0;">${i===0?'URL':''}</span>
+      <a href="${u.replace(/"/g,'&quot;')}" target="_blank" rel="noopener" style="color:var(--work);text-decoration:underline;word-break:break-all;">${u} ↗</a>
+    </div>`).join('');
+
   c.innerHTML = `<div class="day-view">
     <div class="day-card">
       <div class="day-card-head">
@@ -1757,7 +1797,7 @@ function renderEventDetail() {
         </div>
       </div>
       <div class="day-card-body">
-        <div style="border-top:0.5px solid var(--border);">${rowsHtml}</div>
+        <div style="border-top:0.5px solid var(--border);">${rowsHtml}${urlRowsHtml}</div>
       </div>
     </div>
     <div style="display:flex;gap:10px;margin-top:4px;">
@@ -1791,6 +1831,7 @@ function startEdit(dateKey, idx) {
     timeStart: ev.timeStart || '',
     timeEnd:   ev.timeEnd   || '',
     memo:      ev.memo      || '',
+    urls:      ev.urls      || [],
   };
   inputStep = 'icons';
   inputDate = dateKey;
@@ -1828,6 +1869,8 @@ function registerEvent() {
   const primaryIcon  = fs.icons[0]?.icon  || '';
   const primaryLabel = fs.icons[0]?.label || '';
 
+  const cleanUrls = (fs.urls || []).map(u => (u||'').trim()).filter(Boolean);
+
   const eventData = {
     icons: fs.icons,
     icon:  primaryIcon,
@@ -1837,6 +1880,7 @@ function registerEvent() {
     timeStart: fs.timeStart,
     timeEnd:   fs.timeEnd,
     memo: fs.memo,
+    urls: cleanUrls,
     isMultiDay: dateStart !== dateEnd,
   };
 
@@ -1854,7 +1898,7 @@ function registerEvent() {
   if (fs.place) savePlaceHistory(fs.place, fs.icons.map(ic => ic.icon));
 
   const wasEditing = editMode;
-  formState    = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'' };
+  formState    = { icons:[], place:'', dateStart:'', dateEnd:'', timeStart:'', timeEnd:'', memo:'', urls:[] };
   inputStep    = 'icons';
   editMode     = false;
   editDateKey  = null;
@@ -2459,7 +2503,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>IRODORI<br>
-        <b>現バージョン：</b>MK-35<br>
+        <b>現バージョン：</b>MK-36<br>
         <b>用途：</b>プライベート手帳（予定・日記・生活記録）<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
