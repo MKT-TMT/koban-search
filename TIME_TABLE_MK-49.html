@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>TIME TABLE MK-91</title>
+<title>TIME TABLE MK-93</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -1019,7 +1019,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-91</div>
+    <div class="auth-logo">MK-93</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -1034,7 +1034,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-91 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-93 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1884,14 +1884,13 @@ function renderDay() {
   dayWorkBtns.forEach(b => {
     dayWorkBtnsHtml += `<button style="font-size:16px;font-weight:700;padding:12px 18px;border-radius:10px;cursor:pointer;touch-action:manipulation;${b.style}" onclick="openWorkMode('${key}','${b.id}')">${b.label}</button>`;
   });
+  dayWorkBtnsHtml += `<button style="font-size:16px;font-weight:700;padding:12px 18px;border-radius:10px;cursor:pointer;touch-action:manipulation;border:1.5px solid #e24b4a;color:#a32d2d;background:#fcebeb;" onclick="clearShiftSelection('${key}')">クリヤー</button>`;
   dayWorkBtnsHtml += '</div>';
 
   specialHtml = specialHtml + dayWorkBtnsHtml;
 
-  // 休日クリアボタン（選択中のみ）
-  const holidayClearHtml = hasHoliday
-    ? `<button onclick="clearHoliday('${key}')" style="font-size:11px;padding:4px 10px;border-radius:7px;border:1.5px solid #f4a0a0;background:#fff5f5;color:#c0392b;cursor:pointer;font-weight:700;margin-left:8px;">✕ クリア</button>`
-    : '';
+  // 休日クリアボタンは業務列の統一クリヤーボタンに一本化（廃止）
+  const holidayClearHtml = '';
 
   // CODE直接入力
   const currentCode = rec.shift && rec.shift !== '501交番' && rec.shift !== '502交番' && rec.shift !== '503交番' && rec.shift !== '504交番' && rec.shift !== 'compound' ? rec.shift : null;
@@ -1904,7 +1903,6 @@ function renderDay() {
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
       <span style="background:#c8eef8;color:#0878a0;border-radius:9px;padding:5px 16px;font-weight:800;font-size:20px;font-family:var(--mono);letter-spacing:1px;">${codeDisplay}</span>
       <span style="font-size:13px;color:var(--muted);">${codeTimeStr}</span>
-      <button onclick="clearShift('${key}')" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1.5px solid #f4a0a0;background:#fff5f5;color:#c0392b;cursor:pointer;font-weight:700;margin-left:auto;" id="clearShiftBtn_${key}">業務クリア</button>
     </div>` : '';
 
   const shiftListHtml = '';
@@ -2248,6 +2246,17 @@ function renderDay() {
           return rec.shift !== 'compound' ? selBarHtml + shiftListHtml : '';
         })()}
       </div>
+    </div>
+    <div class="inp-card" style="margin-top:8px;">
+      <div class="inp-card-header">🕐 勤務希望（ワン／ツー）</div>
+      <div class="inp-card-body">
+        <div style="display:flex;gap:8px;">
+          <button class="shift-req-btn${rec.shiftRequest==='one'?' active':''}" onclick="setShiftRequest('${key}','one')">ワン</button>
+          <button class="shift-req-btn${rec.shiftRequest==='two'?' active':''}" onclick="setShiftRequest('${key}','two')">ツー</button>
+          <button class="shift-req-btn${!rec.shiftRequest?' active':''}" onclick="setShiftRequest('${key}',null)">クリヤー</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;">ワン：午前中勤務の希望　ツー：午後からの勤務の希望</div>
+      </div>
     </div>` : ''}
 
     <div class="section-label">サマリー</div>
@@ -2555,6 +2564,7 @@ function renderInput() {
   businessBtns.forEach(b => {
     workBtnsHtml += `<button style="font-size:16px;font-weight:700;padding:12px 18px;border-radius:10px;cursor:pointer;${b.style}" onclick="openWorkMode('${key}','${b.id}')">${b.label}</button>`;
   });
+  workBtnsHtml += `<button style="font-size:16px;font-weight:700;padding:12px 18px;border-radius:10px;cursor:pointer;border:1.5px solid #e24b4a;color:#a32d2d;background:#fcebeb;" onclick="clearShiftSelection('${key}')">クリヤー</button>`;
   workBtnsHtml += '</div>';
 
   const specialHtml = holidayHtml + workBtnsHtml;
@@ -2897,7 +2907,7 @@ function renderInput() {
         <div style="display:flex;gap:8px;">
           <button class="shift-req-btn${rec.shiftRequest==='one'?' active':''}" onclick="setShiftRequest('${key}','one')">ワン</button>
           <button class="shift-req-btn${rec.shiftRequest==='two'?' active':''}" onclick="setShiftRequest('${key}','two')">ツー</button>
-          <button class="shift-req-btn${!rec.shiftRequest?' active':''}" onclick="setShiftRequest('${key}',null)">なし</button>
+          <button class="shift-req-btn${!rec.shiftRequest?' active':''}" onclick="setShiftRequest('${key}',null)">クリヤー</button>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:8px;">ワン：午前中勤務の希望　ツー：午後からの勤務の希望</div>
       </div>
@@ -2914,13 +2924,13 @@ function renderInput() {
 function changeInputDate(val) {
   selectedDate = val;
   updateNavTitle();
-  renderInput();
+  render();
 }
 function setShiftRequest(key, val) {
   if (!appData[key]) appData[key] = { life: {} };
   appData[key].shiftRequest = val;
   saveData(appData);
-  renderInput();
+  render();
 }
 
 function setShift(dateKey, shiftId) {
@@ -2945,7 +2955,12 @@ function setShift(dateKey, shiftId) {
     delete appData[dateKey].trainingEnd;
   }
   saveData(appData);
-  renderInput();
+  render();
+}
+
+// 休日・業務の選択をまとめてクリヤー（＝予定未定と同じ全消去処理）
+function clearShiftSelection(dateKey) {
+  setShift(dateKey, null);
 }
 
 // ── 生活時刻の手動変更 → 逆算欄にも反映 ──
@@ -3034,7 +3049,7 @@ function setCustomShift(dateKey) {
   appData[dateKey].customStart = start;
   appData[dateKey].customEnd   = end;
   saveData(appData);
-  renderInput();
+  render();
 }
 
 // ── 複合業務・業務習得 ──
@@ -3046,7 +3061,7 @@ function setShiftMode(dateKey, mode) {
       window._compoundState = { dateKey, koban: null, search: '' };
     }
     saveData(appData);
-    renderInput();
+    render();
   } else {
     setShift(dateKey, mode);
   }
@@ -3071,7 +3086,7 @@ function clearCompoundManualTime(dateKey) {
   delete appData[dateKey].compoundManualStart;
   delete appData[dateKey].compoundManualEnd;
   saveData(appData);
-  renderInput();
+  render();
 }
 
 
@@ -3079,7 +3094,7 @@ function filterCompoundKoban(dateKey, val) {
   if (!window._compoundState) window._compoundState = {};
   window._compoundState.dateKey = dateKey;
   window._compoundState.search = val.replace('交番','').trim();
-  renderInput();
+  render();
 }
 
 // 全部/一部モード切替
@@ -3101,7 +3116,7 @@ function setKobanMode(dateKey, kobanNum, mode) {
     }
   }
   saveData(appData);
-  renderInput();
+  render();
 }
 
 // 一部モード手入力の保存
@@ -3123,7 +3138,7 @@ function toggleCompoundKoban(dateKey, kobanNum) {
   else { kobans.splice(idx, 1); }
   appData[dateKey].compoundKobans = kobans;
   saveData(appData);
-  renderInput();
+  render();
 }
 
 // 旧selectCompoundKoban互換（念のため残す）
@@ -3140,13 +3155,13 @@ function toggleTaskForm(dateKey) {
     window._taskFormOpen = dateKey;
     window._taskFormState = { type: '業務習得', customName: '', start: '', end: '' };
   }
-  renderInput();
+  render();
 }
 
 function setTaskFormType(dateKey, type) {
   if (!window._taskFormState) window._taskFormState = {};
   window._taskFormState.type = type;
-  renderInput();
+  render();
 }
 
 function setTaskFormCustom(dateKey, val) {
@@ -3176,14 +3191,14 @@ function registerTaskContent(dateKey) {
   window._taskFormOpen = null;
   window._taskFormState = null;
   saveData(appData);
-  renderInput();
+  render();
 }
 
 function deleteTaskContent(dateKey, idx) {
   if (!appData[dateKey] || !appData[dateKey].taskContents) return;
   appData[dateKey].taskContents.splice(idx, 1);
   saveData(appData);
-  renderInput();
+  render();
 }
 
 function saveTraining(dateKey) {
@@ -3220,7 +3235,7 @@ function saveTraining(dateKey) {
     appData[dateKey].life.sleep   = fmtMin(sleepMin);
   }
   saveData(appData);
-  renderInput();
+  render();
 }
 
 function clearTraining(dateKey) {
@@ -3230,7 +3245,7 @@ function clearTraining(dateKey) {
   delete appData[dateKey].trainingEnd;
   if (appData[dateKey].shift === 'training') appData[dateKey].shift = null;
   saveData(appData);
-  renderInput();
+  render();
 }
 
 // 互換ラッパー（日ビュー等から参照される場合を考慮）
@@ -3285,7 +3300,7 @@ function openWorkMode(dateKey, modeType) {
   window._workModeStart = '';
   window._workModeEnd = '';
   window._workModeName = '';
-  renderInput();
+  render();
 }
 
 // CODE入力変更時（交番通り/一部共通）
@@ -3303,7 +3318,7 @@ function onWorkModeCodeInput(dateKey, val) {
   if (window._workModeType === 'part') {
     window._workModeCode = v;
     window._workModeTrips = [];
-    renderInput();
+    render();
   }
 }
 
@@ -3313,7 +3328,7 @@ function toggleWorkModeTrip(tripNo) {
   const idx = window._workModeTrips.indexOf(tripNo);
   if (idx === -1) window._workModeTrips.push(tripNo);
   else window._workModeTrips.splice(idx, 1);
-  renderInput();
+  render();
 }
 
 // 交番通り確定
@@ -3340,7 +3355,7 @@ function confirmWorkModeAll(dateKey) {
   window._workModeOpen = null;
   window._workModeType = null;
   window._workModeCode = '';
-  renderInput();
+  render();
 }
 
 // 交番一部確定
@@ -3372,7 +3387,7 @@ function confirmWorkModePart(dateKey) {
   window._workModeType = null;
   window._workModeCode = '';
   window._workModeTrips = [];
-  renderInput();
+  render();
 }
 
 // 業務習得・車庫整理・その他 確定
@@ -3396,7 +3411,7 @@ function confirmWorkModeTask(dateKey, taskType) {
   window._workModeStart = '';
   window._workModeEnd = '';
   window._workModeName = '';
-  renderInput();
+  render();
 }
 
 // 業務項目削除
@@ -3410,7 +3425,7 @@ function deleteWorkItem(dateKey, idx) {
     appData[dateKey].shift = item.type==='all'||item.type==='part' ? item.code+'交番' : 'compound';
   }
   saveData(appData);
-  renderInput();
+  render();
 }
 
 // 複数業務の出退社時刻保存
@@ -3423,7 +3438,7 @@ function saveMultiWorkTime(dateKey) {
   if (s) appData[dateKey].multiWorkStart = s;
   if (e) appData[dateKey].multiWorkEnd   = e;
   saveData(appData);
-  renderInput();
+  render();
 }
 
 // 業務項目編集（簡易：削除して再入力）
@@ -3472,7 +3487,7 @@ function addCompoundKobanNew(dateKey, mode) {
     window._compEditingKoban = null;
     window._compEditingMode = null;
   }
-  renderInput();
+  render();
 }
 
 // TRIP選択トグル（チェックボックス代わり）
@@ -3499,7 +3514,7 @@ function toggleCompoundTrip(dateKey, kobanNum, tripNo) {
   if (times.length) pd.start = times[0];
   if (endTimes.length) pd.end = endTimes[endTimes.length-1];
   saveData(appData);
-  renderInput();
+  render();
 }
 
 // 「決定」ボタン（TRIP選択確定）
@@ -3512,7 +3527,7 @@ function decideTripSelection(dateKey, kobanNum) {
   window._compEditingKoban = null;
   window._compEditingMode = null;
   saveData(appData);
-  renderInput();
+  render();
 }
 
 // 編集ボタン（✏️）から編集モードへ
@@ -3542,7 +3557,7 @@ function removeCompoundKoban(dateKey, kobanNum) {
   if (!appData[dateKey]) return;
   appData[dateKey].compoundKobans = (appData[dateKey].compoundKobans || []).filter(n => n !== kobanNum);
   saveData(appData);
-  renderInput();
+  render();
 }
 
 function previewTrip(dateKey, kobanNum, val) {
@@ -3589,14 +3604,14 @@ function addCompoundTrip(dateKey, kobanNum) {
   if (times.length) pd.start = times[0];
   if (endTimes.length) pd.end = endTimes[endTimes.length-1];
   saveData(appData);
-  renderInput();
+  render();
 }
 
 function removeCompoundTrip(dateKey, kobanNum, idx) {
   if (!appData[dateKey]?.compoundPartialData?.[kobanNum]?.tripNos) return;
   appData[dateKey].compoundPartialData[kobanNum].tripNos.splice(idx, 1);
   saveData(appData);
-  renderInput();
+  render();
 }
 
 function decideCompound(dateKey) {
@@ -3774,7 +3789,7 @@ function printList(startDateKey) {
   </style>
   </head><body>
   <div class="header">
-    <div class="header-title">MK-91 TIME TABLE</div>
+    <div class="header-title">MK-93 TIME TABLE</div>
     <div class="header-range">${title}</div>
   </div>
   ${rows}
@@ -3840,7 +3855,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-91<br>
+        <b>現バージョン：</b>MK-93<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -3967,6 +3982,8 @@ function renderSpec() {
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📝 変更履歴</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>MK-93：</b>普段使用する「日」タブのシフト情報展開パネルに「勤務希望（ワン／ツー）」欄を追加。同パネルの「✕クリア」「業務クリア」を廃止し、「業務」ボタン列に統一の「クリヤー」ボタンを追加（休日・業務の選択を一括解除）。業務入力操作後の画面更新処理を修正し、常に現在表示中のタブ（月／日／統計／仕様書）が正しく再表示されるよう修正（従来は使われていない「入力」画面に切り替わってしまう不具合があった）<br>
+        <b>MK-92：</b>入力画面（現在は未使用）「業務」ボタン列に「クリヤー」ボタンを追加。「勤務希望」欄の「なし」ボタンを「クリヤー」に変更<br>
         <b>MK-91：</b>入力画面に「勤務希望」欄（ワン／ツー）を追加。月カレンダー・リスト表示に希望バッジを表示。プライベート予定（IRODORI連携）がある日はセル背景を薄い黄色に変更（アイコン表示は維持）。今日のセルは背景を塗らず日付の丸強調のみ<br>
         <b>MK-90：</b>ジャービスルールに【厳命】を追加。相槌のみでは実装許可とみなさず、「実装して」等の明確な指示があるまでファイル変更しないことを明文化<br>
         <b>MK-89：</b>「ジャービス」タブの表記を「仕様書」に変更（タブ名・ナビタイトル。ジャービスルールの見出しは維持）<br>
