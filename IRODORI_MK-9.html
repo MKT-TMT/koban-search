@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<title>IRODORI MK-36</title>
+<title>IRODORI MK-37</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -57,6 +57,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
   font-family:var(--sans); font-size:12px; font-weight:600;
   padding:5px 11px; border-radius:7px; cursor:pointer;
   border:none; background:transparent; color:var(--muted); transition:all .16s;
+  white-space:nowrap;
 }
 .tab.active { background:var(--green); color:#fff; box-shadow:0 2px 8px rgba(46,207,122,.35); }
 .tab:hover:not(.active) { color:var(--text); background:var(--border); }
@@ -93,7 +94,18 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 }
 .dow-cell.sat { color:var(--work); }
 .dow-cell.sun { color:var(--red); }
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; }
+.cal-grid .cal-cell { min-width:0; overflow:hidden; }
+.cal-grid .cal-shift { white-space:normal; text-overflow:clip; word-break:break-all; padding:2px 2px; line-height:1.25; }
+@media (max-width:480px) {
+  .header { padding:0 8px; gap:6px; }
+  .logo { font-size:13px; letter-spacing:1px; line-height:1.2; }
+  .logo-sub { display:none; }
+  .tab { padding:5px 7px; font-size:11px; }
+  .cal-grid { gap:3px; }
+  .cal-grid .cal-cell { padding:4px 2px 5px; }
+  .cal-time { letter-spacing:-0.5px; }
+}
 .cal-cell {
   background:var(--surface); border-radius:9px; padding:5px 4px 6px;
   min-height:70px; cursor:pointer;
@@ -130,6 +142,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .cal-shift.plan    { background:var(--orangebg); color:#a05000; }
 .cal-shift.task    { background:#d4f5e5; color:#0a5e2a; }
 .cal-shift.task2   { background:#fff3cc; color:#8a5c00; }
+.cal-time { font-family:var(--mono); font-size:14px; color:var(--muted); line-height:1.2; margin-bottom:2px; }
 .cal-irodori-icons { display:flex; flex-wrap:wrap; gap:1px; margin-top:2px; }
 .cal-irodori-icon  { font-size:11px; line-height:1; }
 
@@ -491,7 +504,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .ml-shift-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px; display: inline-block; white-space: nowrap; }
 .ml-shift-badge.work { background: var(--workbg); color: #007c91; border: 1px solid var(--workbd); }
 .ml-shift-badge.off  { background: #ffd9d9; color: #a01010; border: 1px solid #ffb3b3; }
-.ml-shift-time { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+.ml-shift-time { font-family: var(--mono); font-size: 14px; color: var(--muted); }
 .ml-shift-empty { min-height: 20px; }
 
 .ml-icons { flex: 1; display: flex; flex-wrap: wrap; gap: 4px; padding-top: 3px; }
@@ -534,7 +547,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">IRODORI MK-36</div>
+    <div class="auth-logo">IRODORI MK-37</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -549,7 +562,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 
 <!-- HEADER -->
 <div class="header">
-  <div class="logo">IRODORI MK-36 <span class="logo-sub">プライベート手帳</span></div>
+  <div class="logo">IRODORI MK-37 <span class="logo-sub">プライベート手帳</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -558,7 +571,7 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
     <button class="tab active" onclick="switchView('month')">📅 月</button>
     <button class="tab" onclick="switchView('day')">📋 日</button>
     <button class="tab" onclick="switchView('kino')">⚙️ 機能</button>
-    <button class="tab" onclick="switchView('spec')">EDITH</button>
+    <button class="tab" onclick="switchView('spec')">仕様書</button>
   </div>
 </div>
 
@@ -944,7 +957,7 @@ function updateNavTitle() {
       const d = today;
       el.textContent = `${d.getMonth()+1}月${d.getDate()}日（${DOW[d.getDay()]}）の予定`;
     } else if (view === 'spec') {
-      el.textContent = 'EDITH';
+      el.textContent = '仕様書';
     } else {
       el.textContent = '';
     }
@@ -1101,6 +1114,10 @@ function renderMonthGrid() {
         }
       }
       shiftChip = `<span class="cal-shift ${cls}">${lbl}</span>`;
+      // MK-37：勤務時間を開始・終了の2段で表示（TIME TABLEと同じ形）
+      if (ttInfo.type === 'work' && ttInfo.start && ttInfo.end) {
+        shiftChip += `<div class="cal-time">${ttInfo.start}<br>${ttInfo.end}</div>`;
+      }
     }
 
     let iconHtml = '';
@@ -2492,10 +2509,10 @@ function renderSpec() {
   c.innerHTML = `
   <div style="padding:16px;max-width:680px;margin:0 auto;font-family:var(--sans);">
 
-    <!-- EDITHヘッダー -->
+    <!-- ジャービスヘッダー -->
     <div style="background:linear-gradient(135deg,#0a2e14,#1a6e3c);border-radius:12px;padding:18px;margin-bottom:14px;text-align:center;border:1px solid #2ecf7a;">
-      <div style="font-size:24px;font-weight:900;color:#2ecf7a;letter-spacing:5px;margin-bottom:4px;">E D I T H</div>
-      <div style="font-size:10px;color:#8ee0b8;letter-spacing:1px;">Even Dead I'm The Hero — IRODORI AI Assistant</div>
+      <div style="font-size:24px;font-weight:900;color:#2ecf7a;letter-spacing:5px;margin-bottom:4px;">J A R V I S</div>
+      <div style="font-size:10px;color:#8ee0b8;letter-spacing:1px;">Just A Rather Very Intelligent System — IRODORI AI Assistant</div>
     </div>
 
     <!-- アプリ基本情報 -->
@@ -2503,7 +2520,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>IRODORI<br>
-        <b>現バージョン：</b>MK-36<br>
+        <b>現バージョン：</b>MK-37<br>
         <b>用途：</b>プライベート手帳（予定・日記・生活記録）<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -2514,18 +2531,24 @@ function renderSpec() {
       </div>
     </div>
 
-    <!-- EDITHルール -->
+    <!-- ジャービスルール -->
     <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">🤖 EDITHルール（AI向け）</div>
+      <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">🤖 ジャービスルール（AI向け）</div>
       <div style="font-size:12px;color:var(--text);line-height:1.6;">
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
           <span style="flex-shrink:0;">🔢</span><span>アップデートのたびにMK番号を必ず+1する。同じ番号を再利用しない</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">🖼️</span><span>修正・新機能はイメージ図を先に見せてから実装する。イメージ図OKの後も、必ずまことさんから「実装してください」の指示があるまで実装に進まない</span>
+          <span style="flex-shrink:0;">⏸️</span><span>実装はまことさんの指示があるまで行わない</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">🔍</span><span>アップデートの際は実装前にプログラムの確認を行い不具合が無いか見直す様に進める</span>
+          <span style="flex-shrink:0;">🚨</span><span>【厳命】「それで」「OK」「いいよ」等の相槌・同意だけでは実装の許可とみなさない。まことさんが明確に「実装して」「やって」等、実行を指す言葉を発するまでファイルを一切変更しない。曖昧な場合は必ず先に確認する</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🖼️</span><span>修正・新機能はイメージ図を先に見せてから実装する。イメージ図OKの後も、必ずまことさんから「実装して」の指示があるまで実装に進まない</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">🔍</span><span>アップデートの際は実装前にプログラムの確認を行い、不具合が無いか見直す様に進める</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
           <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する。勝手に先へ進まない</span>
@@ -2534,7 +2557,7 @@ function renderSpec() {
           <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：IRODORI_MK-24.html）。アップロード時はIRODORI_MK-9.htmlに改名して上書き</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;">
-          <span style="flex-shrink:0;">👤</span><span>ユーザー名はまことさん。AIの名前はEDITH（イディス）</span>
+          <span style="flex-shrink:0;">👤</span><span>ユーザー名はまことさん。AIの名前はジャービス</span>
         </div>
       </div>
     </div>
@@ -2546,7 +2569,7 @@ function renderSpec() {
         <b>📅 月：</b>月間カレンダー。各日の予定・シフトを表示。タップで日ビューへ遷移<br>
         <b>📋 日：</b>0:00〜24:00のタイムライン表示。仕事・睡眠・勤務間時間・支度・予定を帯で表示し、重なりは自動分割。タップで編集<br>
         <b>⚙️ 機能：</b>お薬手帳など追加機能の一覧<br>
-        <b>EDITH（本画面）：</b>アプリ仕様書・EDITHルール確認
+        <b>仕様書（本画面）：</b>アプリ仕様書・ジャービスルール確認
       </div>
     </div>
 
@@ -2563,6 +2586,14 @@ function renderSpec() {
           ・飲み合わせメモ<br>
           ・カレンダーとの連携
         </div>
+      </div>
+    </div>
+
+    <!-- 変更履歴 -->
+    <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;letter-spacing:0.5px;">📝 変更履歴</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.8;">
+        <b>MK-37：</b>月グリッド表示に勤務時間（TIME TABLE連携）を開始・終了の2段で追加（14px）。月リスト表示の勤務時間の文字を拡大（9px→14px）。AI名をジャービスに統一し、ジャービスルールをTIME TABLEと共通の文面に統一（【厳命】等を追加）。仕様書の大見出しをJ A R V I Sに、タブ名を「EDITH」から「仕様書」に変更。変更履歴欄を新設。月グリッドの7列を同じ幅に固定（休日名などは折り返して表示）。タブ文字の折り返しを防止。スマホ幅ではヘッダーの「プライベート手帳」を非表示にしロゴ・タブを縮小<br>
       </div>
     </div>
 
