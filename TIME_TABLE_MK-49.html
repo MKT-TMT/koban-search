@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>TIME TABLE MK-93</title>
+<title>TIME TABLE MK-94</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -68,6 +68,7 @@
     padding: 9px 18px; border-radius: 7px; cursor: pointer;
     border: none; background: transparent; color: var(--muted);
     transition: all .16s ease; letter-spacing: 0.3px;
+    white-space: nowrap;
   }
   .tab.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(14,168,216,.35); }
   .tab:hover:not(.active) { color: var(--text); background: var(--border); }
@@ -100,7 +101,9 @@
   .dow-cell.sat { color: var(--sky); }
   .dow-cell.sun { color: var(--red); }
 
-  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 4px; }
+  .cal-grid .cal-cell { min-width: 0; overflow: hidden; }
+  .cal-grid .cal-shift { white-space: normal; text-overflow: clip; word-break: break-all; padding: 2px 2px; line-height: 1.25; }
   .cal-cell {
     background: var(--surface); border-radius: 9px; padding: 6px 5px 7px;
     min-height: 74px; cursor: pointer;
@@ -157,7 +160,7 @@
   .cal-shift.task2   { background: #d4f5e5; color: #0a5e2a; }
   .cal-shift.garage  { background: #d4f5e5; color: #0a5e2a; }
   .cal-shift.other   { background: #d4f5e5; color: #0a5e2a; }
-  .cal-time { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .cal-time { font-family: var(--mono); font-size: 14px; color: var(--muted); line-height: 1.2; }
   .cal-koban-info { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 2px; }
   .cal-koban-badge {
     font-family: var(--mono); font-size: 9px; padding: 1px 5px;
@@ -880,9 +883,19 @@
   @media (max-width: 600px) {
     .cal-cell { min-height: 58px; padding: 4px; }
     .cal-shift { font-size: 11px; }
-    .cal-time { font-size: 10px; }
+    .cal-time { font-size: 14px; }
     .nav-title { font-size: 17px; }
     .tab { padding: 5px 10px; font-size: 11px; }
+  }
+  @media (max-width: 480px) {
+    .header { padding: 0 8px; gap: 6px; }
+    .logo { font-size: 13px; letter-spacing: 1px; white-space: nowrap; }
+    .logo-sub { display: none; }
+    #syncStatus { font-size: 9px !important; }
+    .tab { padding: 5px 7px; }
+    .cal-grid { gap: 3px; }
+    .cal-grid .cal-cell { padding: 4px 2px 5px; }
+    .cal-time { letter-spacing: -0.5px; }
   }
 
   /* ══════════════ AUTH OVERLAY ══════════════ */
@@ -1019,7 +1032,7 @@
 
 <div id="authOverlay">
   <div class="auth-card">
-    <div class="auth-logo">MK-93</div>
+    <div class="auth-logo">MK-94</div>
     <div class="auth-title">🔒 パスワードを入力してください</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••••"
       onkeydown="if(event.key==='Enter') checkAuth()">
@@ -1034,7 +1047,7 @@
 
 
 <div class="header">
-  <div class="logo">MK-93 <span class="logo-sub">TIME TABLE</span></div>
+  <div class="logo">MK-94 <span class="logo-sub">TIME TABLE</span></div>
   <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:4px;">
     <span id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
     <span id="syncText">接続中…</span>
@@ -1793,7 +1806,7 @@ function renderCalCell(year, month, day, dateKey, other, todayKey) {
           inner += `<div class="cal-shift work">${lbl}</div>`;
         });
       }
-      if (info.start) inner += `<div class="cal-time">${info.start}–${info.end}</div>`;
+      if (info.start) inner += `<div class="cal-time">${info.start}<br>${info.end}</div>`;
     } else {
       // 通常シフト（trainingも含む）
       const tasks = rec.taskContents || [];
@@ -1806,7 +1819,7 @@ function renderCalCell(year, month, day, dateKey, other, todayKey) {
         inner += `<div class="cal-shift ${cls2}">${t.name}</div>`;
       });
       inner += `<div class="cal-shift work">${info.label}</div>`;
-      if (info.start) inner += `<div class="cal-time">${info.start}–${info.end}</div>`;
+      if (info.start) inner += `<div class="cal-time">${info.start}<br>${info.end}</div>`;
     }
   } else if (info && other) {
     // 前後月セルは簡略表示
@@ -3789,7 +3802,7 @@ function printList(startDateKey) {
   </style>
   </head><body>
   <div class="header">
-    <div class="header-title">MK-93 TIME TABLE</div>
+    <div class="header-title">MK-94 TIME TABLE</div>
     <div class="header-range">${title}</div>
   </div>
   ${rows}
@@ -3846,8 +3859,8 @@ function renderSpec() {
 
     <!-- ジャービスヘッダー -->
     <div style="background:linear-gradient(135deg,#0d2137,#1a3a5c);border-radius:12px;padding:18px;margin-bottom:14px;text-align:center;border:1px solid #30363d;">
-      <div style="font-size:24px;font-weight:900;color:#58a6ff;letter-spacing:5px;margin-bottom:4px;">E D I T H</div>
-      <div style="font-size:10px;color:#8b949e;letter-spacing:1px;">Even Dead I'm The Hero — TIME TABLE AI Assistant</div>
+      <div style="font-size:24px;font-weight:900;color:#58a6ff;letter-spacing:5px;margin-bottom:4px;">J A R V I S</div>
+      <div style="font-size:10px;color:#8b949e;letter-spacing:1px;">Just A Rather Very Intelligent System — TIME TABLE AI Assistant</div>
     </div>
 
     <!-- アプリ基本情報 -->
@@ -3855,7 +3868,7 @@ function renderSpec() {
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📱 アプリ基本情報</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
         <b>アプリ名：</b>TIME TABLE<br>
-        <b>現バージョン：</b>MK-93<br>
+        <b>現バージョン：</b>MK-94<br>
         <b>用途：</b>バス運転士の勤務スケジュール管理アプリ<br>
         <b>データ同期：</b>Firebase Firestore（リアルタイム・クラウド同期）<br>
         <b>運用：</b>GitHub Pages にて公開（固定URL運用）<br>
@@ -3880,10 +3893,13 @@ function renderSpec() {
           <span style="flex-shrink:0;">🚨</span><span><b>【厳命】</b>「それで」「OK」「いいよ」等の相槌・同意だけでは実装の許可とみなさない。まことさんが明確に「実装して」「やって」等、実行を指す言葉を発するまでファイルを一切変更しない。曖昧な場合は必ず先に確認する</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">🖼️</span><span>修正・新機能はイメージ図を先に見せてから実装する</span>
+          <span style="flex-shrink:0;">🖼️</span><span>修正・新機能はイメージ図を先に見せてから実装する。イメージ図OKの後も、必ずまことさんから「実装して」の指示があるまで実装に進まない</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-          <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する</span>
+          <span style="flex-shrink:0;">🔍</span><span>アップデートの際は実装前にプログラムの確認を行い、不具合が無いか見直す様に進める</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+          <span style="flex-shrink:0;">💬</span><span>一つずつ順を追って話を進める。まことさんの意向を確認しながら進める。相談の上で決断する。勝手に先へ進まない</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
           <span style="flex-shrink:0;">🐙</span><span>GitHub：納品ファイル名はバージョン付き（例：TIME_TABLE_MK-88.html）。アップロード時はTIME_TABLE_MK-49.htmlに改名して上書き</span>
@@ -3901,7 +3917,7 @@ function renderSpec() {
         <b>月（月ビュー）：</b>月間カレンダー。各日にCODE・タスクを表示。タップで日ビューへ遷移<br>
         <b>週（週ビュー）：</b>廃止。月タブのリスト表示に統合<br>
         <b>日（日ビュー）：</b>選択日の詳細。入力へのショートカットあり。TRIPカード表示<br>
-        <b>入力：</b>勤務データ入力画面。業務種別ボタン選択→CODE入力またはTRIP選択<br>
+        <b>入力：</b>現在は未使用（タブなし）。勤務の入力は日タブのシフト情報展開パネルから行う<br>
         <b>📊（統計）：</b>勤務時間・睡眠・勤務間隔の統計グラフ<br>
         <b>仕様書（本画面）：</b>アプリ仕様書・ジャービスルール確認
       </div>
@@ -3982,6 +3998,7 @@ function renderSpec() {
     <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid var(--border);">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:0.5px;">📝 変更履歴</div>
       <div style="font-size:12px;color:var(--text);line-height:2;">
+        <b>MK-94：</b>月グリッド表示の勤務時間を開始・終了の2段表示に変更し文字を拡大（11px/スマホ10px→14px）。月グリッドの7列を同じ幅に固定（休日名などは折り返して表示）。タブ文字の折り返しを防止。スマホ幅ではヘッダーの「TIME TABLE」副題を非表示にしロゴ・タブを縮小。ジャービスルールをIRODORIと共通の文面に統一（🔍実装前の見直し等を追加）。仕様書の大見出しをJ A R V I Sに変更、タブ構成の「入力」の記述を現状に合わせて修正<br>
         <b>MK-93：</b>普段使用する「日」タブのシフト情報展開パネルに「勤務希望（ワン／ツー）」欄を追加。同パネルの「✕クリア」「業務クリア」を廃止し、「業務」ボタン列に統一の「クリヤー」ボタンを追加（休日・業務の選択を一括解除）。業務入力操作後の画面更新処理を修正し、常に現在表示中のタブ（月／日／統計／仕様書）が正しく再表示されるよう修正（従来は使われていない「入力」画面に切り替わってしまう不具合があった）<br>
         <b>MK-92：</b>入力画面（現在は未使用）「業務」ボタン列に「クリヤー」ボタンを追加。「勤務希望」欄の「なし」ボタンを「クリヤー」に変更<br>
         <b>MK-91：</b>入力画面に「勤務希望」欄（ワン／ツー）を追加。月カレンダー・リスト表示に希望バッジを表示。プライベート予定（IRODORI連携）がある日はセル背景を薄い黄色に変更（アイコン表示は維持）。今日のセルは背景を塗らず日付の丸強調のみ<br>
